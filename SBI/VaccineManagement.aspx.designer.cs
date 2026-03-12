@@ -15,93 +15,156 @@ namespace SBI
     {
 
         /// <summary>
-        /// tabCaseSummary control.
+        /// btnBatchHistory control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton tabCaseSummary;
+        protected global::System.Web.UI.WebControls.Button btnBatchHistory;
 
         /// <summary>
-        /// tabHighRisk control.
+        /// btnAddStock control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton tabHighRisk;
+        protected global::System.Web.UI.WebControls.Button btnAddStock;
 
         /// <summary>
-        /// tabVaxUtil control.
+        /// lblLowStock control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton tabVaxUtil;
+        protected global::System.Web.UI.WebControls.Label lblLowStock;
 
         /// <summary>
-        /// tabExpiry control.
+        /// btnRequestRestock control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton tabExpiry;
+        protected global::System.Web.UI.WebControls.Button btnRequestRestock;
 
         /// <summary>
-        /// ddlReportPeriod control.
+        /// lblTotalDoses control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlReportPeriod;
+        protected global::System.Web.UI.WebControls.Label lblTotalDoses;
 
         /// <summary>
-        /// txtFromDate control.
+        /// lblExpiring30 control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtFromDate;
+        protected global::System.Web.UI.WebControls.Label lblExpiring30;
 
         /// <summary>
-        /// txtToDate control.
+        /// lblExpired control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtToDate;
+        protected global::System.Web.UI.WebControls.Label lblExpired;
 
         /// <summary>
-        /// btnGenerateReport control.
+        /// lblAdministeredMTD control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnGenerateReport;
+        protected global::System.Web.UI.WebControls.Label lblAdministeredMTD;
 
         /// <summary>
-        /// btnExportPdf control.
+        /// ddlVaccineName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnExportPdf;
+        protected global::System.Web.UI.WebControls.DropDownList ddlVaccineName;
 
         /// <summary>
-        /// btnExportExcel control.
+        /// txtBatchNumber control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnExportExcel;
+        protected global::System.Web.UI.WebControls.TextBox txtBatchNumber;
+
+        /// <summary>
+        /// txtExpiryDate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtExpiryDate;
+
+        /// <summary>
+        /// txtQuantity control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtQuantity;
+
+        /// <summary>
+        /// btnReset control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnReset;
+
+        /// <summary>
+        /// btnAddToInventory control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnAddToInventory;
+
+        /// <summary>
+        /// txtSearchInventory control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtSearchInventory;
+
+        /// <summary>
+        /// ddlFilterType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlFilterType;
+
+        /// <summary>
+        /// gvInventory control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gvInventory;
     }
 }
