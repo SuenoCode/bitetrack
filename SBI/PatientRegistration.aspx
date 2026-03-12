@@ -12,7 +12,7 @@
             </p>
         </div>
 
-        <!-- A. PATIENT INFORMATION -->
+        <!-- A. PATIENT INFORMATION!!!! --> 
         <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4">
                 <h3 class="text-lg font-extrabold text-slate-900">A. Patient Information</h3>
