@@ -14,31 +14,9 @@ namespace SBI
         {
             if (!IsPostBack)
             {
-                // Pre-Exposure doses
-                var preExposureDoses = new List<Dose>
-                {
-                    new Dose{ Label="Day 0" },
-                    new Dose{ Label="Day 7" },
-                    new Dose{ Label="Day 28" },
-                    new Dose{ Label="Booster 1" },
-                    new Dose{ Label="Booster 2" }
-                };
+                
 
-                rptPreExposure.DataSource = preExposureDoses;
-                rptPreExposure.DataBind();
-
-                // Post-Exposure doses
-                var postExposureDoses = new List<Dose>
-                {
-                    new Dose{ Label="Day 0" },
-                    new Dose{ Label="Day 3" },
-                    new Dose{ Label="Day 7" },
-                    new Dose{ Label="Day 14" },
-                    new Dose{ Label="Day 28/30" }
-                };
-
-                rptPostExposure.DataSource = postExposureDoses;
-                rptPostExposure.DataBind();
+                
             }
         }
 
