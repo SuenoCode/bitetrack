@@ -1,6 +1,6 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="CaseSurveillance.aspx.cs"
     Inherits="SBI.CaseSurveillance"
-    MasterPageFile="~/Site1.Master" %>
+    MasterPageFile="~/Admin.Master" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
@@ -55,9 +55,7 @@
             </div>
         </div>
 
-        <!-- ============================================================ -->
         <!-- STATS CARDS                                                   -->
-        <!-- ============================================================ -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-6">
 
             <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -98,9 +96,8 @@
 
         </div>
 
-        <!-- ============================================================ -->
+
         <!-- SECTION 1: ALL SURVEILLANCE CASES TABLE                      -->
-        <!-- ============================================================ -->
         <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" id="module-surveillance">
 
             <div class="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
