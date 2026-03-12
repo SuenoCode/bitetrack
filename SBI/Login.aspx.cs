@@ -23,12 +23,13 @@ namespace SBI
             using (SqlConnection conn = new SqlConnection(connStr))
             {
                 string query = "SELECT role, full_name FROM Users WHERE username = @username AND password = @password";
-                conn.Open();
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    // Use parameters to prevent SQL injection
-                    cmd.Parameters.AddWithValue("@username", username);
-                    cmd.Parameters.AddWithValue("@password", password);
+                    // Use explicit parameter types for reliability
+                    cmd.Parameters.Add("@username", SqlDbType.VarChar, 50).Value = username;
+                    cmd.Parameters.Add("@password", SqlDbType.VarChar, 50).Value = password;
+
+                    conn.Open();
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -36,14 +37,25 @@ namespace SBI
                     {
                         reader.Read();
 
-                        Session["userRole"] = reader["role"].ToString();
-                        Session["fullName"] = reader["full_name"].ToString();
-                        // Successful login
-                        Response.Redirect("~/Dashboard.aspx");
+                        // Store user info in session (optional)
+                        Session["userRole"] = reader["role"].ToString().Trim();
+                        Session["fullName"] = reader["full_name"].ToString().Trim();
+
+                        string role = Session["userRole"] as string;
+
+                        if (role == "staff")
+                        {
+                            Response.Redirect("Dashboard.aspx");
+                        }
+                        else if (role == "admin")
+                        {
+                            Response.Redirect("UserManagement.aspx");
+                        }
                     }
                     else
                     {
-                        // Failed login
+                        // Invalid login
+                        errorMsg.Text = "Invalid username or password.";
                         errorMsg.Visible = true;
                     }
                 }
