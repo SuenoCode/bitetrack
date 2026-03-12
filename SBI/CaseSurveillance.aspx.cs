@@ -14,9 +14,12 @@ namespace SBI
         {
             if (!IsPostBack)
             {
-                
 
-                
+                if (Session["userRole"] == null || Session["userRole"].ToString().ToLower() != "staff")
+                {
+                    Response.Redirect("Login.aspx");
+                }
+
             }
         }
 

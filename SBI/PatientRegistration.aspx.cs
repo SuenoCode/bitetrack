@@ -12,6 +12,11 @@ namespace SBI
         protected void Page_Load(object sender, EventArgs e)
         {
             txtContactNo.Attributes["type"] = "tel";
+
+            if (Session["userRole"] == null || Session["userRole"].ToString().ToLower() != "staff")
+            {
+                Response.Redirect("Login.aspx");
+            }
         }
     }
 }

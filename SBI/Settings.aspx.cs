@@ -11,7 +11,10 @@ namespace SBI
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            if (Session["userRole"] != "staff" || Session["userRole"] != "admin")
+            {
+                Response.Redirect("Login.aspx");
+            }
         }
     }
 }

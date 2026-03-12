@@ -17,6 +17,7 @@ namespace SBI
 
                 if (role == "staff")
                 {
+
                     adminHeader.Visible = false;
                     lnkUserManagement.Visible =false;
                     lnkSettings.Visible = false;
@@ -24,10 +25,12 @@ namespace SBI
                 }
                 else if(role == "admin")
                 {
-                    adminHeader.Visible = true;
-                    lnkUserManagement.Visible = true;
-                    lnkSettings.Visible = true;
-                    lnkAudit.Visible = true;
+                    mainNavigation.Visible = false;
+                    lnkDashboard.Visible = false;
+                    lnkCaseSurv.Visible = false;
+                    lnkPatients.Visible = false;
+                    lnkVaccReg.Visible = false;
+                    lnkReports.Visible = false;
                 }
 
 
@@ -95,7 +98,8 @@ namespace SBI
         }
         protected void btnSignOut_Click(object sender, EventArgs e)
         {
-            Response.Redirect("Home.aspx");
+            Session.Clear();
+            Response.Redirect("Login.aspx");
         }
 
         protected void btnAudit_Click(object sender, EventArgs e)
