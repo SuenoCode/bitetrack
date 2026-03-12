@@ -1,0 +1,127 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true"
+    CodeBehind="Site1.master.cs"
+    Inherits="SBI.Site1" %>
+
+<%@ Register Src="~/sideBarNavigation.ascx"
+    TagPrefix="uc"
+    TagName="SideBarNavigation" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <!-- adding custom fonts -->
+    <style>
+        @font-face {
+            font-family: 'AlteHaasGrotesk';
+            src: url('../Fonts/AlteHaasGroteskRegular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'AlteHaasGrotesk';
+            src: url('../Fonts/AlteHaasGroteskBold.ttf') format('truetype');
+            font-weight: 700;
+        }
+
+        @font-face {
+            font-family: 'LouisGeorgeCafe';
+            src: url('../Fonts/Louis George Cafe Light.ttf') format('truetype');
+            font-weight: 300;
+        }
+
+        @font-face {
+            font-family: 'LouisGeorgeCafe';
+            src: url('../Fonts/Louis George Cafe Bold.ttf') format('truetype');
+            font-weight: 700;
+        }
+
+        @font-face {
+            font-family: 'CreatoDisplay';
+            src: url('../Fonts/CreatoDisplay-Regular.otf') format('opentype');
+            font-weight: 400;
+        }
+
+        @font-face {
+            font-family: 'CreatoDisplay';
+            src: url('../Fonts/CreatoDisplay-Bold.otf') format('opentype');
+            font-weight: 700;
+        }
+
+        @font-face {
+            font-family: 'AwesomeSerif';
+            src: url('../Fonts/AwesomeSerif-Regular.otf') format('opentype');
+            font-weight: 400;
+        }
+
+        @font-face {
+            font-family: 'AwesomeSerif';
+            src: url('../Fonts/AwesomeSerif-BoldRegular.otf') format('opentype');
+            font-weight: 700;
+        }
+    </style>
+    <title>SBI System</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007bff',
+                        sidebar: '#111827'
+                    },
+                    fontFamily: {
+                        heading1: ['AlteHaasGrotesk', 'ui-sans-serif', 'system-ui'],
+                        heading2: ['Creato Display', 'ui-sans-serif', 'system-ui'],
+                        para1: ['AwesomeSerif', 'ui-sans-serif', 'system-ui'],
+                        para2: ['LouisGeorgeCafe', 'ui-sans-serif', 'system-ui']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- LEAFLET (map naten)-->
+    <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- CHART.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Page Head -->
+    <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server" />
+
+    <asp:ContentPlaceHolder ID="head" runat="server" />
+</head>
+
+<body class="bg-gray-100">
+
+    <form id="form1" runat="server" class="h-screen">
+
+                        <asp:ContentPlaceHolder ID="ContentPlaceHolder2" runat="server" />
+
+
+        <div class="flex h-screen w-full">
+
+            <!-- Sidebar -->
+            <uc:SideBarNavigation
+                ID="SideBarNavigation"
+                runat="server" />
+
+            <!-- Main content -->
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-100">
+                <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+            </main>
+
+        </div>
+
+    </form>
+
+</body>
+</html>

@@ -1,0 +1,202 @@
+
+/* BEGIN EXTERNAL SOURCE */
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-card {
+            width: 360px;
+            padding: 30px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .login-logo-badge {
+            font-size: 40px;
+        }
+
+        .login-title {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .error-msg {
+            color: red;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            width: 90px;
+            margin-right: 10px;
+        }
+
+        .form-group input {
+            flex: 1;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .password-wrap {
+            display: flex;
+            flex: 1;
+            align-items: center;
+        }
+
+        .password-wrap input {
+            flex: 1;
+            padding: 8px;
+        }
+
+        .password-wrap button {
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        .form-row-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .https-badge {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+            color: gray;
+        }
+    
+/* END EXTERNAL SOURCE */
+
+/* BEGIN EXTERNAL SOURCE */
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-card {
+            width: 360px;
+            padding: 30px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .login-logo-badge {
+            font-size: 40px;
+        }
+
+        .login-title {
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .error-msg {
+            color: red;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            width: 90px;
+            margin-right: 10px;
+        }
+
+        .form-group input {
+            flex: 1;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .password-wrap {
+            display: flex;
+            flex: 1;
+            align-items: center;
+        }
+
+        .password-wrap input {
+            flex: 1;
+            padding: 8px;
+        }
+
+        .password-wrap button {
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        .form-row-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .https-badge {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+            color: gray;
+        }
+    
+/* END EXTERNAL SOURCE */
