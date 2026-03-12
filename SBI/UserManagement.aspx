@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" MasterPageFile="~/Site1.Master" AutoEventWireup="true" CodeBehind="UserManagement.aspx.cs" Inherits="SBI.UserManagement" %>
+﻿<%@ Page Language="C#" MasterPageFile="~/Admin.Master" AutoEventWireup="true" CodeBehind="UserManagement.aspx.cs" Inherits="SBI.UserManagement" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <title>SBI User Management</title>
