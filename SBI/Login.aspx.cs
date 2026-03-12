@@ -22,20 +22,22 @@ namespace SBI
 
             using (SqlConnection conn = new SqlConnection(connStr))
             {
-                string query = "SELECT COUNT(*) FROM Users WHERE username = @username AND password = @password";
-
+                string query = "SELECT role, full_name FROM Users WHERE username = @username AND password = @password";
+                conn.Open();
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     // Use parameters to prevent SQL injection
                     cmd.Parameters.AddWithValue("@username", username);
                     cmd.Parameters.AddWithValue("@password", password);
 
-                    conn.Open();
-                    int count = (int)cmd.ExecuteScalar();
-                    conn.Close();
+                    SqlDataReader reader = cmd.ExecuteReader();
 
-                    if (count > 0)
+                    if (reader.HasRows)
                     {
+                        reader.Read();
+
+                        Session["userRole"] = reader["role"].ToString();
+                        Session["fullName"] = reader["full_name"].ToString();
                         // Successful login
                         Response.Redirect("~/Dashboard.aspx");
                     }

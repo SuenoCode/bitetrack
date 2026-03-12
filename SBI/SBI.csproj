@@ -204,6 +204,7 @@
     <Content Include="CaseSurveillance.aspx" />
     <Content Include="Dashboard.aspx" />
     <Content Include="Global.asax" />
+    <Content Include="Icons\audit.svg" />
     <Content Include="Icons\caseMonitoring.svg" />
     <Content Include="Icons\dashboard.svg" />
     <Content Include="Icons\eye.svg" />
