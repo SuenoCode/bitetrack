@@ -43,7 +43,7 @@ namespace SBI
 
                         string role = Session["userRole"] as string;
 
-                        if (role == "staff")
+                        if (role == "adminAssistant" || role == "vaccinators")
                         {
                             Response.Redirect("Dashboard.aspx");
                         }

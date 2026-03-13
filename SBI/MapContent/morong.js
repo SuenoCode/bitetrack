@@ -1513,7 +1513,7 @@ var morongData = {
                 "adm2_psgc": 405800000,
                 "adm3_psgc": 405809000,
                 "adm4_psgc": 405809002,
-                "adm4_en": "Can-Cal-Lan",
+                "adm4_en": "CCL",
                 "geo_level": "Bgy",
                 "len_crs": 7953,
                 "area_crs": 1873870,

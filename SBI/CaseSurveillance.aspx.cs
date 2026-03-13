@@ -15,7 +15,7 @@ namespace SBI
             if (!IsPostBack)
             {
 
-                if (Session["userRole"] == null || Session["userRole"].ToString().ToLower() != "staff")
+                if (Session["userRole"] == null || Session["userRole"].ToString().ToLower() != "adminAssisstant" || Session["userRole"].ToString().ToLower() != "vaccinators")
                 {
                     Response.Redirect("Login.aspx");
                 }

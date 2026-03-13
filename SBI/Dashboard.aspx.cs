@@ -15,34 +15,34 @@ namespace SBI
             if (!IsPostBack)
             {
                 BindPreviousCases();
-                if (Session["userRole"] == null || Session["userRole"].ToString().ToLower() != "staff")
-                {
-                    Response.Redirect("Login.aspx");
-                }
-
             }
         }
 
         private void BindPreviousCases()
         {
             string connectionString = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
+
             string query = @"
                 SELECT TOP 10 
-                    NameID as 'ID',
-                    FORMAT(Date, 'MMM dd, yyyy') as 'Date',
-                    Place as 'Barangay'
-                FROM KyleMonggoloid 
-                WHERE Place IS NOT NULL AND Place != 'NULL'
-                ORDER BY Date DESC";
+                    patient_id AS 'ID',
+                    FORMAT(date_of_bite, 'MMM dd, yyyy') AS 'Date',
+                    place_of_bite AS 'Barangay'
+                FROM BiteCase
+                WHERE place_of_bite IS NOT NULL 
+                      AND place_of_bite <> '' 
+                      AND place_of_bite <> 'NULL'
+                ORDER BY date_of_bite DESC";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     conn.Open();
+
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
+
                     gvPreviousCases.DataSource = dt;
                     gvPreviousCases.DataBind();
                 }
@@ -60,16 +60,19 @@ namespace SBI
                 {
                     string query = @"
                         SELECT 
-                            ISNULL(Place, 'Unknown') as Barangay,
-                            COUNT(*) as CaseCount
-                        FROM KyleMonggoloid
-                        WHERE Place IS NOT NULL AND Place != 'NULL'
-                        GROUP BY Place
+                            ISNULL(place_of_bite, 'Unknown') AS Barangay,
+                            COUNT(*) AS CaseCount
+                        FROM BiteCase
+                        WHERE place_of_bite IS NOT NULL 
+                              AND place_of_bite <> '' 
+                              AND place_of_bite <> 'NULL'
+                        GROUP BY place_of_bite
                         ORDER BY CaseCount DESC";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         conn.Open();
+
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
                             DataTable dt = new DataTable();
@@ -77,8 +80,13 @@ namespace SBI
 
                             var result = new
                             {
-                                Barangays = dt.AsEnumerable().Select(r => r["Barangay"].ToString()).ToArray(),
-                                CaseCounts = dt.AsEnumerable().Select(r => Convert.ToInt32(r["CaseCount"])).ToArray()
+                                Barangays = dt.AsEnumerable()
+                                    .Select(r => r["Barangay"].ToString())
+                                    .ToArray(),
+
+                                CaseCounts = dt.AsEnumerable()
+                                    .Select(r => Convert.ToInt32(r["CaseCount"]))
+                                    .ToArray()
                             };
 
                             return result;
@@ -102,8 +110,29 @@ namespace SBI
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    return true;
+
+                    string query = @"
+                        SELECT 
+                            COUNT(*) AS TotalCases,
+                            COUNT(DISTINCT place_of_bite) AS TotalBarangays
+                        FROM BiteCase";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        SqlDataReader reader = cmd.ExecuteReader();
+
+                        if (reader.Read())
+                        {
+                            return new
+                            {
+                                TotalCases = reader["TotalCases"],
+                                TotalBarangays = reader["TotalBarangays"]
+                            };
+                        }
+                    }
                 }
+
+                return null;
             }
             catch (Exception ex)
             {

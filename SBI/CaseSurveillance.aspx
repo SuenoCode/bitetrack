@@ -15,10 +15,10 @@
             <div class="flex flex-wrap gap-3">
                 <asp:Button ID="btnPrintSchedules" runat="server"
                     CssClass="h-11 rounded-lg border border-slate-200 bg-white px-4 font-semibold text-slate-700 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition"
-                    Text="🖨 Print Schedules" />
+                    Text="Print Schedules" />
                 <asp:Button ID="btnSendReminders" runat="server"
                     CssClass="h-11 rounded-lg bg-[#1a4ed8] px-5 font-extrabold text-white shadow hover:brightness-110 hover:-translate-y-[1px] transition"
-                    Text="📨 Send Reminders" />
+                    Text="Send Reminders" />
             </div>
         </div>
 

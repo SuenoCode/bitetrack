@@ -62,7 +62,6 @@
                         Password
                     </label>
                     <asp:TextBox ID="txtPassword" runat="server"
-                        TextMode="Password"
                         CssClass="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm
                         focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
                         Placeholder="Enter your password"/>

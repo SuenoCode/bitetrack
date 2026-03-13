@@ -184,9 +184,11 @@
 
         // Get color based on case count (3 colors)
         function getColor(caseCount) {
-            if (caseCount >= 5) {
+            if (caseCount >= 30) {
                 return '#dc2626'; // Red - High (5+ cases)
-            } else if (caseCount >= 1) {
+            } else if (caseCount >= 20) {
+                return '#FFFF00'; // Yellow - Medium (1-4 cases)
+            } else if (caseCount >= 10) {
                 return '#f97316'; // Orange - Medium (1-4 cases)
             } else {
                 return '#22c55e'; // Green - Low/No cases
