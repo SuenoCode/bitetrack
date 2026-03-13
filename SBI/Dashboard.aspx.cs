@@ -27,7 +27,7 @@ namespace SBI
                     patient_id AS 'ID',
                     FORMAT(date_of_bite, 'MMM dd, yyyy') AS 'Date',
                     place_of_bite AS 'Barangay'
-                FROM BiteCase
+                FROM [Case]
                 WHERE place_of_bite IS NOT NULL 
                       AND place_of_bite <> '' 
                       AND place_of_bite <> 'NULL'
@@ -62,7 +62,7 @@ namespace SBI
                         SELECT 
                             ISNULL(place_of_bite, 'Unknown') AS Barangay,
                             COUNT(*) AS CaseCount
-                        FROM BiteCase
+                        FROM [Case]
                         WHERE place_of_bite IS NOT NULL 
                               AND place_of_bite <> '' 
                               AND place_of_bite <> 'NULL'
@@ -115,7 +115,7 @@ namespace SBI
                         SELECT 
                             COUNT(*) AS TotalCases,
                             COUNT(DISTINCT place_of_bite) AS TotalBarangays
-                        FROM BiteCase";
+                        FROM [Case]";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {

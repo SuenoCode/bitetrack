@@ -70,7 +70,7 @@ namespace SBI
                         bc.site_of_bite,
                         bc.category,
                         p.fname + ' ' + p.lname AS PatientName
-                    FROM BiteCase bc
+                    FROM [Case] bc
                     INNER JOIN Patient p ON bc.patient_id = p.patient_id
                     ORDER BY bc.date_of_bite ASC";
 
