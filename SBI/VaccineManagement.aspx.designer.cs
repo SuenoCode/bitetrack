@@ -15,40 +15,40 @@ namespace SBI
     {
 
         /// <summary>
-        /// btnBatchHistory control.
+        /// btnOverviewTab control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnBatchHistory;
+        protected global::System.Web.UI.WebControls.LinkButton btnOverviewTab;
 
         /// <summary>
-        /// btnAddStock control.
+        /// btnAddStockTab control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnAddStock;
+        protected global::System.Web.UI.WebControls.LinkButton btnAddStockTab;
 
         /// <summary>
-        /// lblLowStock control.
+        /// btnInventoryTab control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblLowStock;
+        protected global::System.Web.UI.WebControls.LinkButton btnInventoryTab;
 
         /// <summary>
-        /// btnRequestRestock control.
+        /// panelOverview control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnRequestRestock;
+        protected global::System.Web.UI.WebControls.Panel panelOverview;
 
         /// <summary>
         /// lblTotalDoses control.
@@ -87,6 +87,15 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Label lblAdministeredMTD;
 
         /// <summary>
+        /// panelAddStock control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel panelAddStock;
+
+        /// <summary>
         /// ddlVaccineName control.
         /// </summary>
         /// <remarks>
@@ -123,40 +132,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.TextBox txtQuantity;
 
         /// <summary>
-        /// btnReset control.
+        /// panelInventory control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnReset;
-
-        /// <summary>
-        /// btnAddToInventory control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnAddToInventory;
-
-        /// <summary>
-        /// txtSearchInventory control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtSearchInventory;
-
-        /// <summary>
-        /// ddlFilterType control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlFilterType;
+        protected global::System.Web.UI.WebControls.Panel panelInventory;
 
         /// <summary>
         /// gvInventory control.

@@ -12,10 +12,31 @@ namespace SBI
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (Session["userRole"] == null || Session["userRole"].ToString().ToLower() != "staff")
+            if (Session["userRole"] == null || Session["userRole"].ToString().ToLower() != "adminAssisstant" && Session["userRole"].ToString().ToLower() != "vaccinators")
             {
                 Response.Redirect("Login.aspx");
             }
+        }
+
+        protected void btnOverviewTab_Click(object sender, EventArgs e)
+        {
+            panelOverview.Visible = true;
+            panelAddStock.Visible = false;
+            panelInventory.Visible = false;
+        }
+
+        protected void btnAddStockTab_Click(object sender, EventArgs e)
+        {
+            panelOverview.Visible = false;
+            panelAddStock.Visible = true;
+            panelInventory.Visible = false;
+        }
+
+        protected void btnInventoryTab_Click(object sender, EventArgs e)
+        {
+            panelOverview.Visible = false;
+            panelAddStock.Visible = false;
+            panelInventory.Visible = true;
         }
     }
 }
