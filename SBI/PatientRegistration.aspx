@@ -2,24 +2,28 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
+    <asp:HiddenField ID="hfActivePanel" runat="server" Value="addPatientPanel" />
+
     <div class="px-3 py-6 font-sans text-slate-900">
 
         <!-- PANEL TOGGLE BUTTONS -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <button type="button" class="rounded-2xl border border-slate-200 bg-white shadow p-5 hover:shadow-lg transition font-semibold text-green-700"
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <button type="button"
+                class="rounded-2xl border border-slate-200 bg-white shadow p-5 hover:shadow-lg transition font-semibold text-green-700"
                 onclick="showPanel('viewPatientPanel')">
                 View Patient / Case Details
             </button>
-            <button type="button" class="rounded-2xl border border-slate-200 bg-white shadow p-5 hover:shadow-lg transition font-semibold text-blue-700"
+
+            <button type="button"
+                class="rounded-2xl border border-slate-200 bg-white shadow p-5 hover:shadow-lg transition font-semibold text-blue-700"
                 onclick="showPanel('addPatientPanel')">
                 Add New Patient / Case
-
+            </button>
         </div>
 
         <!-- ====================== ADD PATIENT / CASE PANEL ====================== -->
         <div id="addPatientPanel" class="panel">
 
-            <!-- PAGE HEADER -->
             <div class="mb-5">
                 <h2 class="text-4xl font-extrabold tracking-tight text-[#0b2a7a]">Patient Registration</h2>
                 <p class="mt-1 text-base text-slate-600">
@@ -27,14 +31,12 @@
                 </p>
             </div>
 
-            <!-- PATIENT FORM -->
             <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
                 <!-- A. Patient Information -->
                 <div class="px-5 py-5 space-y-4">
                     <h3 class="text-lg font-extrabold text-slate-900 mb-2">A. Patient Information</h3>
 
-                    <!-- Row 1 -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">First Name <span class="text-red-500">*</span></label>
@@ -56,7 +58,6 @@
                         </div>
                     </div>
 
-                    <!-- Row 2 -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Date of Birth <span class="text-red-500">*</span></label>
@@ -77,14 +78,12 @@
                             <asp:DropDownList ID="ddlGender" runat="server"
                                 CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200">
                                 <asp:ListItem Text="Select Gender" Value="" Selected="True" />
-                                <asp:ListItem Text="Male" Value="Male" />
-                                <asp:ListItem Text="Female" Value="Female" />
-                                <asp:ListItem Text="Other" Value="Other" />
+                                <asp:ListItem Text="Male" Value="M" />
+                                <asp:ListItem Text="Female" Value="F" />
                             </asp:DropDownList>
                         </div>
                     </div>
 
-                    <!-- Row 3 -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Civil Status</label>
@@ -93,8 +92,8 @@
                                 <asp:ListItem Text="Select Status" Value="" Selected="True" />
                                 <asp:ListItem Text="Single" Value="Single" />
                                 <asp:ListItem Text="Married" Value="Married" />
-                                <asp:ListItem Text="Divorced" Value="Divorced" />
                                 <asp:ListItem Text="Widowed" Value="Widowed" />
+                                <asp:ListItem Text="Separated" Value="Separated" />
                             </asp:DropDownList>
                         </div>
                         <div>
@@ -105,7 +104,6 @@
                         </div>
                     </div>
 
-                    <!-- Address -->
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1">Address <span class="text-red-500">*</span></label>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -116,7 +114,6 @@
                         </div>
                     </div>
 
-                    <!-- Row 4 -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Occupation <span class="text-red-500">*</span></label>
@@ -144,7 +141,6 @@
                         </div>
                     </div>
 
-                    <!-- Optional Vitals -->
                     <div class="pt-2 border-t border-slate-200">
                         <button type="button" onclick="toggleVitals()"
                             class="text-sm font-semibold text-blue-600 hover:text-blue-800">
@@ -177,7 +173,6 @@
                     <h3 class="text-lg font-extrabold text-slate-900 mb-4">B. History of Biting Incident</h3>
 
                     <div class="space-y-4">
-                        <!-- Date + Place -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Date and Time of Bite <span class="text-red-500">*</span></label>
@@ -192,7 +187,6 @@
                             </div>
                         </div>
 
-                        <!-- Animal Type -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="rounded-xl border border-slate-200 p-4">
                                 <div class="mb-2 text-sm font-bold text-slate-900">Biting Animal <span class="text-red-500">*</span></div>
@@ -207,7 +201,6 @@
                                 </div>
                             </div>
 
-                            <!-- Circumstance -->
                             <div class="rounded-xl border border-slate-200 p-4">
                                 <div class="mb-2 text-sm font-bold text-slate-900">Circumstance <span class="text-red-500">*</span></div>
                                 <div class="flex flex-wrap gap-4 text-sm font-semibold text-slate-700">
@@ -217,7 +210,6 @@
                             </div>
                         </div>
 
-                        <!-- Ownership + Animal Status -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="rounded-xl border border-slate-200 p-4">
                                 <div class="mb-2 text-sm font-bold text-slate-900">Ownership <span class="text-red-500">*</span></div>
@@ -239,7 +231,6 @@
                             </div>
                         </div>
 
-                        <!-- Additional Bite Details -->
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Type of Exposure</label>
@@ -258,16 +249,15 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Wound Type</label>
-                                <asp:DropDownList ID="DropDownList1" runat="server"
+                                <asp:DropDownList ID="ddlWoundType" runat="server"
                                     CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200">
-                                    <asp:ListItem Text="select type" Value="" Selected="True" />
+                                    <asp:ListItem Text="Select Type" Value="" Selected="True" />
                                     <asp:ListItem Text="Lacerated" Value="Lacerated" />
                                     <asp:ListItem Text="Avulsion" Value="Avulsion" />
                                     <asp:ListItem Text="Punctured" Value="Punctured" />
                                     <asp:ListItem Text="Abrasion" Value="Abrasion" />
-                                    <asp:ListItem Text="Scratchs" Value="Scratchs" />
+                                    <asp:ListItem Text="Scratches" Value="Scratches" />
                                     <asp:ListItem Text="Hematoma" Value="Hematoma" />
-
                                 </asp:DropDownList>
                             </div>
                             <div>
@@ -281,7 +271,6 @@
                             </div>
                         </div>
 
-                        <!-- Category -->
                         <div class="rounded-xl border border-slate-200 p-4">
                             <div class="mb-2 text-sm font-bold text-slate-900">Category</div>
                             <div class="flex flex-wrap gap-4 text-sm font-semibold text-slate-700">
@@ -293,7 +282,6 @@
                     </div>
                 </div>
 
-                <!-- ACTION BUTTONS -->
                 <div class="px-5 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
                     <asp:Button ID="btnClear" runat="server" Text="Clear"
                         CssClass="px-6 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
@@ -304,68 +292,197 @@
                 </div>
             </div>
         </div>
-        <!-- END ADD PATIENT PANEL -->
 
         <!-- ====================== VIEW PATIENT DETAILS PANEL ====================== -->
-<div id="viewPatientPanel" class="panel hidden rounded-2xl border border-slate-200 bg-white shadow p-5">
-    <h4 class="text-lg font-bold text-slate-900 mb-4">Patient Details</h4>
-            <div class="overflow-x-auto">
-                <asp:GridView ID="gvPatients" runat="server" AutoGenerateColumns="False"
-                    CssClass="w-full border-collapse border border-slate-200"
-                    HeaderStyle-CssClass="bg-slate-50 text-slate-700 font-semibold"
-                    RowStyle-CssClass="border-b border-slate-200 hover:bg-slate-50"
-                    AlternatingRowStyle-CssClass="bg-slate-50">
-                    <Columns>
-                        <asp:BoundField DataField="patient_id" HeaderText="Patient ID" />
-                        <asp:BoundField DataField="fname" HeaderText="First Name" />
-                        <asp:BoundField DataField="lname" HeaderText="Last Name" />
-                        <asp:BoundField DataField="Gender" HeaderText="Gender" />
-                        <asp:BoundField DataField="contact_no" HeaderText="Contact No" />
-                        <asp:BoundField DataField="address" HeaderText="Address" />
-                        <asp:BoundField DataField="date_added" HeaderText="Date Added" DataFormatString="{0:MMM dd, yyyy}" />
-                    </Columns>
-                </asp:GridView>
-            </div>
-            <br /><br />
-            <h4 class="text-lg font-bold text-slate-900 mb-4">Case Details</h4>
-            <div class="overflow-x-auto">
-                <asp:GridView ID="gvCases" runat="server" AutoGenerateColumns="False"
-                    CssClass="w-full border-collapse border border-slate-200"
-                    HeaderStyle-CssClass="bg-slate-50 text-slate-700 font-semibold"
-                    RowStyle-CssClass="border-b border-slate-200 hover:bg-slate-50"
-                    AlternatingRowStyle-CssClass="bg-slate-50">
-                    <Columns>
-                        <asp:BoundField DataField="case_id" HeaderText="Case ID" />
-                        <asp:BoundField DataField="patient_id" HeaderText="Patient ID" />
-                        <asp:BoundField DataField="case_no" HeaderText="Case Number" />
-                        <asp:BoundField DataField="date_of_bite" HeaderText="Date of Bite" DataFormatString="{0:MMM dd, yyyy}" />
-                        <asp:BoundField DataField="place_of_bite" HeaderText="Place of Bite" />
-                        <asp:BoundField DataField="type_of_exposure" HeaderText="Type of Exposure" />
-                        <asp:BoundField DataField="site_of_bite" HeaderText="Site of Bite" />
-                        <asp:BoundField DataField="category" HeaderText="Category" />
-                    </Columns>
-                </asp:GridView>
+        <div id="viewPatientPanel" class="panel hidden space-y-6">
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+                <!-- LEFT -->
+                <div class="xl:col-span-2 space-y-6">
+
+                    <!-- Patient Table -->
+                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50">
+                            <div>
+                                <h4 class="text-lg font-bold text-slate-900">Patient Details</h4>
+                                <p class="text-sm text-slate-500">List of registered patients</p>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <asp:GridView ID="gvPatients" runat="server" AutoGenerateColumns="False"
+                                CssClass="w-full min-w-[950px] text-sm text-left text-slate-700"
+                                GridLines="None"
+                                EmptyDataText="No patient records found."
+                                DataKeyNames="patient_id"
+                                OnRowCommand="gvPatients_RowCommand"
+                                HeaderStyle-CssClass="bg-slate-100 text-slate-800"
+                                RowStyle-CssClass="border-b border-slate-200 hover:bg-slate-50"
+                                AlternatingRowStyle-CssClass="bg-slate-50/50"
+                                EmptyDataRowStyle-CssClass="text-center text-slate-500 italic py-6">
+
+                                <Columns>
+                                    <asp:TemplateField HeaderText="Action">
+                                        <HeaderStyle CssClass="px-4 py-3 text-xs font-bold uppercase tracking-wider" />
+                                        <ItemStyle CssClass="px-4 py-3" />
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="btnViewPatient" runat="server"
+                                                Text="View"
+                                                CommandName="ViewPatient"
+                                                CommandArgument='<%# Eval("patient_id") %>'
+                                                CssClass="inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:BoundField DataField="patient_id" HeaderText="Patient ID" />
+                                    <asp:BoundField DataField="fname" HeaderText="First Name" />
+                                    <asp:BoundField DataField="lname" HeaderText="Last Name" />
+                                    <asp:BoundField DataField="gender" HeaderText="Gender" />
+                                    <asp:BoundField DataField="contact_no" HeaderText="Contact No" />
+                                    <asp:BoundField DataField="address" HeaderText="Address" />
+                                    <asp:BoundField DataField="date_added" HeaderText="Date Added" DataFormatString="{0:MMM dd, yyyy}" />
+                                </Columns>
+                            </asp:GridView>
+                        </div>
+                    </div>
+
+                    <!-- Case Table -->
+                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50">
+                            <div>
+                                <h4 class="text-lg font-bold text-slate-900">Case Details</h4>
+                                <p class="text-sm text-slate-500">Recorded bite exposure cases</p>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <asp:GridView ID="gvCases" runat="server" AutoGenerateColumns="False"
+                                CssClass="w-full min-w-[1100px] text-sm text-left text-slate-700"
+                                GridLines="None"
+                                EmptyDataText="No case records found."
+                                DataKeyNames="case_id"
+                                OnRowCommand="gvCases_RowCommand"
+                                HeaderStyle-CssClass="bg-slate-100 text-slate-800"
+                                RowStyle-CssClass="border-b border-slate-200 hover:bg-slate-50"
+                                AlternatingRowStyle-CssClass="bg-slate-50/50"
+                                EmptyDataRowStyle-CssClass="text-center text-slate-500 italic py-6">
+
+                                <Columns>
+                                    <asp:TemplateField HeaderText="Action">
+                                        <HeaderStyle CssClass="px-4 py-3 text-xs font-bold uppercase tracking-wider" />
+                                        <ItemStyle CssClass="px-4 py-3" />
+                                        <ItemTemplate>
+                                            <asp:LinkButton ID="btnViewCase" runat="server"
+                                                Text="View"
+                                                CommandName="ViewCase"
+                                                CommandArgument='<%# Eval("case_id") %>'
+                                                CssClass="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+
+                                    <asp:BoundField DataField="case_id" HeaderText="Case ID" />
+                                    <asp:BoundField DataField="patient_id" HeaderText="Patient ID" />
+                                    <asp:BoundField DataField="case_no" HeaderText="Case Number" />
+                                    <asp:BoundField DataField="date_of_bite" HeaderText="Date of Bite" DataFormatString="{0:MMM dd, yyyy}" />
+                                    <asp:BoundField DataField="place_of_bite" HeaderText="Place of Bite" />
+                                    <asp:BoundField DataField="type_of_exposure" HeaderText="Type of Exposure" />
+                                    <asp:BoundField DataField="site_of_bite" HeaderText="Site of Bite" />
+                                    <asp:BoundField DataField="category" HeaderText="Category" />
+                                </Columns>
+                            </asp:GridView>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT PREVIEW -->
+                <div class="xl:col-span-1">
+                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden sticky top-6">
+                        <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
+                            <h4 class="text-lg font-bold text-slate-900">Record Preview</h4>
+                            <p class="text-sm text-slate-500">Click View to display full details</p>
+                        </div>
+
+                        <div class="p-5 space-y-5">
+                            <asp:Panel ID="pnlPreviewEmpty" runat="server">
+                                <div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
+                                    No record selected yet.
+                                </div>
+                            </asp:Panel>
+
+                            <asp:Panel ID="pnlPatientPreview" runat="server" Visible="false">
+                                <div class="rounded-xl bg-blue-50 border border-blue-100 p-4 mb-4">
+                                    <h5 class="text-base font-bold text-blue-900">Patient Information</h5>
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-3 text-sm">
+                                    <div><span class="font-semibold text-slate-700">Patient ID:</span> <asp:Label ID="lblPatientId" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Name:</span> <asp:Label ID="lblPatientName" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Date of Birth:</span> <asp:Label ID="lblPatientDOB" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Gender:</span> <asp:Label ID="lblPatientGender" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Civil Status:</span> <asp:Label ID="lblPatientCivilStatus" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Address:</span> <asp:Label ID="lblPatientAddress" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Contact No:</span> <asp:Label ID="lblPatientContact" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Occupation:</span> <asp:Label ID="lblPatientOccupation" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Emergency Contact:</span> <asp:Label ID="lblPatientEmergencyPerson" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Emergency No:</span> <asp:Label ID="lblPatientEmergencyNo" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Blood Pressure:</span> <asp:Label ID="lblPatientBP" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Temperature:</span> <asp:Label ID="lblPatientTemp" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Weight:</span> <asp:Label ID="lblPatientWeight" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Date Added:</span> <asp:Label ID="lblPatientDateAdded" runat="server" /></div>
+                                </div>
+                            </asp:Panel>
+
+                            <asp:Panel ID="pnlCasePreview" runat="server" Visible="false">
+                                <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-4 mb-4">
+                                    <h5 class="text-base font-bold text-emerald-900">Case Information</h5>
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-3 text-sm">
+                                    <div><span class="font-semibold text-slate-700">Case ID:</span> <asp:Label ID="lblCaseId" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Patient ID:</span> <asp:Label ID="lblCasePatientId" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Case No:</span> <asp:Label ID="lblCaseNo" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Date of Bite:</span> <asp:Label ID="lblCaseDateOfBite" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Time of Bite:</span> <asp:Label ID="lblCaseTimeOfBite" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Place of Bite:</span> <asp:Label ID="lblCasePlaceOfBite" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Exposure Type:</span> <asp:Label ID="lblCaseExposureType" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Wound Type:</span> <asp:Label ID="lblCaseWoundType" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Bleeding:</span> <asp:Label ID="lblCaseBleeding" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Site of Bite:</span> <asp:Label ID="lblCaseSiteOfBite" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Category:</span> <asp:Label ID="lblCaseCategory" runat="server" /></div>
+                                    <div><span class="font-semibold text-slate-700">Washed:</span> <asp:Label ID="lblCaseWashed" runat="server" /></div>
+                                </div>
+                            </asp:Panel>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
-       
     </div>
-    <!-- JavaScript -->
+
     <script type="text/javascript">
         function showPanel(panelId) {
-            // Hide all panels
-            document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
-            // Show selected panel
+            document.querySelectorAll('.panel').forEach(function (p) {
+                p.classList.add('hidden');
+            });
+
             document.getElementById(panelId).classList.remove('hidden');
+
+            var hiddenField = document.getElementById('<%= hfActivePanel.ClientID %>');
+            if (hiddenField) {
+                hiddenField.value = panelId;
+            }
         }
 
         function toggleVitals() {
             document.getElementById('optionalVitals').classList.toggle('hidden');
         }
 
-        // Show Add Patient panel by default
         document.addEventListener('DOMContentLoaded', function () {
-            showPanel('addPatientPanel');
+            var hiddenField = document.getElementById('<%= hfActivePanel.ClientID %>');
+            var activePanel = hiddenField && hiddenField.value ? hiddenField.value : 'addPatientPanel';
+            showPanel(activePanel);
         });
     </script>
 
