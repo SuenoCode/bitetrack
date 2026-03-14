@@ -3,22 +3,27 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
     <asp:HiddenField ID="hfActivePanel" runat="server" Value="addPatientPanel" />
+    <asp:HiddenField ID="hfSelectedPatientId" runat="server" Value="" />
+    <asp:HiddenField ID="hfSelectedCaseId" runat="server" Value="" />
+    <asp:HiddenField ID="hfEditMode" runat="server" Value="" />
 
     <div class="px-3 py-6 font-sans text-slate-900">
 
         <!-- PANEL TOGGLE BUTTONS -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <button type="button"
-                class="rounded-2xl border border-slate-200 bg-white shadow p-5 hover:shadow-lg transition font-semibold text-green-700"
-                onclick="showPanel('viewPatientPanel')">
-                View Patient / Case Details
-            </button>
+        <div class="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm p-3">
+            <div class="flex flex-wrap gap-3">
+                <button type="button" id="btnViewPanel"
+                    class="panel-tab rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-50"
+                    onclick="showPanel('viewPatientPanel')">
+                    View Patient / Case Details
+                </button>
 
-            <button type="button"
-                class="rounded-2xl border border-slate-200 bg-white shadow p-5 hover:shadow-lg transition font-semibold text-blue-700"
-                onclick="showPanel('addPatientPanel')">
-                Add New Patient / Case
-            </button>
+                <button type="button" id="btnAddPanel"
+                    class="panel-tab rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-50"
+                    onclick="showPanel('addPatientPanel')">
+                    Add New Patient / Case
+                </button>
+            </div>
         </div>
 
         <!-- ====================== ADD PATIENT / CASE PANEL ====================== -->
@@ -286,9 +291,20 @@
                     <asp:Button ID="btnClear" runat="server" Text="Clear"
                         CssClass="px-6 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
                         OnClick="btnClear_Click" />
+
                     <asp:Button ID="btnSave" runat="server" Text="Save Patient Record"
                         CssClass="px-6 py-2 rounded-lg bg-blue-700 text-white font-semibold shadow hover:bg-blue-800"
                         OnClick="btnSave_Click" />
+
+                    <asp:Button ID="btnUpdateRecord" runat="server" Text="Update Record"
+                        Visible="false"
+                        CssClass="px-6 py-2 rounded-lg bg-amber-500 text-white font-semibold shadow hover:bg-amber-600"
+                        OnClick="btnUpdateRecord_Click" />
+
+                    <asp:Button ID="btnCancelEditForm" runat="server" Text="Cancel Edit"
+                        Visible="false"
+                        CssClass="px-6 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
+                        OnClick="btnCancelEditForm_Click" />
                 </div>
             </div>
         </div>
@@ -302,10 +318,22 @@
 
                     <!-- Patient Table -->
                     <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50">
+                        <div class="flex flex-col gap-3 px-5 py-4 border-b border-slate-200 bg-slate-50">
                             <div>
                                 <h4 class="text-lg font-bold text-slate-900">Patient Details</h4>
                                 <p class="text-sm text-slate-500">List of registered patients</p>
+                            </div>
+
+                            <div class="flex flex-col md:flex-row gap-3">
+                                <asp:TextBox ID="txtSearchPatient" runat="server"
+                                    CssClass="h-10 w-full md:w-80 rounded-lg border border-slate-200 px-3 text-sm"
+                                    placeholder="Search by Patient ID, Name, Contact, Address" />
+                                <asp:Button ID="btnSearchPatient" runat="server" Text="Search"
+                                    CssClass="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700"
+                                    OnClick="btnSearchPatient_Click" />
+                                <asp:Button ID="btnResetPatientSearch" runat="server" Text="Reset"
+                                    CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
+                                    OnClick="btnResetPatientSearch_Click" />
                             </div>
                         </div>
 
@@ -326,11 +354,19 @@
                                         <HeaderStyle CssClass="px-4 py-3 text-xs font-bold uppercase tracking-wider" />
                                         <ItemStyle CssClass="px-4 py-3" />
                                         <ItemTemplate>
-                                            <asp:LinkButton ID="btnViewPatient" runat="server"
-                                                Text="View"
-                                                CommandName="ViewPatient"
-                                                CommandArgument='<%# Eval("patient_id") %>'
-                                                CssClass="inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700" />
+                                            <div class="flex gap-2">
+                                                <asp:LinkButton ID="btnViewPatient" runat="server"
+                                                    Text="View"
+                                                    CommandName="ViewPatient"
+                                                    CommandArgument='<%# Eval("patient_id") %>'
+                                                    CssClass="inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700" />
+
+                                                <asp:LinkButton ID="btnEditPatient" runat="server"
+                                                    Text="Edit"
+                                                    CommandName="EditPatient"
+                                                    CommandArgument='<%# Eval("patient_id") %>'
+                                                    CssClass="inline-flex items-center rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600" />
+                                            </div>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
@@ -348,10 +384,22 @@
 
                     <!-- Case Table -->
                     <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50">
+                        <div class="flex flex-col gap-3 px-5 py-4 border-b border-slate-200 bg-slate-50">
                             <div>
                                 <h4 class="text-lg font-bold text-slate-900">Case Details</h4>
                                 <p class="text-sm text-slate-500">Recorded bite exposure cases</p>
+                            </div>
+
+                            <div class="flex flex-col md:flex-row gap-3">
+                                <asp:TextBox ID="txtSearchCase" runat="server"
+                                    CssClass="h-10 w-full md:w-80 rounded-lg border border-slate-200 px-3 text-sm"
+                                    placeholder="Search by Case ID, Patient ID, Case No, Place, Category" />
+                                <asp:Button ID="btnSearchCase" runat="server" Text="Search"
+                                    CssClass="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700"
+                                    OnClick="btnSearchCase_Click" />
+                                <asp:Button ID="btnResetCaseSearch" runat="server" Text="Reset"
+                                    CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
+                                    OnClick="btnResetCaseSearch_Click" />
                             </div>
                         </div>
 
@@ -372,11 +420,19 @@
                                         <HeaderStyle CssClass="px-4 py-3 text-xs font-bold uppercase tracking-wider" />
                                         <ItemStyle CssClass="px-4 py-3" />
                                         <ItemTemplate>
-                                            <asp:LinkButton ID="btnViewCase" runat="server"
-                                                Text="View"
-                                                CommandName="ViewCase"
-                                                CommandArgument='<%# Eval("case_id") %>'
-                                                CssClass="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700" />
+                                            <div class="flex gap-2">
+                                                <asp:LinkButton ID="btnViewCase" runat="server"
+                                                    Text="View"
+                                                    CommandName="ViewCase"
+                                                    CommandArgument='<%# Eval("case_id") %>'
+                                                    CssClass="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700" />
+
+                                                <asp:LinkButton ID="btnEditCase" runat="server"
+                                                    Text="Edit"
+                                                    CommandName="EditCase"
+                                                    CommandArgument='<%# Eval("case_id") %>'
+                                                    CssClass="inline-flex items-center rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600" />
+                                            </div>
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
@@ -430,6 +486,16 @@
                                     <div><span class="font-semibold text-slate-700">Weight:</span> <asp:Label ID="lblPatientWeight" runat="server" /></div>
                                     <div><span class="font-semibold text-slate-700">Date Added:</span> <asp:Label ID="lblPatientDateAdded" runat="server" /></div>
                                 </div>
+
+                                <div class="pt-4 border-t border-slate-200 flex gap-3 mt-4">
+                                    <asp:Button ID="btnPreviewEditPatient" runat="server" Text="Edit Patient"
+                                        CssClass="px-4 py-2 rounded-lg bg-amber-500 text-white font-semibold hover:bg-amber-600"
+                                        OnClick="btnPreviewEditPatient_Click" />
+
+                                    <asp:Button ID="btnCancelPatientPreview" runat="server" Text="Cancel"
+                                        CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
+                                        OnClick="btnCancelPatientPreview_Click" />
+                                </div>
                             </asp:Panel>
 
                             <asp:Panel ID="pnlCasePreview" runat="server" Visible="false">
@@ -451,6 +517,16 @@
                                     <div><span class="font-semibold text-slate-700">Category:</span> <asp:Label ID="lblCaseCategory" runat="server" /></div>
                                     <div><span class="font-semibold text-slate-700">Washed:</span> <asp:Label ID="lblCaseWashed" runat="server" /></div>
                                 </div>
+
+                                <div class="pt-4 border-t border-slate-200 flex gap-3 mt-4">
+                                    <asp:Button ID="btnPreviewEditCase" runat="server" Text="Edit Case"
+                                        CssClass="px-4 py-2 rounded-lg bg-amber-500 text-white font-semibold hover:bg-amber-600"
+                                        OnClick="btnPreviewEditCase_Click" />
+
+                                    <asp:Button ID="btnCancelCasePreview" runat="server" Text="Cancel"
+                                        CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
+                                        OnClick="btnCancelCasePreview_Click" />
+                                </div>
                             </asp:Panel>
                         </div>
                     </div>
@@ -462,12 +538,42 @@
     </div>
 
     <script type="text/javascript">
+        function setActivePanelButton(panelId) {
+            var btnView = document.getElementById('btnViewPanel');
+            var btnAdd = document.getElementById('btnAddPanel');
+
+            if (btnView) {
+                btnView.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                btnView.classList.add('bg-white', 'text-slate-800', 'border-slate-300');
+            }
+
+            if (btnAdd) {
+                btnAdd.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                btnAdd.classList.add('bg-white', 'text-slate-800', 'border-slate-300');
+            }
+
+            if (panelId === 'viewPatientPanel' && btnView) {
+                btnView.classList.remove('bg-white', 'text-slate-800', 'border-slate-300');
+                btnView.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+            }
+
+            if (panelId === 'addPatientPanel' && btnAdd) {
+                btnAdd.classList.remove('bg-white', 'text-slate-800', 'border-slate-300');
+                btnAdd.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+            }
+        }
+
         function showPanel(panelId) {
             document.querySelectorAll('.panel').forEach(function (p) {
                 p.classList.add('hidden');
             });
 
-            document.getElementById(panelId).classList.remove('hidden');
+            var target = document.getElementById(panelId);
+            if (target) {
+                target.classList.remove('hidden');
+            }
+
+            setActivePanelButton(panelId);
 
             var hiddenField = document.getElementById('<%= hfActivePanel.ClientID %>');
             if (hiddenField) {
@@ -476,7 +582,10 @@
         }
 
         function toggleVitals() {
-            document.getElementById('optionalVitals').classList.toggle('hidden');
+            var vitals = document.getElementById('optionalVitals');
+            if (vitals) {
+                vitals.classList.toggle('hidden');
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function () {

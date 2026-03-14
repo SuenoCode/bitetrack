@@ -24,6 +24,33 @@ namespace SBI
 		protected global::System.Web.UI.WebControls.HiddenField hfActivePanel;
 
 		/// <summary>
+		/// hfSelectedPatientId control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.HiddenField hfSelectedPatientId;
+
+		/// <summary>
+		/// hfSelectedCaseId control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.HiddenField hfSelectedCaseId;
+
+		/// <summary>
+		/// hfEditMode control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.HiddenField hfEditMode;
+
+		/// <summary>
 		/// txtFirstName control.
 		/// </summary>
 		/// <remarks>
@@ -411,6 +438,51 @@ namespace SBI
 		protected global::System.Web.UI.WebControls.Button btnSave;
 
 		/// <summary>
+		/// btnUpdateRecord control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.Button btnUpdateRecord;
+
+		/// <summary>
+		/// btnCancelEditForm control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.Button btnCancelEditForm;
+
+		/// <summary>
+		/// txtSearchPatient control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.TextBox txtSearchPatient;
+
+		/// <summary>
+		/// btnSearchPatient control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.Button btnSearchPatient;
+
+		/// <summary>
+		/// btnResetPatientSearch control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.Button btnResetPatientSearch;
+
+		/// <summary>
 		/// gvPatients control.
 		/// </summary>
 		/// <remarks>
@@ -418,6 +490,33 @@ namespace SBI
 		/// To modify move field declaration from designer file to code-behind file.
 		/// </remarks>
 		protected global::System.Web.UI.WebControls.GridView gvPatients;
+
+		/// <summary>
+		/// txtSearchCase control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.TextBox txtSearchCase;
+
+		/// <summary>
+		/// btnSearchCase control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.Button btnSearchCase;
+
+		/// <summary>
+		/// btnResetCaseSearch control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.Button btnResetCaseSearch;
 
 		/// <summary>
 		/// gvCases control.
@@ -573,6 +672,24 @@ namespace SBI
 		protected global::System.Web.UI.WebControls.Label lblPatientDateAdded;
 
 		/// <summary>
+		/// btnPreviewEditPatient control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.Button btnPreviewEditPatient;
+
+		/// <summary>
+		/// btnCancelPatientPreview control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.Button btnCancelPatientPreview;
+
+		/// <summary>
 		/// pnlCasePreview control.
 		/// </summary>
 		/// <remarks>
@@ -688,5 +805,23 @@ namespace SBI
 		/// To modify move field declaration from designer file to code-behind file.
 		/// </remarks>
 		protected global::System.Web.UI.WebControls.Label lblCaseWashed;
+
+		/// <summary>
+		/// btnPreviewEditCase control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.Button btnPreviewEditCase;
+
+		/// <summary>
+		/// btnCancelCasePreview control.
+		/// </summary>
+		/// <remarks>
+		/// Auto-generated field.
+		/// To modify move field declaration from designer file to code-behind file.
+		/// </remarks>
+		protected global::System.Web.UI.WebControls.Button btnCancelCasePreview;
 	}
 }
