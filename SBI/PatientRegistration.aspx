@@ -2,7 +2,7 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
-    <asp:HiddenField ID="hfActivePanel" runat="server" Value="addPatientPanel" />
+    <asp:HiddenField ID="hfActivePanel" runat="server" Value="viewPatientPanel" />
     <asp:HiddenField ID="hfSelectedPatientId" runat="server" Value="" />
     <asp:HiddenField ID="hfSelectedCaseId" runat="server" Value="" />
     <asp:HiddenField ID="hfEditMode" runat="server" Value="" />
@@ -27,7 +27,7 @@
         </div>
 
         <!-- ====================== ADD PATIENT / CASE PANEL ====================== -->
-        <div id="addPatientPanel" class="panel">
+        <div id="addPatientPanel" class="panel hidden">
 
             <div class="mb-5">
                 <h2 class="text-4xl font-extrabold tracking-tight text-[#0b2a7a]">Patient Registration</h2>
@@ -36,23 +36,22 @@
                 </p>
             </div>
 
-            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col min-h-[85vh]">
 
-                <!-- A. Patient Information -->
-                <div class="px-5 py-5 space-y-4">
+                <div class="px-5 py-5 space-y-4 flex-1">
                     <h3 class="text-lg font-extrabold text-slate-900 mb-2">A. Patient Information</h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">First Name <span class="text-red-500">*</span></label>
                             <asp:TextBox ID="txtFirstName" runat="server"
-                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200"
+                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm"
                                 placeholder="e.g. Maria" />
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Last Name <span class="text-red-500">*</span></label>
                             <asp:TextBox ID="txtLastName" runat="server"
-                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200"
+                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm"
                                 placeholder="e.g. Santos" />
                         </div>
                     </div>
@@ -61,13 +60,13 @@
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Date of Birth <span class="text-red-500">*</span></label>
                             <asp:TextBox ID="txtDOB" runat="server" TextMode="Date"
-                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200" />
+                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
                         </div>
-                       
+
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Gender <span class="text-red-500">*</span></label>
                             <asp:DropDownList ID="ddlGender" runat="server"
-                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200">
+                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
                                 <asp:ListItem Text="Select Gender" Value="" Selected="True" />
                                 <asp:ListItem Text="Male" Value="M" />
                                 <asp:ListItem Text="Female" Value="F" />
@@ -79,7 +78,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Civil Status</label>
                             <asp:DropDownList ID="ddlCivilStatus" runat="server"
-                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200">
+                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
                                 <asp:ListItem Text="Select Status" Value="" Selected="True" />
                                 <asp:ListItem Text="Single" Value="Single" />
                                 <asp:ListItem Text="Married" Value="Married" />
@@ -90,7 +89,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Contact No <span class="text-red-500">*</span></label>
                             <asp:TextBox ID="txtContactNo" runat="server"
-                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200"
+                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm"
                                 placeholder="e.g. 09123456789" />
                         </div>
                     </div>
@@ -109,7 +108,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Occupation <span class="text-red-500">*</span></label>
                             <asp:DropDownList ID="ddlOccupation" runat="server"
-                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200">
+                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
                                 <asp:ListItem Text="Select Occupation" Value="" Selected="True" />
                                 <asp:ListItem Text="Student" Value="Student" />
                                 <asp:ListItem Text="Employed" Value="Employed" />
@@ -121,13 +120,13 @@
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Emergency Contact Person <span class="text-red-500">*</span></label>
                             <asp:TextBox ID="txtEmergencyContactPerson" runat="server"
-                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200"
+                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm"
                                 placeholder="Full name" />
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Emergency Contact Number <span class="text-red-500">*</span></label>
                             <asp:TextBox ID="txtEmergencyContactNo" runat="server"
-                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200"
+                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm"
                                 placeholder="Contact number" />
                         </div>
                     </div>
@@ -154,12 +153,11 @@
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Capillary Refill</label>
-                            <asp:TextBox ID="txtCapillaryRefill" runat="server" CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" placeholder="e.g. &lt; 2 seconds" />
+                            <asp:TextBox ID="txtCapillaryRefill" runat="server" CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" placeholder="e.g. < 2 seconds" />
                         </div>
                     </div>
                 </div>
 
-                <!-- B. History of Biting Incident -->
                 <div class="px-5 py-5 border-t border-slate-200">
                     <h3 class="text-lg font-extrabold text-slate-900 mb-4">B. History of Biting Incident</h3>
 
@@ -168,57 +166,13 @@
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Date and Time of Bite <span class="text-red-500">*</span></label>
                                 <asp:TextBox ID="txtBiteDateTime" runat="server" TextMode="DateTimeLocal"
-                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200" />
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Place of Exposure <span class="text-red-500">*</span></label>
                                 <asp:TextBox ID="txtPlaceExposure" runat="server"
-                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200"
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm"
                                     placeholder="e.g. Home, Street, etc." />
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="rounded-xl border border-slate-200 p-4">
-                                <div class="mb-2 text-sm font-bold text-slate-900">Biting Animal <span class="text-red-500">*</span></div>
-                                <div class="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-700">
-                                    <asp:RadioButton ID="rbDog" runat="server" GroupName="AnimalType" Text="Dog" Checked="true" />
-                                    <asp:RadioButton ID="rbCat" runat="server" GroupName="AnimalType" Text="Cat" />
-                                    <div class="flex items-center gap-2">
-                                        <asp:RadioButton ID="rbOtherAnimal" runat="server" GroupName="AnimalType" Text="Others:" />
-                                        <asp:TextBox ID="txtOtherAnimal" runat="server"
-                                            CssClass="h-9 w-40 rounded-lg border border-slate-200 px-2 text-sm" placeholder="Specify" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="rounded-xl border border-slate-200 p-4">
-                                <div class="mb-2 text-sm font-bold text-slate-900">Circumstance <span class="text-red-500">*</span></div>
-                                <div class="flex flex-wrap gap-4 text-sm font-semibold text-slate-700">
-                                    <asp:RadioButton ID="rbProvoked" runat="server" GroupName="Circumstance" Text="Provoked" />
-                                    <asp:RadioButton ID="rbUnprovoked" runat="server" GroupName="Circumstance" Text="Unprovoked" Checked="true" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="rounded-xl border border-slate-200 p-4">
-                                <div class="mb-2 text-sm font-bold text-slate-900">Ownership <span class="text-red-500">*</span></div>
-                                <div class="flex flex-wrap gap-4 text-sm font-semibold text-slate-700">
-                                    <asp:RadioButton ID="rbOwned" runat="server" GroupName="Ownership" Text="Owned" />
-                                    <asp:RadioButton ID="rbStray" runat="server" GroupName="Ownership" Text="Stray" Checked="true" />
-                                    <asp:RadioButton ID="rbLeashed" runat="server" GroupName="Ownership" Text="Leashed/Cage" />
-                                </div>
-                            </div>
-
-                            <div class="rounded-xl border border-slate-200 p-4">
-                                <div class="mb-2 text-sm font-bold text-slate-900">Animal Status <span class="text-red-500">*</span></div>
-                                <div class="flex flex-wrap gap-4 text-sm font-semibold text-slate-700">
-                                    <asp:RadioButton ID="rbAlive" runat="server" GroupName="AnimalStatus" Text="Alive" Checked="true" />
-                                    <asp:RadioButton ID="rbSick" runat="server" GroupName="AnimalStatus" Text="Sick" />
-                                    <asp:RadioButton ID="rbDied" runat="server" GroupName="AnimalStatus" Text="Died" />
-                                    <asp:RadioButton ID="rbUnknown" runat="server" GroupName="AnimalStatus" Text="Unknown" />
-                                </div>
                             </div>
                         </div>
 
@@ -226,7 +180,7 @@
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Type of Exposure</label>
                                 <asp:DropDownList ID="ddlExposureType" runat="server"
-                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200">
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
                                     <asp:ListItem Text="Select Type" Value="" Selected="True" />
                                     <asp:ListItem Text="Bite" Value="Bite" />
                                     <asp:ListItem Text="Non-Bite / Play Bite" Value="Non Bite" />
@@ -235,13 +189,13 @@
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Wound Location</label>
                                 <asp:TextBox ID="txtWoundLocation" runat="server"
-                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200"
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm"
                                     placeholder="e.g. Left arm, Right leg" />
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Wound Type</label>
                                 <asp:DropDownList ID="ddlWoundType" runat="server"
-                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200">
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
                                     <asp:ListItem Text="Select Type" Value="" Selected="True" />
                                     <asp:ListItem Text="Lacerated" Value="Lacerated" />
                                     <asp:ListItem Text="Avulsion" Value="Avulsion" />
@@ -254,7 +208,7 @@
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Bleeding</label>
                                 <asp:DropDownList ID="ddlBleeding" runat="server"
-                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200">
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
                                     <asp:ListItem Text="Select" Value="" Selected="True" />
                                     <asp:ListItem Text="No" Value="No" />
                                     <asp:ListItem Text="Yes" Value="Yes" />
@@ -273,7 +227,7 @@
                     </div>
                 </div>
 
-                <div class="px-5 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+                <div class="mt-auto px-5 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap justify-end gap-3">
                     <asp:Button ID="btnClear" runat="server" Text="Clear"
                         CssClass="px-6 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
                         OnClick="btnClear_Click" />
@@ -295,12 +249,12 @@
             </div>
         </div>
 
-        <!-- ====================== VIEW PATIENT DETAILS PANEL ====================== -->
-        <div id="viewPatientPanel" class="panel hidden space-y-6">
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <!-- ====================== VIEW PANEL ====================== -->
+        <div id="viewPatientPanel" class="panel">
+            <div id="viewLayout" class="grid grid-cols-1 gap-6 transition-all duration-300 no-preview">
 
                 <!-- LEFT -->
-                <div class="xl:col-span-2 space-y-6">
+                <div id="detailsPane" class="space-y-6 min-w-0">
 
                     <!-- Patient Table -->
                     <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -310,22 +264,42 @@
                                 <p class="text-sm text-slate-500">List of registered patients</p>
                             </div>
 
-                            <div class="flex flex-col md:flex-row gap-3">
-                                <asp:TextBox ID="txtSearchPatient" runat="server"
-                                    CssClass="h-10 w-full md:w-80 rounded-lg border border-slate-200 px-3 text-sm"
-                                    placeholder="Search by Patient ID, Name, Contact, Address" />
-                                <asp:Button ID="btnSearchPatient" runat="server" Text="Search"
-                                    CssClass="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700"
-                                    OnClick="btnSearchPatient_Click" />
-                                <asp:Button ID="btnResetPatientSearch" runat="server" Text="Reset"
-                                    CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
-                                    OnClick="btnResetPatientSearch_Click" />
+                            <div class="flex flex-wrap gap-3 items-end">
+                                <div>
+                                    <asp:TextBox ID="txtSearchPatient" runat="server"
+                                        CssClass="h-10 w-80 rounded-lg border border-slate-200 px-3 text-sm"
+                                        placeholder="Search by Patient ID, Name, Contact, Address" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">From</label>
+                                    <asp:TextBox ID="txtPatientDateFrom" runat="server" TextMode="Date"
+                                        CssClass="h-10 rounded-lg border border-slate-200 px-3 text-sm" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">To</label>
+                                    <asp:TextBox ID="txtPatientDateTo" runat="server" TextMode="Date"
+                                        CssClass="h-10 rounded-lg border border-slate-200 px-3 text-sm" />
+                                </div>
+
+                                <div>
+                                    <asp:Button ID="btnSearchPatient" runat="server" Text="Search"
+                                        CssClass="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700"
+                                        OnClick="btnSearchPatient_Click" />
+                                </div>
+
+                                <div>
+                                    <asp:Button ID="btnResetPatientSearch" runat="server" Text="Reset"
+                                        CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
+                                        OnClick="btnResetPatientSearch_Click" />
+                                </div>
                             </div>
                         </div>
 
                         <div class="overflow-x-auto">
                             <asp:GridView ID="gvPatients" runat="server" AutoGenerateColumns="False"
-                                CssClass="w-full min-w-[950px] text-sm text-left text-slate-700"
+                                CssClass="w-full min-w-[1050px] text-sm text-left text-slate-700"
                                 GridLines="None"
                                 EmptyDataText="No patient records found."
                                 DataKeyNames="patient_id"
@@ -337,22 +311,12 @@
 
                                 <Columns>
                                     <asp:TemplateField HeaderText="Action">
-                                        <HeaderStyle CssClass="px-4 py-3 text-xs font-bold uppercase tracking-wider" />
-                                        <ItemStyle CssClass="px-4 py-3" />
                                         <ItemTemplate>
-                                            <div class="flex gap-2">
-                                                <asp:LinkButton ID="btnViewPatient" runat="server"
-                                                    Text="View"
-                                                    CommandName="ViewPatient"
-                                                    CommandArgument='<%# Eval("patient_id") %>'
-                                                    CssClass="inline-flex items-center rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700" />
-
-                                                <asp:LinkButton ID="btnEditPatient" runat="server"
-                                                    Text="Edit"
-                                                    CommandName="EditPatient"
-                                                    CommandArgument='<%# Eval("patient_id") %>'
-                                                    CssClass="inline-flex items-center rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600" />
-                                            </div>
+                                            <asp:LinkButton ID="btnEditPatient" runat="server"
+                                                Text="Edit"
+                                                CommandName="EditPatient"
+                                                CommandArgument='<%# Eval("patient_id") %>'
+                                                CssClass="inline-flex items-center rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600" />
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
@@ -376,22 +340,42 @@
                                 <p class="text-sm text-slate-500">Recorded bite exposure cases</p>
                             </div>
 
-                            <div class="flex flex-col md:flex-row gap-3">
-                                <asp:TextBox ID="txtSearchCase" runat="server"
-                                    CssClass="h-10 w-full md:w-80 rounded-lg border border-slate-200 px-3 text-sm"
-                                    placeholder="Search by Case ID, Patient ID, Case No, Place, Category" />
-                                <asp:Button ID="btnSearchCase" runat="server" Text="Search"
-                                    CssClass="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700"
-                                    OnClick="btnSearchCase_Click" />
-                                <asp:Button ID="btnResetCaseSearch" runat="server" Text="Reset"
-                                    CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
-                                    OnClick="btnResetCaseSearch_Click" />
+                            <div class="flex flex-wrap gap-3 items-end">
+                                <div>
+                                    <asp:TextBox ID="txtSearchCase" runat="server"
+                                        CssClass="h-10 w-80 rounded-lg border border-slate-200 px-3 text-sm"
+                                        placeholder="Search by Case ID, Patient ID, Case No, Place, Category" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">From</label>
+                                    <asp:TextBox ID="txtCaseDateFrom" runat="server" TextMode="Date"
+                                        CssClass="h-10 rounded-lg border border-slate-200 px-3 text-sm" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">To</label>
+                                    <asp:TextBox ID="txtCaseDateTo" runat="server" TextMode="Date"
+                                        CssClass="h-10 rounded-lg border border-slate-200 px-3 text-sm" />
+                                </div>
+
+                                <div>
+                                    <asp:Button ID="btnSearchCase" runat="server" Text="Search"
+                                        CssClass="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700"
+                                        OnClick="btnSearchCase_Click" />
+                                </div>
+
+                                <div>
+                                    <asp:Button ID="btnResetCaseSearch" runat="server" Text="Reset"
+                                        CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
+                                        OnClick="btnResetCaseSearch_Click" />
+                                </div>
                             </div>
                         </div>
 
                         <div class="overflow-x-auto">
                             <asp:GridView ID="gvCases" runat="server" AutoGenerateColumns="False"
-                                CssClass="w-full min-w-[1100px] text-sm text-left text-slate-700"
+                                CssClass="w-full min-w-[1200px] text-sm text-left text-slate-700"
                                 GridLines="None"
                                 EmptyDataText="No case records found."
                                 DataKeyNames="case_id"
@@ -403,22 +387,12 @@
 
                                 <Columns>
                                     <asp:TemplateField HeaderText="Action">
-                                        <HeaderStyle CssClass="px-4 py-3 text-xs font-bold uppercase tracking-wider" />
-                                        <ItemStyle CssClass="px-4 py-3" />
                                         <ItemTemplate>
-                                            <div class="flex gap-2">
-                                                <asp:LinkButton ID="btnViewCase" runat="server"
-                                                    Text="View"
-                                                    CommandName="ViewCase"
-                                                    CommandArgument='<%# Eval("case_id") %>'
-                                                    CssClass="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700" />
-
-                                                <asp:LinkButton ID="btnEditCase" runat="server"
-                                                    Text="Edit"
-                                                    CommandName="EditCase"
-                                                    CommandArgument='<%# Eval("case_id") %>'
-                                                    CssClass="inline-flex items-center rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600" />
-                                            </div>
+                                            <asp:LinkButton ID="btnEditCase" runat="server"
+                                                Text="Edit"
+                                                CommandName="EditCase"
+                                                CommandArgument='<%# Eval("case_id") %>'
+                                                CssClass="inline-flex items-center rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600" />
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
@@ -437,94 +411,382 @@
                 </div>
 
                 <!-- RIGHT PREVIEW -->
-                <div class="xl:col-span-1">
-                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden sticky top-6">
-                        <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
+                <asp:Panel ID="pnlRecordPreviewContainer" runat="server" Visible="false" CssClass="min-w-0">
+                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden lg:sticky lg:top-6 max-h-[85vh] flex flex-col">
+                        <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex-shrink-0">
                             <h4 class="text-lg font-bold text-slate-900">Record Preview</h4>
-                            <p class="text-sm text-slate-500">Click View to display full details</p>
+                            <p class="text-sm text-slate-500">Edit the selected record here</p>
                         </div>
 
-                        <div class="p-5 space-y-5">
-                            <asp:Panel ID="pnlPreviewEmpty" runat="server">
-                                <div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
-                                    No record selected yet.
-                                </div>
-                            </asp:Panel>
-
-                            <asp:Panel ID="pnlPatientPreview" runat="server" Visible="false">
-                                <div class="rounded-xl bg-blue-50 border border-blue-100 p-4 mb-4">
+                        <div class="flex-1 overflow-y-auto p-5">
+                            <!-- PATIENT PREVIEW -->
+                            <asp:Panel ID="pnlPatientPreview" runat="server" Visible="false" CssClass="space-y-5">
+                                <div class="rounded-xl bg-blue-50 border border-blue-100 p-3 mb-4">
                                     <h5 class="text-base font-bold text-blue-900">Patient Information</h5>
                                 </div>
 
-                                <div class="grid grid-cols-1 gap-3 text-sm">
-                                    <div><span class="font-semibold text-slate-700">Patient ID:</span> <asp:Label ID="lblPatientId" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Name:</span> <asp:Label ID="lblPatientName" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Date of Birth:</span> <asp:Label ID="lblPatientDOB" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Gender:</span> <asp:Label ID="lblPatientGender" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Civil Status:</span> <asp:Label ID="lblPatientCivilStatus" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Address:</span> <asp:Label ID="lblPatientAddress" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Contact No:</span> <asp:Label ID="lblPatientContact" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Occupation:</span> <asp:Label ID="lblPatientOccupation" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Emergency Contact:</span> <asp:Label ID="lblPatientEmergencyPerson" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Emergency No:</span> <asp:Label ID="lblPatientEmergencyNo" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Blood Pressure:</span> <asp:Label ID="lblPatientBP" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Temperature:</span> <asp:Label ID="lblPatientTemp" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Weight:</span> <asp:Label ID="lblPatientWeight" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Capillary Refill:</span> <asp:Label ID="lblPatientCapillaryRefill" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Date Added:</span> <asp:Label ID="lblPatientDateAdded" runat="server" /></div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                    <div class="md:col-span-2">
+                                        <label class="block font-semibold text-slate-700 mb-1">Patient ID</label>
+                                        <asp:TextBox ID="txtPreviewPatientId" runat="server" ReadOnly="true"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 bg-slate-100 px-3 text-sm text-slate-700" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">First Name</label>
+                                        <asp:TextBox ID="txtPreviewFirstName" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Last Name</label>
+                                        <asp:TextBox ID="txtPreviewLastName" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Date of Birth</label>
+                                        <asp:TextBox ID="txtPreviewDOB" runat="server" TextMode="Date"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Gender</label>
+                                        <asp:DropDownList ID="ddlPreviewGender" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                            <asp:ListItem Text="Select Gender" Value="" />
+                                            <asp:ListItem Text="Male" Value="M" />
+                                            <asp:ListItem Text="Female" Value="F" />
+                                        </asp:DropDownList>
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Civil Status</label>
+                                        <asp:DropDownList ID="ddlPreviewCivilStatus" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                            <asp:ListItem Text="Select Status" Value="" />
+                                            <asp:ListItem Text="Single" Value="Single" />
+                                            <asp:ListItem Text="Married" Value="Married" />
+                                            <asp:ListItem Text="Widowed" Value="Widowed" />
+                                            <asp:ListItem Text="Separated" Value="Separated" />
+                                        </asp:DropDownList>
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Contact No</label>
+                                        <asp:TextBox ID="txtPreviewContactNo" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Occupation</label>
+                                        <asp:DropDownList ID="ddlPreviewOccupation" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                            <asp:ListItem Text="Select Occupation" Value="" />
+                                            <asp:ListItem Text="Student" Value="Student" />
+                                            <asp:ListItem Text="Employed" Value="Employed" />
+                                            <asp:ListItem Text="Self-Employed" Value="Self-Employed" />
+                                            <asp:ListItem Text="Unemployed" Value="Unemployed" />
+                                            <asp:ListItem Text="Retired" Value="Retired" />
+                                        </asp:DropDownList>
+                                    </div>
+
+                                    <div class="md:col-span-2">
+                                        <label class="block font-semibold text-slate-700 mb-1">Address</label>
+                                        <asp:TextBox ID="txtPreviewAddress" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Emergency Contact</label>
+                                        <asp:TextBox ID="txtPreviewEmergencyPerson" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Emergency No</label>
+                                        <asp:TextBox ID="txtPreviewEmergencyNo" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
+                                    </div>
                                 </div>
 
-                                <div class="pt-4 border-t border-slate-200 flex gap-3 mt-4">
-                                    <asp:Button ID="btnPreviewEditPatient" runat="server" Text="Edit Patient"
-                                        CssClass="px-4 py-2 rounded-lg bg-amber-500 text-white font-semibold hover:bg-amber-600"
-                                        OnClick="btnPreviewEditPatient_Click" />
+                                <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                    <h6 class="text-sm font-bold text-slate-800 mb-3">Vitals</h6>
 
-                                    <asp:Button ID="btnCancelPatientPreview" runat="server" Text="Cancel"
-                                        CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
-                                        OnClick="btnCancelPatientPreview_Click" />
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 mb-1">Blood Pressure</label>
+                                            <asp:TextBox ID="txtPreviewBP" runat="server"
+                                                CssClass="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"
+                                                placeholder="e.g. 120/80" />
+                                        </div>
+
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 mb-1">Temperature</label>
+                                            <asp:TextBox ID="txtPreviewTemp" runat="server"
+                                                CssClass="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"
+                                                placeholder="e.g. 36.5" />
+                                        </div>
+
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 mb-1">Weight</label>
+                                            <asp:TextBox ID="txtPreviewWeight" runat="server"
+                                                CssClass="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"
+                                                placeholder="e.g. 65" />
+                                        </div>
+
+                                        <div>
+                                            <label class="block font-semibold text-slate-700 mb-1">Capillary Refill</label>
+                                            <asp:TextBox ID="txtPreviewCapillaryRefill" runat="server"
+                                                CssClass="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm"
+                                                placeholder="e.g. < 2 seconds" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <label class="block font-semibold text-slate-700 mb-1">Date Added</label>
+                                    <asp:TextBox ID="txtPreviewDateAdded" runat="server" ReadOnly="true"
+                                        CssClass="h-10 w-full rounded-lg border border-slate-200 bg-slate-100 px-3 text-sm text-slate-700" />
+                                </div>
+
+                                <div class="pt-4 border-t border-slate-200 flex gap-3 mt-5 bg-white pb-1">
+                                    <asp:Button ID="btnPreviewUpdatePatient" runat="server" Text="Update"
+                                        CssClass="px-5 py-2 rounded-lg bg-amber-500 text-white font-semibold hover:bg-amber-600"
+                                        OnClick="btnPreviewUpdatePatient_Click"
+                                        UseSubmitBehavior="false"
+                                        OnClientClick="showConfirmModal('patient'); return false;" />
+
+                                    <asp:Button ID="btnPreviewCancelPatient" runat="server" Text="Cancel"
+                                        CssClass="px-5 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
+                                        OnClick="btnPreviewCancelPatient_Click" />
                                 </div>
                             </asp:Panel>
 
-                            <asp:Panel ID="pnlCasePreview" runat="server" Visible="false">
-                                <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-4 mb-4">
+                            <!-- CASE PREVIEW -->
+                            <asp:Panel ID="pnlCasePreview" runat="server" Visible="false" CssClass="space-y-5">
+                                <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-3 mb-4">
                                     <h5 class="text-base font-bold text-emerald-900">Case Information</h5>
                                 </div>
 
-                                <div class="grid grid-cols-1 gap-3 text-sm">
-                                    <div><span class="font-semibold text-slate-700">Case ID:</span> <asp:Label ID="lblCaseId" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Patient ID:</span> <asp:Label ID="lblCasePatientId" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Case No:</span> <asp:Label ID="lblCaseNo" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Date of Bite:</span> <asp:Label ID="lblCaseDateOfBite" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Time of Bite:</span> <asp:Label ID="lblCaseTimeOfBite" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Place of Bite:</span> <asp:Label ID="lblCasePlaceOfBite" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Exposure Type:</span> <asp:Label ID="lblCaseExposureType" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Wound Type:</span> <asp:Label ID="lblCaseWoundType" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Bleeding:</span> <asp:Label ID="lblCaseBleeding" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Site of Bite:</span> <asp:Label ID="lblCaseSiteOfBite" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Category:</span> <asp:Label ID="lblCaseCategory" runat="server" /></div>
-                                    <div><span class="font-semibold text-slate-700">Washed:</span> <asp:Label ID="lblCaseWashed" runat="server" /></div>
+                                <div class="grid grid-cols-1 gap-4 mb-4">
+                                    <!-- Biting Animal -->
+                                    <div class="rounded-xl border border-slate-200 p-4">
+                                        <div class="mb-3 text-sm font-bold text-slate-900">
+                                            Biting Animal <span class="text-red-500">*</span>
+                                        </div>
+
+                                        <div class="space-y-3 text-sm font-semibold text-slate-700">
+                                            <div class="flex flex-wrap items-center gap-4">
+                                                <asp:RadioButton ID="rbDog" runat="server" GroupName="AnimalType" Text="Dog" Checked="true" />
+                                                <asp:RadioButton ID="rbCat" runat="server" GroupName="AnimalType" Text="Cat" />
+                                            </div>
+
+                                            <div class="flex items-center gap-3">
+                                                <asp:RadioButton ID="rbOtherAnimal" runat="server" GroupName="AnimalType" Text="Others:" />
+                                                <asp:TextBox ID="txtOtherAnimal" runat="server"
+                                                    CssClass="h-10 flex-1 min-w-0 rounded-lg border border-slate-200 px-3 text-sm"
+                                                    placeholder="Specify" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Circumstance -->
+                                    <div class="rounded-xl border border-slate-200 p-4">
+                                        <div class="mb-2 text-sm font-bold text-slate-900">
+                                            Circumstance <span class="text-red-500">*</span>
+                                        </div>
+
+                                        <div class="flex flex-wrap gap-4 text-sm font-semibold text-slate-700">
+                                            <asp:RadioButton ID="rbProvoked" runat="server" GroupName="Circumstance" Text="Provoked" />
+                                            <asp:RadioButton ID="rbUnprovoked" runat="server" GroupName="Circumstance" Text="Unprovoked" Checked="true" />
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="pt-4 border-t border-slate-200 flex gap-3 mt-4">
-                                    <asp:Button ID="btnPreviewEditCase" runat="server" Text="Edit Case"
-                                        CssClass="px-4 py-2 rounded-lg bg-amber-500 text-white font-semibold hover:bg-amber-600"
-                                        OnClick="btnPreviewEditCase_Click" />
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Case ID</label>
+                                        <asp:TextBox ID="txtPreviewCaseId" runat="server" ReadOnly="true"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 bg-slate-100 px-3 text-sm text-slate-700" />
+                                    </div>
 
-                                    <asp:Button ID="btnCancelCasePreview" runat="server" Text="Cancel"
-                                        CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
-                                        OnClick="btnCancelCasePreview_Click" />
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Patient ID</label>
+                                        <asp:TextBox ID="txtPreviewCasePatientId" runat="server" ReadOnly="true"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 bg-slate-100 px-3 text-sm text-slate-700" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Case No</label>
+                                        <asp:TextBox ID="txtPreviewCaseNo" runat="server" ReadOnly="true"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 bg-slate-100 px-3 text-sm text-slate-700" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Date of Bite</label>
+                                        <asp:TextBox ID="txtPreviewCaseDateOfBite" runat="server" TextMode="Date"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Time of Bite</label>
+                                        <asp:TextBox ID="txtPreviewCaseTimeOfBite" runat="server" TextMode="Time"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Exposure Type</label>
+                                        <asp:DropDownList ID="ddlPreviewCaseExposureType" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                            <asp:ListItem Text="Select Type" Value="" />
+                                            <asp:ListItem Text="Bite" Value="Bite" />
+                                            <asp:ListItem Text="Non-Bite / Play Bite" Value="Non Bite" />
+                                        </asp:DropDownList>
+                                    </div>
+
+                                    <div class="md:col-span-2">
+                                        <label class="block font-semibold text-slate-700 mb-1">Place of Bite</label>
+                                        <asp:TextBox ID="txtPreviewCasePlaceOfBite" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Wound Type</label>
+                                        <asp:DropDownList ID="ddlPreviewCaseWoundType" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                            <asp:ListItem Text="Select Type" Value="" />
+                                            <asp:ListItem Text="Lacerated" Value="Lacerated" />
+                                            <asp:ListItem Text="Avulsion" Value="Avulsion" />
+                                            <asp:ListItem Text="Punctured" Value="Punctured" />
+                                            <asp:ListItem Text="Abrasion" Value="Abrasion" />
+                                            <asp:ListItem Text="Scratches" Value="Scratches" />
+                                            <asp:ListItem Text="Hematoma" Value="Hematoma" />
+                                        </asp:DropDownList>
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Bleeding</label>
+                                        <asp:DropDownList ID="ddlPreviewCaseBleeding" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                            <asp:ListItem Text="Select" Value="" />
+                                            <asp:ListItem Text="No" Value="No" />
+                                            <asp:ListItem Text="Yes" Value="Yes" />
+                                        </asp:DropDownList>
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Site of Bite</label>
+                                        <asp:TextBox ID="txtPreviewCaseSiteOfBite" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm" />
+                                    </div>
+
+                                    <div>
+                                        <label class="block font-semibold text-slate-700 mb-1">Category</label>
+                                        <asp:DropDownList ID="ddlPreviewCaseCategory" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                            <asp:ListItem Text="Select Category" Value="" />
+                                            <asp:ListItem Text="I" Value="I" />
+                                            <asp:ListItem Text="II" Value="II" />
+                                            <asp:ListItem Text="III" Value="III" />
+                                        </asp:DropDownList>
+                                    </div>
+
+                                    <div class="md:col-span-2">
+                                        <label class="block font-semibold text-slate-700 mb-1">Washed</label>
+                                        <asp:DropDownList ID="ddlPreviewCaseWashed" runat="server"
+                                            CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                            <asp:ListItem Text="Select" Value="" />
+                                            <asp:ListItem Text="Yes" Value="Yes" />
+                                            <asp:ListItem Text="No" Value="No" />
+                                        </asp:DropDownList>
+                                    </div>
+                                </div>
+
+                                <div class="pt-4 border-t border-slate-200 flex gap-3 mt-5 bg-white">
+                                    <asp:Button ID="btnPreviewUpdateCase" runat="server" Text="Update"
+                                        CssClass="px-5 py-2 rounded-lg bg-amber-500 text-white font-semibold hover:bg-amber-600"
+                                        OnClick="btnPreviewUpdateCase_Click"
+                                        UseSubmitBehavior="false"
+                                        OnClientClick="showConfirmModal('case'); return false;" />
+
+                                    <asp:Button ID="btnPreviewCancelCase" runat="server" Text="Cancel"
+                                        CssClass="px-5 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
+                                        OnClick="btnPreviewCancelCase_Click" />
                                 </div>
                             </asp:Panel>
                         </div>
                     </div>
-                </div>
+                </asp:Panel>
 
             </div>
         </div>
 
     </div>
 
+    <style>
+        @media (min-width: 1280px) {
+            #viewLayout.with-preview {
+                grid-template-columns: minmax(0, 1.8fr) minmax(360px, 440px);
+                align-items: start;
+            }
+
+            #viewLayout.no-preview {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        @media (max-width: 1279px) {
+            #viewLayout.with-preview,
+            #viewLayout.no-preview {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px) scale(.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+
+    <!-- CONFIRM MODAL -->
+    <div id="confirmModal"
+        class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/50 px-4">
+
+        <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden"
+            style="animation: fadeIn .2s ease-out;">
+            <div class="px-6 py-5 border-b border-slate-200">
+                <h3 class="text-lg font-bold text-slate-900">Confirm Update</h3>
+                <p id="confirmModalMessage" class="mt-1 text-sm text-slate-600">
+                    Are you sure you want to continue?
+                </p>
+            </div>
+
+            <div class="px-6 py-4 bg-slate-50 flex justify-end gap-3">
+                <button type="button"
+                    class="rounded-lg border border-slate-300 bg-white px-5 py-2 font-semibold text-slate-700 hover:bg-slate-100"
+                    onclick="hideConfirmModal()">
+                    Cancel
+                </button>
+
+                <button type="button"
+                    class="rounded-lg bg-amber-500 px-5 py-2 font-semibold text-white hover:bg-amber-600"
+                    onclick="confirmModalAction()">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="text/javascript">
+        var pendingUpdateType = '';
+
         function setActivePanelButton(panelId) {
             var btnView = document.getElementById('btnViewPanel');
             var btnAdd = document.getElementById('btnAddPanel');
@@ -550,6 +812,21 @@
             }
         }
 
+        function updateViewLayout() {
+            var viewLayout = document.getElementById('viewLayout');
+            var preview = document.getElementById('<%= pnlRecordPreviewContainer.ClientID %>');
+
+            if (!viewLayout || !preview) return;
+
+            var previewVisible =
+                preview.style.display !== 'none' &&
+                !preview.hasAttribute('hidden') &&
+                preview.offsetParent !== null;
+
+            viewLayout.classList.remove('with-preview', 'no-preview');
+            viewLayout.classList.add(previewVisible ? 'with-preview' : 'no-preview');
+        }
+
         function showPanel(panelId) {
             document.querySelectorAll('.panel').forEach(function (p) {
                 p.classList.add('hidden');
@@ -566,6 +843,8 @@
             if (hiddenField) {
                 hiddenField.value = panelId;
             }
+
+            setTimeout(updateViewLayout, 50);
         }
 
         function toggleVitals() {
@@ -575,11 +854,78 @@
             }
         }
 
+        function showConfirmModal(type) {
+            pendingUpdateType = type || '';
+
+            var modal = document.getElementById('confirmModal');
+            var message = document.getElementById('confirmModalMessage');
+
+            if (message) {
+                if (type === 'patient') {
+                    message.textContent = 'Are you sure you want to update this patient record?';
+                } else if (type === 'case') {
+                    message.textContent = 'Are you sure you want to update this case record?';
+                } else {
+                    message.textContent = 'Are you sure you want to continue?';
+                }
+            }
+
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function hideConfirmModal() {
+            var modal = document.getElementById('confirmModal');
+
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        function confirmModalAction() {
+            var actionType = pendingUpdateType;
+            hideConfirmModal();
+
+            if (actionType === 'patient') {
+                __doPostBack('<%= btnPreviewUpdatePatient.UniqueID %>', '');
+            } else if (actionType === 'case') {
+                __doPostBack('<%= btnPreviewUpdateCase.UniqueID %>', '');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             var hiddenField = document.getElementById('<%= hfActivePanel.ClientID %>');
-            var activePanel = hiddenField && hiddenField.value ? hiddenField.value : 'addPatientPanel';
+            var activePanel = hiddenField && hiddenField.value ? hiddenField.value : 'viewPatientPanel';
             showPanel(activePanel);
+            setTimeout(updateViewLayout, 100);
         });
+
+        document.addEventListener('keydown', function (e) {
+            var modal = document.getElementById('confirmModal');
+            if (!modal || modal.classList.contains('hidden')) return;
+
+            if (e.key === 'Escape') {
+                hideConfirmModal();
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            var modal = document.getElementById('confirmModal');
+            if (!modal || modal.classList.contains('hidden')) return;
+
+            if (e.target === modal) {
+                hideConfirmModal();
+            }
+        });
+
+        window.addEventListener('resize', updateViewLayout);
     </script>
 
 </asp:Content>
