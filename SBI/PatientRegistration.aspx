@@ -37,7 +37,7 @@
                 <div class="px-5 py-5 space-y-4">
                     <h3 class="text-lg font-extrabold text-slate-900 mb-2">A. Patient Information</h3>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">First Name <span class="text-red-500">*</span></label>
                             <asp:TextBox ID="txtFirstName" runat="server"
@@ -50,29 +50,15 @@
                                 CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200"
                                 placeholder="e.g. Santos" />
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-1">Middle Name</label>
-                            <asp:TextBox ID="txtMiddleName" runat="server"
-                                CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200"
-                                placeholder="e.g. Cruz" />
-                        </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Date of Birth <span class="text-red-500">*</span></label>
                             <asp:TextBox ID="txtDOB" runat="server" TextMode="Date"
                                 CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm focus:ring-2 focus:ring-blue-200" />
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-1">
-                                Age
-                                <span class="ml-2 bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">AUTO</span>
-                            </label>
-                            <asp:TextBox ID="txtAge" runat="server" ReadOnly="true"
-                                CssClass="h-10 w-full rounded-lg border border-blue-100 bg-blue-50 px-3 text-sm font-bold text-blue-900"
-                                placeholder="Auto-calculated" />
-                        </div>
+                       
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1">Gender <span class="text-red-500">*</span></label>
                             <asp:DropDownList ID="ddlGender" runat="server"

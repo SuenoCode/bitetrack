@@ -104,9 +104,6 @@ namespace SBI
                     lblPatientOccupation.Text = dr["occupation"].ToString();
                     lblPatientEmergencyPerson.Text = dr["emergency_contact_person"].ToString();
                     lblPatientEmergencyNo.Text = dr["emergency_contact_no"].ToString();
-                    lblPatientBP.Text = dr["blood_pressure"].ToString();
-                    lblPatientTemp.Text = dr["temperature"].ToString();
-                    lblPatientWeight.Text = dr["wt"].ToString();
                     lblPatientDateAdded.Text = dr["date_added"] == DBNull.Value ? "-" : Convert.ToDateTime(dr["date_added"]).ToString("MMM dd, yyyy");
                 }
             }
@@ -174,15 +171,18 @@ namespace SBI
                 {
                     int patientId;
 
+                    // =========================
+                    // INSERT PATIENT
+                    // =========================
                     string patientQuery = @"
-                    INSERT INTO Patient
-                    (fname,lname,date_of_birth,gender,civil_status,address,contact_no,occupation,
-                     emergency_contact_person,emergency_contact_no,blood_pressure,temperature,cr,wt)
-                    VALUES
-                    (@fname,@lname,@dob,@gender,@civil,@address,@contact,@occupation,
-                     @eperson,@eno,@bp,@temp,@cr,@wt);
+            INSERT INTO Patient
+            (fname,lname,date_of_birth,gender,civil_status,address,contact_no,occupation,
+             emergency_contact_person,emergency_contact_no)
+            VALUES
+            (@fname,@lname,@dob,@gender,@civil,@address,@contact,@occupation,
+             @eperson,@eno);
 
-                    SELECT SCOPE_IDENTITY();";
+            SELECT SCOPE_IDENTITY();";
 
                     SqlCommand cmdPatient = new SqlCommand(patientQuery, conn, trans);
 
@@ -196,19 +196,37 @@ namespace SBI
                     cmdPatient.Parameters.AddWithValue("@occupation", ddlOccupation.SelectedValue);
                     cmdPatient.Parameters.AddWithValue("@eperson", txtEmergencyContactPerson.Text);
                     cmdPatient.Parameters.AddWithValue("@eno", txtEmergencyContactNo.Text);
-                    cmdPatient.Parameters.AddWithValue("@bp", txtBloodPressure.Text);
-                    cmdPatient.Parameters.AddWithValue("@temp", txtTemperature.Text);
-                    cmdPatient.Parameters.AddWithValue("@cr", txtChiefComplaints.Text);
-                    cmdPatient.Parameters.AddWithValue("@wt", txtWeight.Text);
 
                     patientId = Convert.ToInt32(cmdPatient.ExecuteScalar());
 
+                    // =========================
+                    // INSERT VITAL SIGNS
+                    // =========================
+                    string vitalQuery = @"
+            INSERT INTO VitalSigns
+            (patient_id, blood_pressure, temperature, cr, wt)
+            VALUES
+            (@pid, @bp, @temp, @cr, @wt)";
+
+                    SqlCommand cmdVital = new SqlCommand(vitalQuery, conn, trans);
+
+                    cmdVital.Parameters.AddWithValue("@pid", patientId);
+                    cmdVital.Parameters.AddWithValue("@bp", txtBloodPressure.Text);
+                    cmdVital.Parameters.AddWithValue("@temp", txtTemperature.Text);
+                    cmdVital.Parameters.AddWithValue("@cr", txtChiefComplaints.Text);
+                    cmdVital.Parameters.AddWithValue("@wt", txtWeight.Text);
+
+                    cmdVital.ExecuteNonQuery();
+
+                    // =========================
+                    // INSERT BITE CASE
+                    // =========================
                     string caseQuery = @"
-                    INSERT INTO [Case]
-                    (patient_id,date_of_bite,place_of_bite,time_of_bite,type_of_exposure,
-                     wound_type,bleeding,site_of_bite,category)
-                    VALUES
-                    (@pid,@date,@place,@time,@exposure,@wound,@bleeding,@site,@category)";
+            INSERT INTO [Case]
+            (patient_id,date_of_bite,place_of_bite,time_of_bite,type_of_exposure,
+             wound_type,bleeding,site_of_bite,category)
+            VALUES
+            (@pid,@date,@place,@time,@exposure,@wound,@bleeding,@site,@category)";
 
                     SqlCommand cmdCase = new SqlCommand(caseQuery, conn, trans);
 
@@ -220,7 +238,9 @@ namespace SBI
                     cmdCase.Parameters.AddWithValue("@wound", ddlWoundType.SelectedValue);
                     cmdCase.Parameters.AddWithValue("@bleeding", ddlBleeding.SelectedValue);
                     cmdCase.Parameters.AddWithValue("@site", txtWoundLocation.Text);
-                    cmdCase.Parameters.AddWithValue("@category", rbCategory1.Checked ? "I" : rbCategory2.Checked ? "II" : "III");
+                    cmdCase.Parameters.AddWithValue("@category",
+                        rbCategory1.Checked ? "I" :
+                        rbCategory2.Checked ? "II" : "III");
 
                     cmdCase.ExecuteNonQuery();
 
