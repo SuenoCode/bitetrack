@@ -32,24 +32,29 @@
 
             <div class="w-full overflow-x-auto">
                 <asp:GridView ID="gvUsers" runat="server"
-                    AutoGenerateColumns="False"
-                    CssClass="min-w-[900px] w-full text-sm"
-                    HeaderStyle-CssClass="bg-slate-50 text-slate-700 font-extrabold border-b border-slate-200"
-                    RowStyle-CssClass="border-b border-slate-100"
-                    AlternatingRowStyle-CssClass="bg-white"
-                    GridLines="None">
+    AutoGenerateColumns="False"
+    DataKeyNames="user_id"
+    OnRowEditing="gvUsers_RowEditing"
+    OnRowCancelingEdit="gvUsers_RowCancelingEdit"
+    OnRowUpdating="gvUsers_RowUpdating"
+    OnRowDeleting="gvUsers_RowDeleting"
+    CssClass="min-w-[900px] w-full text-sm"
+    HeaderStyle-CssClass="bg-slate-50 text-slate-700 font-extrabold border-b border-slate-200"
+    RowStyle-CssClass="border-b border-slate-100"
+    AlternatingRowStyle-CssClass="bg-white"
+    GridLines="None">
 
-                    <Columns>
-                        <asp:BoundField HeaderText="Admin ID" />
-                        <asp:BoundField HeaderText="Full Name" />
-                        <asp:BoundField HeaderText="Username" />
-                        <asp:BoundField HeaderText="Password" />
-                        <asp:BoundField HeaderText="Role" />
+    <Columns>
+        <asp:BoundField DataField="user_id"   HeaderText="Admin ID"  ReadOnly="True" />
+        <asp:BoundField DataField="full_name" HeaderText="Full Name" />
+        <asp:BoundField DataField="username"  HeaderText="Username"  />
+        <asp:BoundField DataField="password"  HeaderText="Password"  />
+        <asp:BoundField DataField="role"      HeaderText="Role"      />
 
-                        <asp:CommandField ShowEditButton="true" ShowDeleteButton="true"
-                            ControlStyle-CssClass="font-bold text-[#1a4ed8] hover:text-[#0b2a7a]" />
-                    </Columns>
-                </asp:GridView>
+        <asp:CommandField ShowEditButton="True" ShowDeleteButton="True"
+            ControlStyle-CssClass="font-bold text-[#1a4ed8] hover:text-[#0b2a7a]" />
+    </Columns>
+</asp:GridView>
             </div>
 
             <!-- Optional footer space -->
@@ -107,10 +112,10 @@
                     <label class="mb-2 block text-sm font-semibold text-slate-700">Role</label>
                     <asp:DropDownList ID="ddlRole" runat="server"
                         CssClass="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-[15px] text-slate-900 outline-none focus:ring-2 focus:ring-blue-200">
-                        <asp:ListItem Text="Select Role" Value="" />
-                        <asp:ListItem Text="Super Admin" Value="Super Admin" />
-                        <asp:ListItem Text="Admin" Value="Admin" />
-                        <asp:ListItem Text="Moderator" Value="Moderator" />
+                        <asp:ListItem Text="Select Role"       Value=""               />
+                        <asp:ListItem Text="Admin"             Value="admin"          />
+                        <asp:ListItem Text="Admin Assistant"   Value="adminAssistant" />
+                        <asp:ListItem Text="Vaccinator"        Value="vaccinators"    />
                     </asp:DropDownList>
                 </div>
 
@@ -126,8 +131,9 @@
                     CssClass="h-11 rounded-lg border border-slate-200 bg-white px-5 font-semibold text-slate-700 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition" />
 
                 <asp:Button ID="btnSave" runat="server"
-                    Text="Save"
-                    CssClass="h-11 rounded-lg bg-[#1a4ed8] px-6 font-extrabold text-white shadow hover:brightness-110 hover:-translate-y-[1px] transition" />
+                Text="Save"
+                OnClick="btnSave_Click"
+                CssClass="h-11 rounded-lg bg-[#1a4ed8] px-6 font-extrabold text-white shadow hover:brightness-110 hover:-translate-y-[1px] transition" />
 
             </div>
 

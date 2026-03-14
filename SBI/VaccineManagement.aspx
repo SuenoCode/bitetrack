@@ -92,6 +92,12 @@
 
 
     <!-- ADD STOCK PANEL -->
+    <div class="px-5 pb-5 flex justify-end">
+    <asp:Button ID="btnAddStock" runat="server"
+        Text="Add Stock"
+        OnClick="btnAddStock_Click"
+        CssClass="h-11 rounded-lg bg-[#1a4ed8] px-6 font-extrabold text-white shadow hover:brightness-110 transition" />
+</div>
     <asp:Panel ID="panelAddStock" runat="server" Visible="false" CssClass="mt-6">
 
         <div class="bg-white border border-slate-200 rounded-2xl shadow-sm">
@@ -107,7 +113,21 @@
                 <div>
                     <label class="text-sm font-semibold text-slate-700">Vaccine Name</label>
                     <asp:DropDownList ID="ddlVaccineName" runat="server"
-                        CssClass="h-11 w-full border border-slate-200 rounded-lg px-3"></asp:DropDownList>
+                        CssClass="h-11 w-full border border-slate-200 rounded-lg px-3">
+                        <asp:ListItem Text="Select Name" Value="" Selected="True" />
+                        <asp:ListItem Text="SPEEDA" Value="" Selected="True" />
+                         <asp:ListItem Text="ABHAYRAD" Value="" Selected="True" />
+                         <asp:ListItem Text="VAXIRAB" Value="" Selected="True" />
+                         <asp:ListItem Text="EQUIRAB" Value="" Selected="True" />
+                         <asp:ListItem Text="VINRAB" Value="" Selected="True" />
+                         <asp:ListItem Text="HRIG" Value="" Selected="True" />
+                         <asp:ListItem Text="TT" Value="" Selected="True" />
+                         <asp:ListItem Text="ATS" Value="" Selected="True" />
+                         <asp:ListItem Text="PPD" Value="" Selected="True" />
+                         <asp:ListItem Text="NBS" Value="" Selected="True" />
+                         <asp:ListItem Text="INSULIN" Value="" Selected="True" />
+
+                    </asp:DropDownList>
                 </div>
 
                 <div>
@@ -134,7 +154,21 @@
 
     </asp:Panel>
 
+    <div class="px-5 py-4 border-b border-slate-200 flex gap-3">
+    <asp:TextBox ID="txtSearch" runat="server"
+        placeholder="Search by vaccine name or batch number..."
+        CssClass="h-11 w-full border border-slate-200 rounded-lg px-3 text-sm" />
 
+    <asp:Button ID="btnSearch" runat="server"
+        Text="Search"
+        OnClick="btnSearch_Click"
+        CssClass="h-11 rounded-lg bg-[#1a4ed8] px-5 font-extrabold text-white shadow hover:brightness-110 transition" />
+
+    <asp:Button ID="btnClearSearch" runat="server"
+        Text="Clear"
+        OnClick="btnClearSearch_Click"
+        CssClass="h-11 rounded-lg border border-slate-200 bg-white px-5 font-semibold text-slate-700 shadow-sm hover:shadow-md transition" />
+</div>
     <!-- INVENTORY TABLE PANEL -->
     <asp:Panel ID="panelInventory" runat="server" Visible="false" CssClass="mt-6">
 
@@ -149,20 +183,20 @@
             <div class="overflow-x-auto">
 
                 <asp:GridView ID="gvInventory" runat="server"
-                    AutoGenerateColumns="False"
-                    CssClass="w-full text-sm">
-
-                    <Columns>
-
-                        <asp:BoundField DataField="batch_id" HeaderText="Batch ID"/>
-                        <asp:BoundField DataField="vaccine_id" HeaderText="Vaccine ID"/>
-                        <asp:BoundField DataField="batch_number" HeaderText="Batch Number"/>
-                        <asp:BoundField DataField="expiration_date" HeaderText="Expiry Date"/>
-                        <asp:BoundField DataField="quantity_available" HeaderText="Quantity"/>
-
-                    </Columns>
-
-                </asp:GridView>
+    AutoGenerateColumns="False"
+    CssClass="w-full text-sm">
+    <Columns>
+        <asp:BoundField DataField="batch_id"           HeaderText="Batch ID"           />
+        <asp:BoundField DataField="vaccine_name"       HeaderText="Vaccine"            />
+        <asp:BoundField DataField="batch_number"       HeaderText="Batch Number"       />
+        <asp:BoundField DataField="manufacturing_date" HeaderText="Manufacturing Date" DataFormatString="{0:MMM dd, yyyy}" />
+        <asp:BoundField DataField="expiration_date"    HeaderText="Expiration Date"    DataFormatString="{0:MMM dd, yyyy}" />
+        <asp:BoundField DataField="quantity_received"  HeaderText="Qty Received"       />
+        <asp:BoundField DataField="current_stock"      HeaderText="Current Stock"      />
+        <asp:BoundField DataField="date_received"      HeaderText="Date Received"      DataFormatString="{0:MMM dd, yyyy}" />
+        <asp:BoundField DataField="stock_status"       HeaderText="Status"             />
+    </Columns>
+</asp:GridView>
 
             </div>
 
