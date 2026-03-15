@@ -6,135 +6,114 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div class="mx-auto max-w-6xl px-4 py-6 font-sans text-slate-900">
+    <div class="p-6 font-heading2 text-slate-900">
 
-        <!-- Header -->
-        <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <%-- ── Page Header ───────────────────────────────────────────── --%>
+        <div class="flex justify-between items-start mb-6">
             <div>
-                <h1 class="text-4xl font-extrabold tracking-tight text-[#0b2a7a]">Admin User Management</h1>
-                <p class="mt-1 text-base text-slate-600">Manage admin accounts, roles, and access</p>
+                <h1 class="text-4xl font-bold text-[#0b2a7a] font-hBruns">User Management</h1>
+                <p class="text-slate-500 text-sm mt-1">Manage admin accounts, roles, and access</p>
             </div>
-
             <asp:Button ID="btnAddUser" runat="server"
-                Text="Add User"
+                Text="+ Add User"
                 UseSubmitBehavior="false"
                 OnClientClick="openModal(); return false;"
-                CssClass="h-11 rounded-lg bg-[#1a4ed8] px-5 font-extrabold text-white shadow hover:brightness-110 hover:-translate-y-[1px] transition" />
+                CssClass="h-11 rounded-lg bg-blue-600 px-6 font-bold text-white shadow hover:bg-blue-700 transition cursor-pointer" />
         </div>
 
-        <!-- Table Card -->
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-            <div class="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4">
-                <h2 class="text-lg font-extrabold text-slate-900">Users</h2>
-                <span class="text-sm font-semibold text-slate-500">Edit / Delete from the Actions column</span>
+        <%-- Users Table --%>
+        <asp:Panel runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-extrabold text-slate-800">Users</h3>
+                <span class="text-xs font-semibold text-slate-400">Edit / Delete from the Actions column</span>
             </div>
 
-            <div class="w-full overflow-x-auto">
-                <asp:GridView ID="gvUsers" runat="server"
-    AutoGenerateColumns="False"
-    DataKeyNames="user_id"
-    OnRowEditing="gvUsers_RowEditing"
-    OnRowCancelingEdit="gvUsers_RowCancelingEdit"
-    OnRowUpdating="gvUsers_RowUpdating"
-    OnRowDeleting="gvUsers_RowDeleting"
-    CssClass="min-w-[900px] w-full text-sm"
-    HeaderStyle-CssClass="bg-slate-50 text-slate-700 font-extrabold border-b border-slate-200"
-    RowStyle-CssClass="border-b border-slate-100"
-    AlternatingRowStyle-CssClass="bg-white"
-    GridLines="None">
+            <asp:GridView ID="gvUsers" runat="server"
+                AutoGenerateColumns="False"
+                DataKeyNames="user_id"
+                OnRowEditing="gvUsers_RowEditing"
+                OnRowCancelingEdit="gvUsers_RowCancelingEdit"
+                OnRowUpdating="gvUsers_RowUpdating"
+                OnRowDeleting="gvUsers_RowDeleting"
+                CssClass="w-full text-sm" GridLines="None">
+                <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
+                <RowStyle CssClass="border-b border-slate-100 transition-colors hover:bg-slate-50" />
+                <AlternatingRowStyle CssClass="border-b border-slate-100 hover:bg-slate-50" />
+                <Columns>
+                    <asp:BoundField DataField="user_id"   HeaderText="Admin ID"  ReadOnly="True" ItemStyle-CssClass="p-4 text-slate-600" HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="full_name" HeaderText="Full Name"               ItemStyle-CssClass="p-4 font-bold text-slate-700" HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="username"  HeaderText="Username"                ItemStyle-CssClass="p-4 text-slate-600" HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="password"  HeaderText="Password"                ItemStyle-CssClass="p-4 font-mono text-slate-500 text-xs" HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="role"      HeaderText="Role"                    ItemStyle-CssClass="p-4 text-slate-600" HeaderStyle-CssClass="p-4" />
+                    <asp:CommandField ShowEditButton="True" ShowDeleteButton="True"
+                        ControlStyle-CssClass="font-bold text-blue-600 hover:text-blue-800 hover:underline transition mr-2" />
+                </Columns>
+                <EmptyDataTemplate>
+                    <div class="p-10 text-center text-slate-400 text-sm">No users found.</div>
+                </EmptyDataTemplate>
+            </asp:GridView>
 
-    <Columns>
-        <asp:BoundField DataField="user_id"   HeaderText="Admin ID"  ReadOnly="True" />
-        <asp:BoundField DataField="full_name" HeaderText="Full Name" />
-        <asp:BoundField DataField="username"  HeaderText="Username"  />
-        <asp:BoundField DataField="password"  HeaderText="Password"  />
-        <asp:BoundField DataField="role"      HeaderText="Role"      />
-
-        <asp:CommandField ShowEditButton="True" ShowDeleteButton="True"
-            ControlStyle-CssClass="font-bold text-[#1a4ed8] hover:text-[#0b2a7a]" />
-    </Columns>
-</asp:GridView>
+            <div class="px-5 py-3 border-t border-slate-200 bg-slate-50">
+                <p class="text-xs font-semibold text-slate-400">Tip: Avoid displaying raw passwords in production — use hashed passwords.</p>
             </div>
-
-            <!-- Optional footer space -->
-            <div class="border-t border-slate-200 bg-slate-50 px-5 py-3 text-xs font-semibold text-slate-500">
-                Tip: Avoid displaying raw passwords in production (use hashed passwords).
-            </div>
-
-        </div>
+        </asp:Panel>
 
     </div>
 
-    <!-- MODAL -->
-    <div id="userModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
+    <%-- ── Add User Modal ────────────────────────────────────────── --%>
+    <div id="userModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 px-4">
+        <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
 
-        <div class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-
-            <!-- Modal header -->
-            <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-4">
+            <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                 <div>
-                    <h2 class="text-lg font-extrabold text-slate-900">Add New User</h2>
-                    <p class="mt-0.5 text-sm font-semibold text-slate-500">Fill in the details then click Save</p>
+                    <h3 class="font-extrabold text-slate-900">Add New User</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Fill in the details then click Save</p>
                 </div>
-
                 <button type="button" onclick="closeModal()"
-                    class="rounded-lg px-3 py-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition">
-                    ✕
-                </button>
+                    class="text-slate-400 hover:text-red-500 font-bold text-lg leading-none transition">✕</button>
             </div>
 
-            <!-- Modal body -->
-            <div class="px-5 py-5 space-y-4">
-
+            <div class="p-5 space-y-5">
                 <div>
-                    <label class="mb-2 block text-sm font-semibold text-slate-700">Full Name</label>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Full Name</label>
                     <asp:TextBox ID="txtFullName" runat="server"
-                        CssClass="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-[15px] text-slate-900 outline-none focus:ring-2 focus:ring-blue-200"
+                        CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="e.g. Juan Dela Cruz" />
                 </div>
-
                 <div>
-                    <label class="mb-2 block text-sm font-semibold text-slate-700">Username</label>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Username</label>
                     <asp:TextBox ID="txtUsername" runat="server"
-                        CssClass="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-[15px] text-slate-900 outline-none focus:ring-2 focus:ring-blue-200"
+                        CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="e.g. admin.juan" />
                 </div>
-
                 <div>
-                    <label class="mb-2 block text-sm font-semibold text-slate-700">Password</label>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Password</label>
                     <asp:TextBox ID="txtPassword" runat="server" TextMode="Password"
-                        CssClass="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-[15px] text-slate-900 outline-none focus:ring-2 focus:ring-blue-200"
+                        CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="••••••••" />
                 </div>
-
                 <div>
-                    <label class="mb-2 block text-sm font-semibold text-slate-700">Role</label>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Role</label>
                     <asp:DropDownList ID="ddlRole" runat="server"
-                        CssClass="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-[15px] text-slate-900 outline-none focus:ring-2 focus:ring-blue-200">
+                        CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                         <asp:ListItem Text="Select Role"       Value=""               />
                         <asp:ListItem Text="Admin"             Value="admin"          />
                         <asp:ListItem Text="Admin Assistant"   Value="adminAssistant" />
                         <asp:ListItem Text="Vaccinator"        Value="vaccinators"    />
                     </asp:DropDownList>
                 </div>
-
             </div>
 
-            <!-- Modal footer -->
-            <div class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:justify-end">
-
+            <div class="px-5 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
                 <asp:Button ID="btnCancel" runat="server"
                     Text="Cancel"
                     UseSubmitBehavior="false"
                     OnClientClick="closeModal(); return false;"
-                    CssClass="h-11 rounded-lg border border-slate-200 bg-white px-5 font-semibold text-slate-700 shadow-sm hover:shadow-md hover:-translate-y-[1px] transition" />
-
+                    CssClass="h-11 rounded-lg bg-white border border-slate-300 px-6 font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer" />
                 <asp:Button ID="btnSave" runat="server"
-                Text="Save"
-                OnClick="btnSave_Click"
-                CssClass="h-11 rounded-lg bg-[#1a4ed8] px-6 font-extrabold text-white shadow hover:brightness-110 hover:-translate-y-[1px] transition" />
-
+                    Text="Save"
+                    OnClick="btnSave_Click"
+                    CssClass="h-11 rounded-lg bg-blue-600 px-6 font-bold text-white shadow hover:bg-blue-700 transition cursor-pointer" />
             </div>
 
         </div>
@@ -142,20 +121,16 @@
 
     <script>
         function openModal() {
-            const modal = document.getElementById("userModal");
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
+            var m = document.getElementById('userModal');
+            m.classList.remove('hidden'); m.classList.add('flex');
         }
-
         function closeModal() {
-            const modal = document.getElementById("userModal");
-            modal.classList.remove("flex");
-            modal.classList.add("hidden");
+            var m = document.getElementById('userModal');
+            m.classList.remove('flex'); m.classList.add('hidden');
         }
-
-        document.addEventListener("click", function (e) {
-            const modal = document.getElementById("userModal");
-            if (e.target === modal) closeModal();
+        document.addEventListener('click', function (e) {
+            var m = document.getElementById('userModal');
+            if (e.target === m) closeModal();
         });
     </script>
 

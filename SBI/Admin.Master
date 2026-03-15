@@ -63,6 +63,7 @@
             font-family: 'Brunson';
             src: url('../Brunson.ttf') format('truetype');
             font-weight: 700;
+            font-style: normal;
         }
     </style>
     <title>SBI System</title>
