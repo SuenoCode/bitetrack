@@ -67,10 +67,11 @@
                     <asp:TemplateField HeaderStyle-CssClass="p-4 text-right" ItemStyle-CssClass="p-4 text-right">
                         <ItemTemplate>
                             <asp:Button ID="btnGoToCase" runat="server"
-                                CommandName="ViewCase"
-                                CommandArgument='<%# Container.DataItemIndex %>'
-                                Text="Open Case"
-                                CssClass="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded-lg text-xs transition cursor-pointer" />
+    CommandName="ViewCase"
+    CommandArgument='<%# Container.DataItemIndex %>'
+    Text="Open Case"
+    Visible='<%# CanOpenCase %>'
+    CssClass="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded-lg text-xs transition cursor-pointer" />
                         </ItemTemplate>
                     </asp:TemplateField>
                 </Columns>
@@ -129,10 +130,11 @@
                     <asp:TemplateField HeaderStyle-CssClass="p-4 text-right" ItemStyle-CssClass="p-4 text-right">
                         <ItemTemplate>
                             <asp:Button ID="btnOpenCase" runat="server"
-                                CommandName="OpenCase"
-                                CommandArgument='<%# Container.DataItemIndex %>'
-                                Text="Manage Case"
-                                CssClass="inline-flex items-center gap-1 text-blue-600 font-semibold text-xs hover:text-blue-800 hover:underline transition" />
+    CommandName="OpenCase"
+    CommandArgument='<%# Container.DataItemIndex %>'
+    Text="Manage Case"
+    Visible='<%# CanManageCase %>'
+    CssClass="inline-flex items-center gap-1 text-blue-600 font-semibold text-xs hover:text-blue-800 hover:underline transition" />
                         </ItemTemplate>
                     </asp:TemplateField>
                 </Columns>
@@ -493,18 +495,18 @@
                                     <ItemTemplate>
                                         <%-- Administer — visible to A and C only, Pending doses only --%>
                                         <asp:Button ID="btnAdminister" runat="server"
-                                            CommandName="AdministerDose"
-                                            CommandArgument='<%# Container.DataItemIndex %>'
-                                            Text="Administer"
-                                            CssClass="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer"
-                                            Visible='<%# Eval("status").ToString() == "Pending" && CanAdminister %>' />
+    CommandName="AdministerDose"
+    CommandArgument='<%# Container.DataItemIndex %>'
+    Text="Administer"
+    CssClass="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer"
+    Visible='<%# Eval("status").ToString() == "Pending" && CanAdminister %>' />
                                         <%-- Edit — visible to A and C only, Completed doses only --%>
                                         <asp:Button ID="btnEdit" runat="server"
-                                            CommandName="EditDose"
-                                            CommandArgument='<%# Container.DataItemIndex %>'
-                                            Text="Edit"
-                                            CssClass="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer"
-                                            Visible='<%# Eval("status").ToString() == "Completed" && CanAdminister %>' />
+    CommandName="EditDose"
+    CommandArgument='<%# Container.DataItemIndex %>'
+    Text="Edit"
+    CssClass="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer"
+    Visible='<%# Eval("status").ToString() == "Completed" && CanAdminister %>' />
                                     </ItemTemplate>
                                 </asp:TemplateField>
                             </Columns>
