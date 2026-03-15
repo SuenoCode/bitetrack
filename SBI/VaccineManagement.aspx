@@ -2,231 +2,257 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
-<div class="px-4 py-6 font-sans text-slate-900">
+<style>
+    /* ── Pagination ─────────────────────────────────────────────── */
+    .pager-wrap { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-top:1px solid #e2e8f0; background:#f8fafc; }
+    .pager-wrap .pager-info { font-size:13px; color:#64748b; }
+    .pager-wrap table { margin:0; }
+    .pager-wrap td { padding:0 3px; }
+    .pager-wrap a, .pager-wrap span {
+        display:inline-flex; align-items:center; justify-content:center;
+        min-width:32px; height:32px; padding:0 10px;
+        border-radius:6px; font-size:13px; font-weight:600;
+        border:1px solid #e2e8f0; background:#fff; color:#475569;
+        text-decoration:none; transition:all .15s;
+    }
+    .pager-wrap a:hover { background:#2563eb; color:#fff; border-color:#2563eb; }
+    .pager-wrap span { background:#2563eb; color:#fff; border-color:#2563eb; cursor:default; }
 
-    <h1 class="text-4xl font-extrabold text-[#0b2a7a]">Vaccine Management</h1>
-    <p class="text-slate-600 mt-1">
-        Inventory control, stock monitoring, and administration tracking
-    </p>
+    /* ── Table rows ─────────────────────────────────────────────── */
+    .gv-table tr:hover td { background:#f1f5f9; }
+    .gv-table td, .gv-table th { vertical-align:middle !important; }
 
-    <div class="mt-6 bg-white border border-slate-200 rounded-xl shadow-sm p-3">
-        <div class="flex gap-3 flex-wrap">
+    /* ── Status badges ──────────────────────────────────────────── */
+    .badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; }
+    .badge-ok   { background:#dcfce7; color:#15803d; }
+    .badge-warn { background:#fef9c3; color:#a16207; }
+    .badge-exp  { background:#fee2e2; color:#b91c1c; }
+    .badge-in   { background:#dbeafe; color:#1d4ed8; }
+</style>
 
-            <asp:LinkButton ID="btnOverviewTab" runat="server"
-                OnClick="btnOverviewTab_Click"
-                CssClass="px-4 py-2 rounded-lg font-semibold text-white bg-blue-600">
-                Inventory Overview
-            </asp:LinkButton>
+<div class="p-6 font-heading2 text-slate-900">
 
-            <asp:LinkButton ID="btnAddStockTab" runat="server"
-                OnClick="btnAddStockTab_Click"
-                CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white font-semibold">
-                Add Vaccine Stock
-            </asp:LinkButton>
-
-            <asp:LinkButton ID="btnInventoryTab" runat="server"
-                OnClick="btnInventoryTab_Click"
-                CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white font-semibold">
-                Inventory Table
-            </asp:LinkButton>
-
+    <%-- ── Page Header ───────────────────────────────────────────── --%>
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-4xl font-bold text-[#0b2a7a] font-heading1">Vaccine Management</h1>
+            <p class="text-slate-500 text-sm mt-1">Inventory control and stock monitoring</p>
         </div>
+        <asp:Button ID="btnOpenAddStock" runat="server" Text="+ Add New Stock" OnClick="btnOpenAddStock_Click"
+            CssClass="h-11 rounded-lg bg-blue-600 px-6 font-bold text-white shadow hover:bg-blue-700 transition cursor-pointer" />
     </div>
 
-    <!-- OVERVIEW -->
-    <asp:Panel ID="panelOverview" runat="server" CssClass="mt-6">
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
+    <%-- ── Tab Navigation ────────────────────────────────────────── --%>
+    <div class="flex gap-2 border-b border-slate-200 pb-px mb-6">
+        <asp:LinkButton ID="btnOverviewTab" runat="server" OnClick="btnOverviewTab_Click" />
+        <asp:LinkButton ID="btnAddStockTab" runat="server" OnClick="btnAddStockTab_Click" />
+    </div>
 
-            <h3 class="text-lg font-extrabold text-slate-900 mb-4">
-                Inventory Overview
-            </h3>
+    <%-- ════════════════════════════════════════════════════════════
+         TAB 1 — INVENTORY DASHBOARD
+         ════════════════════════════════════════════════════════════ --%>
+    <asp:Panel ID="panelOverview" runat="server" Visible="true" CssClass="space-y-6">
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <%-- Stat cards --%>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Available Doses</div>
+                <div class="text-3xl font-extrabold text-emerald-600"><asp:Label ID="lblTotalDoses" runat="server" /></div>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Expiring (30d)</div>
+                <div class="text-3xl font-extrabold text-amber-500"><asp:Label ID="lblExpiring30" runat="server" /></div>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Expired</div>
+                <div class="text-3xl font-extrabold text-red-600"><asp:Label ID="lblExpired" runat="server" /></div>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Stock Entries (MTD)</div>
+                <div class="text-3xl font-extrabold text-indigo-600"><asp:Label ID="lblAdministeredMTD" runat="server" /></div>
+            </div>
+        </div>
 
-                <div class="border rounded-xl p-4">
-                    <div class="text-3xl font-extrabold text-emerald-600">
-                        <asp:Label ID="lblTotalDoses" runat="server" Text="0"></asp:Label>
-                    </div>
-                    <div class="text-sm text-slate-600 font-semibold">
-                        Total Available Doses
-                    </div>
+        <%-- Inventory grid --%>
+        <asp:Panel ID="panelInventory" runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-3">
+                <h3 class="font-extrabold text-slate-800">Current Stock by Vaccine</h3>
+                <div class="flex gap-2">
+                    <asp:TextBox ID="txtSearch" runat="server" placeholder="Search vaccine…"
+                        CssClass="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <asp:Button ID="btnSearch" runat="server" Text="Filter" OnClick="btnSearch_Click"
+                        CssClass="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold cursor-pointer hover:bg-slate-700 transition" />
+                    <asp:Button ID="btnClearSearch" runat="server" Text="Clear" OnClick="btnClearSearch_Click"
+                        CssClass="bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold cursor-pointer hover:bg-slate-50 transition" />
                 </div>
-
-                <div class="border rounded-xl p-4">
-                    <div class="text-3xl font-extrabold text-amber-600">
-                        <asp:Label ID="lblExpiring30" runat="server" Text="0"></asp:Label>
-                    </div>
-                    <div class="text-sm text-slate-600 font-semibold">
-                        Expiring within 30 days
-                    </div>
-                </div>
-
-                <div class="border rounded-xl p-4">
-                    <div class="text-3xl font-extrabold text-red-600">
-                        <asp:Label ID="lblExpired" runat="server" Text="0"></asp:Label>
-                    </div>
-                    <div class="text-sm text-slate-600 font-semibold">
-                        Expired Vaccines
-                    </div>
-                </div>
-
-                <div class="border rounded-xl p-4">
-                    <div class="text-3xl font-extrabold text-indigo-600">
-                        <asp:Label ID="lblAdministeredMTD" runat="server" Text="0"></asp:Label>
-                    </div>
-                    <div class="text-sm text-slate-600 font-semibold">
-                        Stock Entries (MTD)
-                    </div>
-                </div>
-
             </div>
 
-        </div>
-    </asp:Panel>
+            <asp:GridView ID="gvInventory" runat="server" AutoGenerateColumns="False"
+                          CssClass="gv-table w-full text-sm" GridLines="None"
+                          OnRowCommand="gvInventory_RowCommand"
+                          AllowPaging="True" PageSize="10"
+                          OnPageIndexChanging="gvInventory_PageIndexChanging"
+                          PagerStyle-CssClass="pager-wrap">
+                <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
+                <RowStyle CssClass="border-b border-slate-100 transition-colors" />
+                <PagerStyle CssClass="pager-wrap" />
+                <PagerSettings Mode="NumericFirstLast" FirstPageText="«" LastPageText="»" PageButtonCount="5" />
+                <Columns>
+                    <asp:BoundField DataField="vaccine_name" HeaderText="Vaccine"
+                        ItemStyle-CssClass="p-4 font-bold text-slate-700"
+                        HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="total_batches" HeaderText="Batches"
+                        ItemStyle-CssClass="p-4 text-slate-600"
+                        HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="total_stock" HeaderText="Total Qty"
+                        ItemStyle-CssClass="p-4 font-extrabold text-slate-800"
+                        HeaderStyle-CssClass="p-4" />
+                    <asp:TemplateField HeaderStyle-CssClass="p-4 text-right" ItemStyle-CssClass="p-4 text-right">
+                        <ItemTemplate>
+                            <asp:LinkButton ID="btnView" runat="server" CommandName="ViewDetails"
+                                CommandArgument='<%# Container.DataItemIndex %>'
+                                CssClass="inline-flex items-center gap-1 text-blue-600 font-semibold text-xs hover:text-blue-800 hover:underline transition">
+                                View Batches →
+                            </asp:LinkButton>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+                <EmptyDataTemplate>
+                    <div class="p-10 text-center text-slate-400 text-sm">No vaccine records found.</div>
+                </EmptyDataTemplate>
+            </asp:GridView>
+        </asp:Panel>
 
-    <!-- OPEN ADD STOCK -->
-    <div class="px-5 pb-5 pt-6 flex justify-end">
-        <asp:Button ID="btnOpenAddStock" runat="server"
-            Text="Add Stock"
-            OnClick="btnOpenAddStock_Click"
-            CssClass="h-11 rounded-lg bg-[#1a4ed8] px-6 font-extrabold text-white shadow hover:brightness-110 transition" />
-    </div>
-
-    <!-- ADD STOCK PANEL -->
-    <asp:Panel ID="panelAddStock" runat="server" Visible="false" CssClass="mt-2">
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm">
-
-            <div class="border-b border-slate-200 px-5 py-4">
-                <h3 class="text-lg font-extrabold text-slate-900">
-                    Add Vaccine Stock
+        <%-- Batch details (inline expand) --%>
+        <asp:Panel ID="panelBatchDetails" runat="server" Visible="false"
+            CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                <h3 class="font-extrabold text-slate-800">
+                    Batch Breakdown — <asp:Label ID="lblSelectedVaccine" runat="server" CssClass="text-blue-600" />
                 </h3>
+                <asp:LinkButton ID="btnCloseDetails" runat="server" OnClick="btnCloseDetails_Click"
+                    CssClass="text-slate-400 hover:text-red-500 font-bold text-lg leading-none transition">✕</asp:LinkButton>
             </div>
 
-            <div class="p-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <asp:GridView ID="gvBatchDetails" runat="server" AutoGenerateColumns="False"
+                          CssClass="gv-table w-full text-sm" GridLines="None"
+                          AllowPaging="True" PageSize="10"
+                          OnPageIndexChanging="gvBatchDetails_PageIndexChanging"
+                          PagerStyle-CssClass="pager-wrap">
+                <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
+                <RowStyle CssClass="border-b border-slate-100" />
+                <PagerStyle CssClass="pager-wrap" />
+                <PagerSettings Mode="NumericFirstLast" FirstPageText="«" LastPageText="»" PageButtonCount="5" />
+                <Columns>
+                    <asp:BoundField DataField="batch_number" HeaderText="Batch #"
+                        ItemStyle-CssClass="p-4 font-mono text-slate-700"
+                        HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="expiration_date" HeaderText="Expiry"
+                        DataFormatString="{0:MMM dd, yyyy}"
+                        ItemStyle-CssClass="p-4 text-slate-600"
+                        HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="current_stock" HeaderText="Stock"
+                        ItemStyle-CssClass="p-4 font-extrabold text-slate-800"
+                        HeaderStyle-CssClass="p-4" />
+                    <asp:TemplateField HeaderText="Status" HeaderStyle-CssClass="p-4" ItemStyle-CssClass="p-4">
+                        <ItemTemplate>
+                            <%# FormatStockStatus(Eval("stock_status").ToString()) %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+                <EmptyDataTemplate>
+                    <div class="p-10 text-center text-slate-400 text-sm">No batch data available.</div>
+                </EmptyDataTemplate>
+            </asp:GridView>
+        </asp:Panel>
 
-                <div>
-                    <label class="text-sm font-semibold text-slate-700">Vaccine Name</label>
-                    <asp:DropDownList ID="ddlVaccineName" runat="server"
-                        CssClass="h-11 w-full border border-slate-200 rounded-lg px-3">
-                    </asp:DropDownList>
+    </asp:Panel>
+
+    <%-- ════════════════════════════════════════════════════════════
+         TAB 2 — RECEIVE STOCK  (form + recent history side by side)
+         ════════════════════════════════════════════════════════════ --%>
+    <asp:Panel ID="panelAddStock" runat="server" Visible="false">
+        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+
+            <%-- LEFT: form (2/5) --%>
+            <div class="xl:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm p-8">
+                <h2 class="text-2xl font-bold mb-1 font-heading1 text-[#0b2a7a]">Receive New Batch</h2>
+                <p class="text-sm text-slate-400 mb-6">Add incoming vaccine stock to the inventory.</p>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Vaccine</label>
+                        <asp:DropDownList ID="ddlVaccineName" runat="server"
+                            CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Expiry Date</label>
+                        <asp:TextBox ID="txtExpiryDate" runat="server" TextMode="Date"
+                            CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Quantity Received</label>
+                        <asp:TextBox ID="txtQuantity" runat="server" TextMode="Number"
+                            CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g. 50" />
+                    </div>
+
+                    <div class="pt-2 flex gap-3">
+                        <asp:Button ID="btnSaveStock" runat="server" Text="Save Batch" OnClick="btnSaveStock_Click"
+                            CssClass="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-bold cursor-pointer transition text-sm" />
+                        <asp:Button ID="btnCancelStock" runat="server" Text="Cancel" OnClick="btnCancelStock_Click"
+                            CssClass="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 py-2.5 rounded-lg font-bold cursor-pointer transition text-sm" />
+                    </div>
                 </div>
-
-                <div>
-                    <label class="text-sm font-semibold text-slate-700">Expiration Date</label>
-                    <asp:TextBox ID="txtExpiryDate" runat="server" TextMode="Date"
-                        CssClass="h-11 w-full border border-slate-200 rounded-lg px-3"></asp:TextBox>
-                </div>
-
-                <div>
-                    <label class="text-sm font-semibold text-slate-700">Quantity</label>
-                    <asp:TextBox ID="txtQuantity" runat="server" TextMode="Number"
-                        CssClass="h-11 w-full border border-slate-200 rounded-lg px-3"></asp:TextBox>
-                </div>
-
             </div>
 
-            <div class="px-5 pb-2 text-sm text-slate-500">
-                Batch number will be generated automatically by the system.
-            </div>
+            <%-- RIGHT: recent history (3/5) --%>
+            <div class="xl:col-span-3 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
+                    <h3 class="font-extrabold text-slate-800">Recent Stock Receipts</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Last 10 stock-in transactions</p>
+                </div>
 
-            <div class="px-5 pb-5 flex justify-end gap-3">
-                <asp:Button ID="btnSaveStock" runat="server"
-                    Text="Save Stock"
-                    OnClick="btnSaveStock_Click"
-                    CssClass="h-11 rounded-lg bg-[#1a4ed8] px-6 font-extrabold text-white shadow hover:brightness-110 transition" />
-
-                <asp:Button ID="btnCancelStock" runat="server"
-                    Text="Cancel"
-                    OnClick="btnCancelStock_Click"
-                    CssClass="h-11 rounded-lg border border-slate-200 bg-white px-6 font-semibold text-slate-700 shadow-sm hover:shadow-md transition" />
+                <asp:GridView ID="gvStockHistory" runat="server" AutoGenerateColumns="False"
+                              CssClass="gv-table w-full text-sm" GridLines="None"
+                              AllowPaging="True" PageSize="10"
+                              OnPageIndexChanging="gvStockHistory_PageIndexChanging"
+                              PagerStyle-CssClass="pager-wrap">
+                    <HeaderStyle CssClass="text-left bg-slate-50 text-slate-400 border-b border-slate-200 uppercase text-xs font-bold" />
+                    <RowStyle CssClass="border-b border-slate-50 transition-colors" />
+                    <PagerStyle CssClass="pager-wrap" />
+                    <PagerSettings Mode="NumericFirstLast" FirstPageText="«" LastPageText="»" PageButtonCount="5" />
+                    <Columns>
+                        <asp:BoundField DataField="transaction_date" HeaderText="Date"
+                            DataFormatString="{0:MMM dd, yyyy}"
+                            ItemStyle-CssClass="p-4 text-slate-500 text-xs whitespace-nowrap"
+                            HeaderStyle-CssClass="p-4" />
+                        <asp:BoundField DataField="vaccine_name" HeaderText="Vaccine"
+                            ItemStyle-CssClass="p-4 font-semibold text-slate-700"
+                            HeaderStyle-CssClass="p-4" />
+                        <asp:BoundField DataField="batch_number" HeaderText="Batch #"
+                            ItemStyle-CssClass="p-4 font-mono text-slate-500 text-xs"
+                            HeaderStyle-CssClass="p-4" />
+                        <asp:BoundField DataField="quantity" HeaderText="Qty"
+                            ItemStyle-CssClass="p-4"
+                            HeaderStyle-CssClass="p-4" />
+                        <asp:TemplateField HeaderText="Qty" HeaderStyle-CssClass="p-4" ItemStyle-CssClass="p-4">
+                            <ItemTemplate>
+                                <span class="badge badge-in">+<%# Eval("quantity") %></span>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:BoundField DataField="updated_by" HeaderText="By"
+                            ItemStyle-CssClass="p-4 text-slate-500 text-xs"
+                            HeaderStyle-CssClass="p-4" />
+                    </Columns>
+                    <EmptyDataTemplate>
+                        <div class="p-10 text-center text-slate-400 text-sm">No stock history yet.</div>
+                    </EmptyDataTemplate>
+                </asp:GridView>
             </div>
 
         </div>
     </asp:Panel>
 
-    <!-- SEARCH -->
-    <div class="px-5 py-4 border-b border-slate-200 flex gap-3 flex-wrap mt-6">
-        <asp:TextBox ID="txtSearch" runat="server"
-            placeholder="Search by vaccine name or batch number..."
-            CssClass="h-11 flex-1 min-w-[260px] border border-slate-200 rounded-lg px-3 text-sm" />
-
-        <asp:Button ID="btnSearch" runat="server"
-            Text="Search"
-            OnClick="btnSearch_Click"
-            CssClass="h-11 rounded-lg bg-[#1a4ed8] px-5 font-extrabold text-white shadow hover:brightness-110 transition" />
-
-        <asp:Button ID="btnClearSearch" runat="server"
-            Text="Clear"
-            OnClick="btnClearSearch_Click"
-            CssClass="h-11 rounded-lg border border-slate-200 bg-white px-5 font-semibold text-slate-700 shadow-sm hover:shadow-md transition" />
-    </div>
-
-    <!-- INVENTORY TABLE -->
-    <asp:Panel ID="panelInventory" runat="server" Visible="false" CssClass="mt-6">
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm">
-
-            <div class="px-5 py-4 border-b border-slate-200">
-                <h3 class="text-lg font-extrabold text-slate-900">
-                    Current Vaccine Inventory
-                </h3>
-            </div>
-
-            <asp:GridView ID="gvInventory" runat="server"
-    AutoGenerateColumns="False"
-    ShowHeaderWhenEmpty="true"
-    OnRowCommand="gvInventory_RowCommand"
-    CssClass="w-full text-sm">
-
-    <Columns>
-
-        <asp:BoundField DataField="vaccine_name" HeaderText="Vaccine Name" />
-        <asp:BoundField DataField="total_batches" HeaderText="Total Batches" />
-        <asp:BoundField DataField="total_stock" HeaderText="Current Stock" />
-
-        <asp:ButtonField
-            ButtonType="Button"
-            Text="View"
-            CommandName="ViewDetails"
-            ControlStyle-CssClass="bg-blue-600 text-white px-3 py-1 rounded" />
-
-    </Columns>
-
-</asp:GridView>
-
-        </div>
-    </asp:Panel>
-    <asp:Panel ID="panelBatchDetails" runat="server" Visible="false" CssClass="mt-6">
-
-<div class="bg-white border border-slate-200 rounded-2xl shadow-sm">
-
-<div class="px-5 py-4 border-b border-slate-200">
-<h3 class="text-lg font-extrabold text-slate-900">
-Batch Details
-</h3>
 </div>
-
-<div class="overflow-x-auto">
-
-<asp:GridView ID="gvBatchDetails" runat="server"
-AutoGenerateColumns="False"
-CssClass="w-full text-sm">
-
-<Columns>
-
-<asp:BoundField DataField="batch_number" HeaderText="Batch Number" />
-<asp:BoundField DataField="manufacturing_date" HeaderText="Manufacturing Date" DataFormatString="{0:MMM dd, yyyy}" />
-<asp:BoundField DataField="expiration_date" HeaderText="Expiration Date" DataFormatString="{0:MMM dd, yyyy}" />
-<asp:BoundField DataField="quantity_received" HeaderText="Qty Received" />
-<asp:BoundField DataField="current_stock" HeaderText="Current Stock" />
-<asp:BoundField DataField="stock_status" HeaderText="Status" />
-
-</Columns>
-
-</asp:GridView>
-
-</div>
-</div>
-</asp:Panel>
-</div>
-
 </asp:Content>
