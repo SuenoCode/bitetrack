@@ -15,7 +15,7 @@ namespace SBI
 
 		protected void Page_Load(object sender, EventArgs e)
 		{
-			if (Session["userRole"] == null)
+		/*	if (Session["userRole"] == null)
 			{
 				Response.Redirect("Login.aspx");
 				return;
@@ -36,7 +36,7 @@ namespace SBI
 				SetDefaultDates();
 				UpdateActiveTabStyles();
 				GenerateReport();
-			}
+			} */
 		}
 
 		private void SetDefaultDates()

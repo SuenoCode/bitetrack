@@ -18,9 +18,7 @@ namespace SBI
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (Session["userRole"] == null ||
-                (Session["userRole"].ToString().ToLower() != "adminassistant" &&
-                 Session["userRole"].ToString().ToLower() != "vaccinators"))
+            if (Session["userRole"] == null)
             {
                 Response.Redirect("Login.aspx");
                 return;
@@ -62,6 +60,7 @@ namespace SBI
         protected void btnOverviewTab_Click(object sender, EventArgs e) => ShowDashboard();
         protected void btnAddStockTab_Click(object sender, EventArgs e) => ShowAddStock();
         protected void btnOpenAddStock_Click(object sender, EventArgs e) => ShowAddStock();
+
         protected void btnCancelStock_Click(object sender, EventArgs e)
         {
             ClearAddStockFields();
@@ -117,11 +116,16 @@ namespace SBI
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
+                // Query directly from Vaccine + VaccineBatch — no view dependency
                 string query = @"
-                    SELECT vaccine_name, total_batches, total_stock
-                    FROM   vw_VaccineInventorySummary
-                    WHERE  (@search = '' OR vaccine_name LIKE @search)
-                    ORDER BY vaccine_name";
+                    SELECT  v.vaccine_name,
+                            COUNT(b.batch_id)      AS total_batches,
+                            ISNULL(SUM(b.current_stock), 0) AS total_stock
+                    FROM    Vaccine v
+                    LEFT JOIN VaccineBatch b ON v.vaccine_id = b.vaccine_id
+                    WHERE   (@search = '' OR v.vaccine_name LIKE @search)
+                    GROUP BY v.vaccine_name
+                    ORDER BY v.vaccine_name";
 
                 SqlDataAdapter da = new SqlDataAdapter(query, conn);
                 da.SelectCommand.Parameters.AddWithValue("@search",
@@ -130,9 +134,7 @@ namespace SBI
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 
-                // Store full data in ViewState so pagination survives PostBack without re-querying
                 ViewState["InventoryData"] = dt;
-
                 gvInventory.DataSource = dt;
                 gvInventory.DataBind();
             }
@@ -142,12 +144,16 @@ namespace SBI
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                // Fetch all recent In entries; the GridView pager shows 10 at a time
                 string query = @"
-                    SELECT TOP 50 l.transaction_date, v.vaccine_name, b.batch_number, l.quantity, l.updated_by
-                    FROM   InventoryLog l
-                    JOIN   VaccineBatch b ON l.batch_id  = b.batch_id
-                    JOIN   Vaccine      v ON b.vaccine_id = v.vaccine_id
+                    SELECT TOP 50
+                           l.transaction_date,
+                           v.vaccine_name,
+                           b.batch_number,
+                           l.quantity,
+                           l.updated_by
+                    FROM   InventoryLog  l
+                    JOIN   VaccineBatch  b ON l.batch_id   = b.batch_id
+                    JOIN   Vaccine       v ON b.vaccine_id = v.vaccine_id
                     WHERE  l.transaction_type = 'In'
                     ORDER BY l.transaction_date DESC";
 
@@ -156,7 +162,6 @@ namespace SBI
                 da.Fill(dt);
 
                 ViewState["StockHistoryData"] = dt;
-
                 gvStockHistory.DataSource = dt;
                 gvStockHistory.DataBind();
             }
@@ -166,12 +171,24 @@ namespace SBI
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
+                // Query directly — no view dependency
                 string query = @"
-                    SELECT batch_number, manufacturing_date, expiration_date,
-                           quantity_received, current_stock, stock_status
-                    FROM   vw_VaccineInventoryDetails
-                    WHERE  vaccine_name = @vname
-                    ORDER BY expiration_date";
+                    SELECT  b.batch_number,
+                            b.manufacturing_date,
+                            b.expiration_date,
+                            b.quantity_received,
+                            b.current_stock,
+                            CASE
+                                WHEN b.expiration_date < CAST(GETDATE() AS DATE)
+                                    THEN 'Expired'
+                                WHEN b.expiration_date <= DATEADD(DAY, 30, CAST(GETDATE() AS DATE))
+                                    THEN 'Expiring Soon'
+                                ELSE 'Available'
+                            END AS stock_status
+                    FROM    VaccineBatch b
+                    JOIN    Vaccine      v ON b.vaccine_id = v.vaccine_id
+                    WHERE   v.vaccine_name = @vname
+                    ORDER BY b.expiration_date";
 
                 SqlDataAdapter da = new SqlDataAdapter(query, conn);
                 da.SelectCommand.Parameters.AddWithValue("@vname", vaccineName);
@@ -211,26 +228,32 @@ namespace SBI
             if (e.CommandName == "ViewDetails")
             {
                 int rowIndex = Convert.ToInt32(e.CommandArgument);
-                // Use Rows[] relative to the current page
-                string vaccineName = gvInventory.Rows[rowIndex].Cells[0].Text;
-                LoadBatchDetails(vaccineName);
+
+                // Safe: read from ViewState DataTable using absolute row index
+                DataTable dt = ViewState["InventoryData"] as DataTable;
+                if (dt != null && rowIndex < dt.Rows.Count)
+                {
+                    // Account for current page offset
+                    int absoluteIndex = (gvInventory.PageIndex * gvInventory.PageSize) + rowIndex;
+                    if (absoluteIndex < dt.Rows.Count)
+                    {
+                        string vaccineName = dt.Rows[absoluteIndex]["vaccine_name"].ToString();
+                        LoadBatchDetails(vaccineName);
+                    }
+                }
             }
         }
 
         // ──────────────────────────────────────────────────────────
-        // PAGINATION — restore from ViewState so no extra DB hit
+        // PAGINATION
         // ──────────────────────────────────────────────────────────
 
         protected void gvInventory_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             gvInventory.PageIndex = e.NewPageIndex;
             DataTable dt = ViewState["InventoryData"] as DataTable;
-            if (dt == null) BindInventoryGrid(); // fallback
-            else
-            {
-                gvInventory.DataSource = dt;
-                gvInventory.DataBind();
-            }
+            if (dt == null) BindInventoryGrid();
+            else { gvInventory.DataSource = dt; gvInventory.DataBind(); }
         }
 
         protected void gvStockHistory_PageIndexChanging(object sender, GridViewPageEventArgs e)
@@ -238,27 +261,15 @@ namespace SBI
             gvStockHistory.PageIndex = e.NewPageIndex;
             DataTable dt = ViewState["StockHistoryData"] as DataTable;
             if (dt == null) LoadStockHistory();
-            else
-            {
-                gvStockHistory.DataSource = dt;
-                gvStockHistory.DataBind();
-            }
+            else { gvStockHistory.DataSource = dt; gvStockHistory.DataBind(); }
         }
 
         protected void gvBatchDetails_PageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             gvBatchDetails.PageIndex = e.NewPageIndex;
             DataTable dt = ViewState["BatchData"] as DataTable;
-            if (dt == null)
-            {
-                if (lblSelectedVaccine != null)
-                    LoadBatchDetails(lblSelectedVaccine.Text);
-            }
-            else
-            {
-                gvBatchDetails.DataSource = dt;
-                gvBatchDetails.DataBind();
-            }
+            if (dt == null) LoadBatchDetails(lblSelectedVaccine.Text);
+            else { gvBatchDetails.DataSource = dt; gvBatchDetails.DataBind(); }
         }
 
         // ──────────────────────────────────────────────────────────
@@ -293,9 +304,8 @@ namespace SBI
                 SqlTransaction trans = conn.BeginTransaction();
                 try
                 {
-                    // Insert batch and get new batch_id
                     string insertBatch = @"
-                        INSERT INTO VaccineBatch 
+                        INSERT INTO VaccineBatch
                             (vaccine_id, manufacturing_date, expiration_date, quantity_received, current_stock, date_received)
                         VALUES (@vid, GETDATE(), @exp, @qty, @qty, GETDATE());
                         SELECT SCOPE_IDENTITY();";
@@ -309,30 +319,27 @@ namespace SBI
                         batchId = Convert.ToInt32(cmd.ExecuteScalar());
                     }
 
-                    // Log the transaction
                     string insertLog = @"
-                        INSERT INTO InventoryLog (batch_id, transaction_type, quantity, transaction_date, updated_by)
+                        INSERT INTO InventoryLog
+                            (batch_id, transaction_type, quantity, transaction_date, updated_by)
                         VALUES (@bid, 'In', @qty, GETDATE(), @user)";
 
                     using (SqlCommand cmd = new SqlCommand(insertLog, conn, trans))
                     {
                         cmd.Parameters.AddWithValue("@bid", batchId);
                         cmd.Parameters.AddWithValue("@qty", qty);
-                        cmd.Parameters.AddWithValue("@user", Session["userName"]?.ToString() ?? "System");
+                        cmd.Parameters.AddWithValue("@user", Session["fullName"]?.ToString() ?? "System");
                         cmd.ExecuteNonQuery();
                     }
 
                     trans.Commit();
                     ShowAlert("Stock added successfully.");
                     ClearAddStockFields();
-
-                    // Stay on Add Stock tab and refresh history so the new entry appears
                     ShowAddStock();
                 }
                 catch (Exception ex)
                 {
                     trans.Rollback();
-                    System.Diagnostics.Debug.WriteLine("SaveStock error: " + ex.Message);
                     ShowAlert("Error saving stock: " + ex.Message);
                 }
             }
@@ -346,6 +353,7 @@ namespace SBI
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
+                // is_active is CHAR(3) — stored as 'Yes' or 'No'
                 string query = "SELECT vaccine_id, vaccine_name FROM Vaccine WHERE is_active = 'Yes' ORDER BY vaccine_name";
                 SqlDataAdapter da = new SqlDataAdapter(query, conn);
                 DataTable dt = new DataTable();
@@ -367,10 +375,6 @@ namespace SBI
             txtQuantity.Text = "";
         }
 
-        /// <summary>
-        /// Returns an HTML badge span for a stock status string.
-        /// Called from the ASPX TemplateField via <%# FormatStockStatus(...) %>
-        /// </summary>
         protected string FormatStockStatus(string status)
         {
             if (string.IsNullOrEmpty(status)) return "";
@@ -378,25 +382,16 @@ namespace SBI
             string css;
             switch (status.ToLower())
             {
-                case "expired":
-                    css = "badge badge-exp";
-                    break;
-                case "expiring soon":
-                    css = "badge badge-warn";
-                    break;
-                case "available":
-                default:
-                    css = "badge badge-ok";
-                    break;
+                case "expired": css = "badge badge-exp"; break;
+                case "expiring soon": css = "badge badge-warn"; break;
+                default: css = "badge badge-ok"; break;
             }
-
             return $"<span class=\"{css}\">{System.Web.HttpUtility.HtmlEncode(status)}</span>";
         }
 
         private void ShowAlert(string message)
         {
-            ClientScript.RegisterStartupScript(
-                this.GetType(), "alert",
+            ClientScript.RegisterStartupScript(GetType(), "alert",
                 $"alert('{message.Replace("'", "\\'")}');", true);
         }
     }

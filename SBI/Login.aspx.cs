@@ -9,7 +9,6 @@ namespace SBI
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
         }
 
         protected void btnLogin_Click(object sender, EventArgs e)
@@ -17,44 +16,42 @@ namespace SBI
             string username = txtUsername.Text.Trim();
             string password = txtPassword.Text.Trim();
 
-            // Get connection string from Web.config
             string connStr = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
 
             using (SqlConnection conn = new SqlConnection(connStr))
             {
-                string query = "SELECT role, full_name FROM Users WHERE username = @username AND password = @password";
+                string query = "SELECT role, fname + ' ' + lname AS full_name FROM Users WHERE username = @username AND password = @password";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    // Use explicit parameter types for reliability
                     cmd.Parameters.Add("@username", SqlDbType.VarChar, 50).Value = username;
-                    cmd.Parameters.Add("@password", SqlDbType.VarChar, 50).Value = password;
+                    cmd.Parameters.Add("@password", SqlDbType.VarChar, 100).Value = password;
 
                     conn.Open();
-
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     if (reader.HasRows)
                     {
                         reader.Read();
 
-                        // Store user info in session (optional)
-                        Session["userRole"] = reader["role"].ToString().Trim();
-                        Session["fullName"] = reader["full_name"].ToString().Trim();
+                        string role = reader["role"].ToString().Trim();
+                        string fullName = reader["full_name"].ToString().Trim();
 
-                        string role = Session["userRole"] as string;
+                        Session["userRole"] = role;
+                        Session["fullName"] = fullName;
 
-                        if (role == "adminAssistant" || role == "vaccinators")
-                        {
-                            Response.Redirect("Dashboard.aspx");
-                        }
-                        else if (role == "admin")
-                        {
+                        // A = Admin, B = Admin Assistant, C = Vaccinator
+                        if (role == "A")
                             Response.Redirect("UserManagement.aspx");
+                        else if (role == "B" || role == "C")
+                            Response.Redirect("Dashboard.aspx");
+                        else
+                        {
+                            errorMsg.Text = "Your account has no assigned role. Contact the administrator.";
+                            errorMsg.Visible = true;
                         }
                     }
                     else
                     {
-                        // Invalid login
                         errorMsg.Text = "Invalid username or password.";
                         errorMsg.Visible = true;
                     }
