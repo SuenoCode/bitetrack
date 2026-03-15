@@ -24,7 +24,6 @@
             <div class="max-w-7xl mx-auto flex justify-between items-center px-8 py-4">
                 <!-- LOGO -->
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
                     <div>
                         <h1 class="font-bold text-blue-900 text-lg">SBI Medical Animal Bite Center</h1>
                         <p class="text-xs text-gray-600">& Vaccination Clinic - Morong Branch</p>
@@ -53,7 +52,7 @@
                     </div>
                 </div>
                 <div>
-                    <img src="https://images.unsplash.com/photo-1580281657527-47f249e0c3b1" class="rounded-xl shadow-lg" alt="Clinic">
+                    <img src="<%= ResolveUrl("~/Icons/logo.png") %>" class="rounded-xl" alt="Clinic">
                 </div>
             </div>
         </section>

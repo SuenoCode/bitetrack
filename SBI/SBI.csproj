@@ -219,7 +219,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="adminSideBarNavigation.ascx" />
-    <Content Include="Audit.aspx" />
     <Content Include="CaseSurveillance.aspx" />
     <Content Include="Dashboard.aspx" />
     <Content Include="Global.asax" />
@@ -253,13 +252,6 @@
     </Compile>
     <Compile Include="adminSideBarNavigation.ascx.designer.cs">
       <DependentUpon>adminSideBarNavigation.ascx</DependentUpon>
-    </Compile>
-    <Compile Include="Audit.aspx.cs">
-      <DependentUpon>Audit.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Audit.aspx.designer.cs">
-      <DependentUpon>Audit.aspx</DependentUpon>
     </Compile>
     <Compile Include="CaseSurveillance.aspx.cs">
       <DependentUpon>CaseSurveillance.aspx</DependentUpon>
