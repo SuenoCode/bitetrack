@@ -20,7 +20,6 @@ namespace SBI
 
                     adminHeader.Visible = false;
                     lnkUserManagement.Visible =false;
-                    lnkSettings.Visible = false;
                     lnkAudit.Visible = false;
                 }
                 else if(role == "admin")
@@ -54,9 +53,6 @@ namespace SBI
 
             lnkUserManagement.CssClass = "sidebar-item block px-4 py-2 rounded-lg hover:bg-blue-700" +
                                      (currentPage.Equals("UserManagement.aspx", StringComparison.OrdinalIgnoreCase) ? " bg-blue-500 text-white" : "");
-
-            lnkSettings.CssClass = "sidebar-item block px-4 py-2 rounded-lg hover:bg-blue-700" +
-                                    (currentPage.Equals("Settings.aspx", StringComparison.OrdinalIgnoreCase) ? " bg-blue-500 text-white" : "");
 
             lnkAudit.CssClass = "sidebar-item block px-4 py-2 rounded-lg hover:bg-blue-700" +
                                     (currentPage.Equals("Audit.aspx", StringComparison.OrdinalIgnoreCase) ? " bg-blue-500 text-white" : "");
@@ -92,10 +88,7 @@ namespace SBI
         {
             Response.Redirect("UserManagement.aspx");
         }
-        protected void btnSettings_Click(object sender, EventArgs e)
-        {
-            Response.Redirect("Settings.aspx");
-        }
+
         protected void btnSignOut_Click(object sender, EventArgs e)
         {
             Session.Clear();

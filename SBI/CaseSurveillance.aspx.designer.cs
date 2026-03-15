@@ -267,6 +267,24 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Literal litCategoryDisplay;
 
         /// <summary>
+        /// litBiteDateDisplay control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litBiteDateDisplay;
+
+        /// <summary>
+        /// litInitialDiagnosis control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litInitialDiagnosis;
+
+        /// <summary>
         /// panelVisitForm control.
         /// </summary>
         /// <remarks>

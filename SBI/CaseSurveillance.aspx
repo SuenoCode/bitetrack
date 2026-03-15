@@ -9,7 +9,7 @@
         <%-- ── Page Header ───────────────────────────────────────────── --%>
         <div class="flex justify-between items-start mb-6">
             <div>
-                <h1 class="text-4xl font-bold text-[#0b2a7a] font-hBruns">Case Surveillance</h1>
+                <h1 class="text-4xl text-[#0b2a7a] font-hBruns tracking-widest">Case Surveillance</h1>
                 <p class="text-slate-500 text-sm mt-1">Monitor patient cases, manage protocols, track daily administration, and record animal follow-ups.</p>
             </div>
         </div>
@@ -45,10 +45,10 @@
             </div>
 
             <asp:GridView ID="gvTodaySchedules" runat="server"
-                          CssClass="w-full text-sm" GridLines="None"
-                          AutoGenerateColumns="False"
-                          DataKeyNames="schedule_id,case_id"
-                          OnRowCommand="gvTodaySchedules_RowCommand">
+                CssClass="w-full text-sm" GridLines="None"
+                AutoGenerateColumns="False"
+                DataKeyNames="schedule_id,case_id"
+                OnRowCommand="gvTodaySchedules_RowCommand">
                 <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
                 <RowStyle CssClass="border-b border-slate-100 transition-colors hover:bg-slate-50" />
                 <Columns>
@@ -101,10 +101,10 @@
             </div>
 
             <asp:GridView ID="gvSummary" runat="server"
-                          CssClass="w-full text-sm" GridLines="None"
-                          AutoGenerateColumns="False"
-                          DataKeyNames="case_id"
-                          OnRowCommand="gvSummary_RowCommand">
+                CssClass="w-full text-sm" GridLines="None"
+                AutoGenerateColumns="False"
+                DataKeyNames="case_id"
+                OnRowCommand="gvSummary_RowCommand">
                 <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
                 <RowStyle CssClass="border-b border-slate-100 transition-colors hover:bg-slate-50" />
                 <Columns>
@@ -205,19 +205,32 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Case Reference</label>
-                                <div class="text-slate-800 font-semibold"><asp:Literal ID="litCaseNoDisplay" runat="server" /></div>
+                                <div class="text-slate-800 font-semibold">
+                                    <asp:Literal ID="litCaseNoDisplay" runat="server" /></div>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Patient Name</label>
-                                <div class="text-slate-800 font-semibold"><asp:Literal ID="litPatientNameDisplay" runat="server" /></div>
+                                <div class="text-slate-800 font-semibold">
+                                    <asp:Literal ID="litPatientNameDisplay" runat="server" /></div>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Exposure Category</label>
-                                <div class="text-slate-800 font-semibold"><asp:Literal ID="litCategoryDisplay" runat="server" /></div>
+                                <div class="text-slate-800 font-semibold">
+                                    <asp:Literal ID="litCategoryDisplay" runat="server" /></div>
+                            </div>
+                            <%-- ADD THESE TWO --%>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Bite Date</label>
+                                <div class="text-slate-800 font-semibold">
+                                    <asp:Literal ID="litBiteDateDisplay" runat="server" /></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Initial Diagnosis</label>
+                                <div class="text-slate-700 text-sm">
+                                    <asp:Literal ID="litInitialDiagnosis" runat="server" /></div>
                             </div>
                         </div>
                     </div>
-
                     <%-- ── Visit Form ──────────────────────────────────────────── --%>
                     <asp:Panel ID="panelVisitForm" runat="server"
                         CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
@@ -357,10 +370,10 @@
                         </div>
 
                         <asp:GridView ID="gvVisits" runat="server"
-                                      CssClass="w-full text-sm" GridLines="None"
-                                      AutoGenerateColumns="False"
-                                      DataKeyNames="visit_id"
-                                      OnRowCommand="gvVisits_RowCommand">
+                            CssClass="w-full text-sm" GridLines="None"
+                            AutoGenerateColumns="False"
+                            DataKeyNames="visit_id"
+                            OnRowCommand="gvVisits_RowCommand">
                             <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
                             <RowStyle CssClass="border-b border-slate-100 transition-colors hover:bg-slate-50" />
                             <Columns>
@@ -462,10 +475,10 @@
                         </div>
 
                         <asp:GridView ID="gvSchedule" runat="server"
-                                      CssClass="w-full text-sm" GridLines="None"
-                                      AutoGenerateColumns="False"
-                                      DataKeyNames="schedule_id"
-                                      OnRowCommand="gvSchedule_RowCommand">
+                            CssClass="w-full text-sm" GridLines="None"
+                            AutoGenerateColumns="False"
+                            DataKeyNames="schedule_id"
+                            OnRowCommand="gvSchedule_RowCommand">
                             <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
                             <RowStyle CssClass="border-b border-slate-100 transition-colors hover:bg-slate-50" />
                             <Columns>
@@ -476,32 +489,22 @@
                                     DataFormatString="{0:MMM dd, yyyy}"
                                     ItemStyle-CssClass="p-4 text-slate-600"
                                     HeaderStyle-CssClass="p-4" />
-                                <asp:TemplateField HeaderText="Status" HeaderStyle-CssClass="p-4" ItemStyle-CssClass="p-4">
-                                    <ItemTemplate>
-                                        <span class='<%# Eval("status").ToString() == "Completed"
-                                            ? "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700 uppercase tracking-wide"
-                                            : "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wide" %>'>
-                                            <%# Eval("status") %>
-                                        </span>
-                                    </ItemTemplate>
-                                </asp:TemplateField>
-                                <asp:BoundField DataField="vaccine_name" HeaderText="Vaccine" NullDisplayText="-"
-                                    ItemStyle-CssClass="p-4 text-slate-500 text-center"
-                                    HeaderStyle-CssClass="p-4 text-center" />
                                 <asp:TemplateField HeaderStyle-CssClass="p-4 text-right" ItemStyle-CssClass="p-4 text-right">
                                     <ItemTemplate>
+                                        <%-- Administer — visible to A and C only, Pending doses only --%>
                                         <asp:Button ID="btnAdminister" runat="server"
                                             CommandName="AdministerDose"
                                             CommandArgument='<%# Container.DataItemIndex %>'
                                             Text="Administer"
                                             CssClass="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer"
-                                            Visible='<%# Eval("status").ToString() == "Pending" %>' />
+                                            Visible='<%# Eval("status").ToString() == "Pending" && CanAdminister %>' />
+                                        <%-- Edit — visible to A and C only, Completed doses only --%>
                                         <asp:Button ID="btnEdit" runat="server"
                                             CommandName="EditDose"
                                             CommandArgument='<%# Container.DataItemIndex %>'
                                             Text="Edit"
                                             CssClass="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer"
-                                            Visible='<%# Eval("status").ToString() == "Completed" %>' />
+                                            Visible='<%# Eval("status").ToString() == "Completed" && CanAdminister %>' />
                                     </ItemTemplate>
                                 </asp:TemplateField>
                             </Columns>

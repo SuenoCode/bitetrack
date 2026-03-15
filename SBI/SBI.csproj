@@ -237,7 +237,6 @@
     <Content Include="MapContent\JavaScript.js" />
     <Content Include="PatientRegistration.aspx" />
     <Content Include="Reports.aspx" />
-    <Content Include="Settings.aspx" />
     <Content Include="UserManagement.aspx" />
     <Content Include="VaccineManagement.aspx" />
     <Content Include="Web.config" />
@@ -316,13 +315,6 @@
     </Compile>
     <Compile Include="Reports.aspx.designer.cs">
       <DependentUpon>Reports.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Settings.aspx.cs">
-      <DependentUpon>Settings.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Settings.aspx.designer.cs">
-      <DependentUpon>Settings.aspx</DependentUpon>
     </Compile>
     <Compile Include="UserManagement.aspx.cs">
       <DependentUpon>UserManagement.aspx</DependentUpon>

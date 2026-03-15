@@ -15,7 +15,7 @@
         <%-- ── Page Header ───────────────────────────────────────────── --%>
         <div class="flex justify-between items-start">
             <div>
-                <h1 class="text-4xl font-bold text-[#0b2a7a] font-hBruns">Dashboard</h1>
+                <h1 class="text-4xl text-[#0b2a7a] font-hBruns tracking-widest">Dashboard</h1>
                 <p class="text-slate-500 text-sm mt-1">
                     SBI Medical — Morong Branch &nbsp;·&nbsp;
                     <span id="today-date" class="font-medium text-slate-600"></span>

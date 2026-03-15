@@ -74,14 +74,6 @@
 
         </asp:LinkButton>
 
-        <asp:LinkButton ID="lnkSettings" runat="server" 
-            Style="display: flex; align-items: center; gap: 8px;"
-            CssClass="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors w-full"
-            OnClick="btnSettings_Click">
-            <img src="Icons/settings.svg" class="h-5 w-5 flex-shrink-0" />
-            <span class="font-heading2 tracking-widest text-sm">Settings</span>
-
-        </asp:LinkButton>
 
        
 
