@@ -7,391 +7,397 @@ using System.Web.UI.WebControls;
 
 namespace SBI
 {
-	public partial class VaccineManagement : System.Web.UI.Page
-	{
-		private readonly string connectionString =
-			ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
+    public partial class VaccineManagement : System.Web.UI.Page
+    {
+        private readonly string connectionString =
+            ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
 
-		protected void Page_Load(object sender, EventArgs e)
-		{
-			if (Session["userRole"] == null ||
-				(Session["userRole"].ToString().ToLower() != "adminassistant" &&
-				 Session["userRole"].ToString().ToLower() != "vaccinators"))
-			{
-				Response.Redirect("Login.aspx");
-				return;
-			}
+        // ──────────────────────────────────────────────────────────
+        // PAGE LOAD
+        // ──────────────────────────────────────────────────────────
 
-			if (!IsPostBack)
-			{
-				panelOverview.Visible = true;
-				panelAddStock.Visible = false;
-				panelInventory.Visible = false;
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (Session["userRole"] == null ||
+                (Session["userRole"].ToString().ToLower() != "adminassistant" &&
+                 Session["userRole"].ToString().ToLower() != "vaccinators"))
+            {
+                Response.Redirect("Login.aspx");
+                return;
+            }
 
-				SetActiveTab("overview");
-				LoadOverview();
-				LoadVaccineDropdown();
-				BindInventoryGrid();
-			}
-		}
+            if (!IsPostBack)
+            {
+                ShowDashboard();
+                LoadVaccineDropdown();
+            }
+        }
 
-		// ============================================================
-		// TAB SWITCHING
-		// ============================================================
-		protected void btnOverviewTab_Click(object sender, EventArgs e)
-		{
-			panelOverview.Visible = true;
-			panelAddStock.Visible = false;
-			panelInventory.Visible = false;
+        // ──────────────────────────────────────────────────────────
+        // NAVIGATION / TAB SWITCHING
+        // ──────────────────────────────────────────────────────────
 
-			LoadOverview();
-			SetActiveTab("overview");
-		}
+        private void ShowDashboard()
+        {
+            panelOverview.Visible = true;
+            panelAddStock.Visible = false;
+            panelBatchDetails.Visible = false;
 
-		protected void btnAddStockTab_Click(object sender, EventArgs e)
-		{
-			panelOverview.Visible = false;
-			panelAddStock.Visible = true;
-			panelInventory.Visible = false;
+            SetActiveTab("overview");
+            LoadOverviewStats();
+            BindInventoryGrid();
+        }
 
-			LoadVaccineDropdown();
-			SetActiveTab("addstock");
-		}
+        private void ShowAddStock()
+        {
+            panelOverview.Visible = false;
+            panelAddStock.Visible = true;
+            panelBatchDetails.Visible = false;
 
-		protected void btnInventoryTab_Click(object sender, EventArgs e)
-		{
-			panelOverview.Visible = false;
-			panelAddStock.Visible = false;
-			panelInventory.Visible = true;
+            LoadVaccineDropdown();
+            LoadStockHistory();
+            SetActiveTab("addstock");
+        }
 
-			BindInventoryGrid();
-			SetActiveTab("inventory");
-		}
+        protected void btnOverviewTab_Click(object sender, EventArgs e) => ShowDashboard();
+        protected void btnAddStockTab_Click(object sender, EventArgs e) => ShowAddStock();
+        protected void btnOpenAddStock_Click(object sender, EventArgs e) => ShowAddStock();
+        protected void btnCancelStock_Click(object sender, EventArgs e)
+        {
+            ClearAddStockFields();
+            ShowDashboard();
+        }
 
-		protected void btnOpenAddStock_Click(object sender, EventArgs e)
-		{
-			panelOverview.Visible = false;
-			panelAddStock.Visible = true;
-			panelInventory.Visible = false;
+        protected void btnCloseDetails_Click(object sender, EventArgs e)
+        {
+            panelBatchDetails.Visible = false;
+        }
 
-			LoadVaccineDropdown();
-			SetActiveTab("addstock");
-		}
+        private void SetActiveTab(string tab)
+        {
+            string active = "px-4 py-2 rounded-lg font-semibold text-white bg-blue-600 text-sm";
+            string inactive = "px-4 py-2 rounded-lg border border-slate-300 bg-white font-semibold text-slate-700 text-sm hover:bg-slate-50 transition";
 
-		protected void btnCancelStock_Click(object sender, EventArgs e)
-		{
-			ClearAddStockFields();
+            btnOverviewTab.CssClass = (tab == "overview") ? active : inactive;
+            btnAddStockTab.CssClass = (tab == "addstock") ? active : inactive;
 
-			panelOverview.Visible = false;
-			panelAddStock.Visible = false;
-			panelInventory.Visible = true;
+            btnOverviewTab.Text = "Inventory Dashboard";
+            btnAddStockTab.Text = "Receive Stock";
+        }
 
-			BindInventoryGrid();
-			SetActiveTab("inventory");
-		}
+        // ──────────────────────────────────────────────────────────
+        // DATA LOADING
+        // ──────────────────────────────────────────────────────────
 
-		private void SetActiveTab(string tab)
-		{
-			string active = "px-4 py-2 rounded-lg font-semibold text-white bg-blue-600";
-			string inactive = "px-4 py-2 rounded-lg border border-slate-300 bg-white font-semibold";
+        private void LoadOverviewStats()
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
 
-			btnOverviewTab.CssClass = tab == "overview" ? active : inactive;
-			btnAddStockTab.CssClass = tab == "addstock" ? active : inactive;
-			btnInventoryTab.CssClass = tab == "inventory" ? active : inactive;
-		}
+                using (SqlCommand cmd = new SqlCommand(
+                    "SELECT ISNULL(SUM(current_stock),0) FROM VaccineBatch WHERE expiration_date >= CAST(GETDATE() AS DATE)", conn))
+                    lblTotalDoses.Text = cmd.ExecuteScalar().ToString();
 
-		// ============================================================
-		// OVERVIEW
-		// ============================================================
-		private void LoadOverview()
-		{
-			using (SqlConnection conn = new SqlConnection(connectionString))
-			{
-				conn.Open();
+                using (SqlCommand cmd = new SqlCommand(
+                    "SELECT ISNULL(SUM(current_stock),0) FROM VaccineBatch WHERE expiration_date >= CAST(GETDATE() AS DATE) AND expiration_date <= DATEADD(DAY,30,CAST(GETDATE() AS DATE))", conn))
+                    lblExpiring30.Text = cmd.ExecuteScalar().ToString();
 
-				string qTotal = @"
-                    SELECT ISNULL(SUM(current_stock), 0)
-                    FROM VaccineBatch
-                    WHERE expiration_date >= CAST(GETDATE() AS DATE)";
+                using (SqlCommand cmd = new SqlCommand(
+                    "SELECT ISNULL(SUM(current_stock),0) FROM VaccineBatch WHERE expiration_date < CAST(GETDATE() AS DATE)", conn))
+                    lblExpired.Text = cmd.ExecuteScalar().ToString();
 
-				using (SqlCommand cmdTotal = new SqlCommand(qTotal, conn))
-				{
-					lblTotalDoses.Text = Convert.ToString(cmdTotal.ExecuteScalar());
-				}
+                using (SqlCommand cmd = new SqlCommand(
+                    "SELECT ISNULL(SUM(quantity),0) FROM InventoryLog WHERE transaction_type='In' AND MONTH(transaction_date)=MONTH(GETDATE()) AND YEAR(transaction_date)=YEAR(GETDATE())", conn))
+                    lblAdministeredMTD.Text = cmd.ExecuteScalar().ToString();
+            }
+        }
 
-				string qExp30 = @"
-                    SELECT ISNULL(SUM(current_stock), 0)
-                    FROM VaccineBatch
-                    WHERE expiration_date >= CAST(GETDATE() AS DATE)
-                      AND expiration_date <= DATEADD(DAY, 30, CAST(GETDATE() AS DATE))";
-
-				using (SqlCommand cmdExp30 = new SqlCommand(qExp30, conn))
-				{
-					lblExpiring30.Text = Convert.ToString(cmdExp30.ExecuteScalar());
-				}
-
-				string qExpired = @"
-                    SELECT ISNULL(SUM(current_stock), 0)
-                    FROM VaccineBatch
-                    WHERE expiration_date < CAST(GETDATE() AS DATE)";
-
-				using (SqlCommand cmdExpired = new SqlCommand(qExpired, conn))
-				{
-					lblExpired.Text = Convert.ToString(cmdExpired.ExecuteScalar());
-				}
-
-				string qMTD = @"
-                    SELECT ISNULL(SUM(quantity), 0)
-                    FROM InventoryLog
-                    WHERE transaction_type = 'In'
-                      AND MONTH(transaction_date) = MONTH(GETDATE())
-                      AND YEAR(transaction_date) = YEAR(GETDATE())";
-
-				using (SqlCommand cmdMTD = new SqlCommand(qMTD, conn))
-				{
-					lblAdministeredMTD.Text = Convert.ToString(cmdMTD.ExecuteScalar());
-				}
-			}
-		}
-
-		// ============================================================
-		// DROPDOWN
-		// ============================================================
-		private void LoadVaccineDropdown()
-		{
-			using (SqlConnection conn = new SqlConnection(connectionString))
-			{
-				string query = @"
-                    SELECT vaccine_id, vaccine_name
-                    FROM Vaccine
-                    WHERE is_active = 'Yes'
+        private void BindInventoryGrid(string search = "")
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"
+                    SELECT vaccine_name, total_batches, total_stock
+                    FROM   vw_VaccineInventorySummary
+                    WHERE  (@search = '' OR vaccine_name LIKE @search)
                     ORDER BY vaccine_name";
 
-				using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
-				{
-					DataTable dt = new DataTable();
-					da.Fill(dt);
+                SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                da.SelectCommand.Parameters.AddWithValue("@search",
+                    string.IsNullOrWhiteSpace(search) ? "" : "%" + search + "%");
 
-					ddlVaccineName.DataSource = dt;
-					ddlVaccineName.DataTextField = "vaccine_name";
-					ddlVaccineName.DataValueField = "vaccine_id";
-					ddlVaccineName.DataBind();
-					ddlVaccineName.Items.Insert(0, new ListItem("-- Select Vaccine --", ""));
-				}
-			}
-		}
+                DataTable dt = new DataTable();
+                da.Fill(dt);
 
-		// ============================================================
-		// ADD STOCK
-		// ============================================================
-		protected void btnSaveStock_Click(object sender, EventArgs e)
-		{
-			if (string.IsNullOrWhiteSpace(ddlVaccineName.SelectedValue) ||
-				string.IsNullOrWhiteSpace(txtExpiryDate.Text) ||
-				string.IsNullOrWhiteSpace(txtQuantity.Text))
-			{
-				ShowAlert("Please fill in all fields.");
-				return;
-			}
+                // Store full data in ViewState so pagination survives PostBack without re-querying
+                ViewState["InventoryData"] = dt;
 
-			int vaccineId;
-			int quantity;
-			DateTime expiryDate;
+                gvInventory.DataSource = dt;
+                gvInventory.DataBind();
+            }
+        }
 
-			if (!int.TryParse(ddlVaccineName.SelectedValue, out vaccineId))
-			{
-				ShowAlert("Please select a valid vaccine.");
-				return;
-			}
+        private void LoadStockHistory()
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                // Fetch all recent In entries; the GridView pager shows 10 at a time
+                string query = @"
+                    SELECT TOP 50 l.transaction_date, v.vaccine_name, b.batch_number, l.quantity, l.updated_by
+                    FROM   InventoryLog l
+                    JOIN   VaccineBatch b ON l.batch_id  = b.batch_id
+                    JOIN   Vaccine      v ON b.vaccine_id = v.vaccine_id
+                    WHERE  l.transaction_type = 'In'
+                    ORDER BY l.transaction_date DESC";
 
-			if (!int.TryParse(txtQuantity.Text.Trim(), out quantity) || quantity <= 0)
-			{
-				ShowAlert("Please enter a valid quantity.");
-				return;
-			}
+                SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
 
-			if (!DateTime.TryParse(txtExpiryDate.Text.Trim(), out expiryDate))
-			{
-				ShowAlert("Please enter a valid expiration date.");
-				return;
-			}
+                ViewState["StockHistoryData"] = dt;
 
-			using (SqlConnection conn = new SqlConnection(connectionString))
-			{
-				conn.Open();
-				SqlTransaction trans = conn.BeginTransaction();
+                gvStockHistory.DataSource = dt;
+                gvStockHistory.DataBind();
+            }
+        }
 
-				try
-				{
-					// Create a NEW batch for the selected vaccine
-					string insertBatch = @"
-                        INSERT INTO VaccineBatch
+        private void LoadBatchDetails(string vaccineName)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"
+                    SELECT batch_number, manufacturing_date, expiration_date,
+                           quantity_received, current_stock, stock_status
+                    FROM   vw_VaccineInventoryDetails
+                    WHERE  vaccine_name = @vname
+                    ORDER BY expiration_date";
+
+                SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                da.SelectCommand.Parameters.AddWithValue("@vname", vaccineName);
+
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                ViewState["BatchData"] = dt;
+                lblSelectedVaccine.Text = vaccineName;
+                gvBatchDetails.DataSource = dt;
+                gvBatchDetails.DataBind();
+                panelBatchDetails.Visible = true;
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // SEARCH
+        // ──────────────────────────────────────────────────────────
+
+        protected void btnSearch_Click(object sender, EventArgs e)
+        {
+            BindInventoryGrid(txtSearch.Text.Trim());
+        }
+
+        protected void btnClearSearch_Click(object sender, EventArgs e)
+        {
+            txtSearch.Text = "";
+            BindInventoryGrid();
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // GRIDVIEW ROW COMMANDS
+        // ──────────────────────────────────────────────────────────
+
+        protected void gvInventory_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "ViewDetails")
+            {
+                int rowIndex = Convert.ToInt32(e.CommandArgument);
+                // Use Rows[] relative to the current page
+                string vaccineName = gvInventory.Rows[rowIndex].Cells[0].Text;
+                LoadBatchDetails(vaccineName);
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // PAGINATION — restore from ViewState so no extra DB hit
+        // ──────────────────────────────────────────────────────────
+
+        protected void gvInventory_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            gvInventory.PageIndex = e.NewPageIndex;
+            DataTable dt = ViewState["InventoryData"] as DataTable;
+            if (dt == null) BindInventoryGrid(); // fallback
+            else
+            {
+                gvInventory.DataSource = dt;
+                gvInventory.DataBind();
+            }
+        }
+
+        protected void gvStockHistory_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            gvStockHistory.PageIndex = e.NewPageIndex;
+            DataTable dt = ViewState["StockHistoryData"] as DataTable;
+            if (dt == null) LoadStockHistory();
+            else
+            {
+                gvStockHistory.DataSource = dt;
+                gvStockHistory.DataBind();
+            }
+        }
+
+        protected void gvBatchDetails_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            gvBatchDetails.PageIndex = e.NewPageIndex;
+            DataTable dt = ViewState["BatchData"] as DataTable;
+            if (dt == null)
+            {
+                if (lblSelectedVaccine != null)
+                    LoadBatchDetails(lblSelectedVaccine.Text);
+            }
+            else
+            {
+                gvBatchDetails.DataSource = dt;
+                gvBatchDetails.DataBind();
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // SAVE STOCK
+        // ──────────────────────────────────────────────────────────
+
+        protected void btnSaveStock_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(ddlVaccineName.SelectedValue) ||
+                string.IsNullOrWhiteSpace(txtExpiryDate.Text) ||
+                string.IsNullOrWhiteSpace(txtQuantity.Text))
+            {
+                ShowAlert("Please fill in all fields.");
+                return;
+            }
+
+            if (!int.TryParse(txtQuantity.Text, out int qty) || qty <= 0)
+            {
+                ShowAlert("Quantity must be a positive whole number.");
+                return;
+            }
+
+            if (!DateTime.TryParse(txtExpiryDate.Text, out DateTime expiry))
+            {
+                ShowAlert("Please enter a valid expiry date.");
+                return;
+            }
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                SqlTransaction trans = conn.BeginTransaction();
+                try
+                {
+                    // Insert batch and get new batch_id
+                    string insertBatch = @"
+                        INSERT INTO VaccineBatch 
                             (vaccine_id, manufacturing_date, expiration_date, quantity_received, current_stock, date_received)
-                        VALUES
-                            (@vaccine_id, CAST(GETDATE() AS DATE), @expiration_date, @quantity, @quantity, CAST(GETDATE() AS DATE));
+                        VALUES (@vid, GETDATE(), @exp, @qty, @qty, GETDATE());
+                        SELECT SCOPE_IDENTITY();";
 
-                        SELECT CAST(SCOPE_IDENTITY() AS INT);";
+                    int batchId;
+                    using (SqlCommand cmd = new SqlCommand(insertBatch, conn, trans))
+                    {
+                        cmd.Parameters.AddWithValue("@vid", ddlVaccineName.SelectedValue);
+                        cmd.Parameters.AddWithValue("@exp", expiry);
+                        cmd.Parameters.AddWithValue("@qty", qty);
+                        batchId = Convert.ToInt32(cmd.ExecuteScalar());
+                    }
 
-					int batchId;
-					using (SqlCommand cmdBatch = new SqlCommand(insertBatch, conn, trans))
-					{
-						cmdBatch.Parameters.AddWithValue("@vaccine_id", vaccineId);
-						cmdBatch.Parameters.AddWithValue("@expiration_date", expiryDate);
-						cmdBatch.Parameters.AddWithValue("@quantity", quantity);
+                    // Log the transaction
+                    string insertLog = @"
+                        INSERT INTO InventoryLog (batch_id, transaction_type, quantity, transaction_date, updated_by)
+                        VALUES (@bid, 'In', @qty, GETDATE(), @user)";
 
-						batchId = Convert.ToInt32(cmdBatch.ExecuteScalar());
-					}
+                    using (SqlCommand cmd = new SqlCommand(insertLog, conn, trans))
+                    {
+                        cmd.Parameters.AddWithValue("@bid", batchId);
+                        cmd.Parameters.AddWithValue("@qty", qty);
+                        cmd.Parameters.AddWithValue("@user", Session["userName"]?.ToString() ?? "System");
+                        cmd.ExecuteNonQuery();
+                    }
 
-					// Log inventory transaction
-					string insertLog = @"
-                        INSERT INTO InventoryLog
-                            (batch_id, transaction_type, quantity, transaction_date, updated_by)
-                        VALUES
-                            (@batch_id, 'In', @quantity, GETDATE(), @updated_by)";
+                    trans.Commit();
+                    ShowAlert("Stock added successfully.");
+                    ClearAddStockFields();
 
-					using (SqlCommand cmdLog = new SqlCommand(insertLog, conn, trans))
-					{
-						cmdLog.Parameters.AddWithValue("@batch_id", batchId);
-						cmdLog.Parameters.AddWithValue("@quantity", quantity);
-						cmdLog.Parameters.AddWithValue("@updated_by",
-							Session["userName"] != null ? Session["userName"].ToString() : "System");
+                    // Stay on Add Stock tab and refresh history so the new entry appears
+                    ShowAddStock();
+                }
+                catch (Exception ex)
+                {
+                    trans.Rollback();
+                    System.Diagnostics.Debug.WriteLine("SaveStock error: " + ex.Message);
+                    ShowAlert("Error saving stock: " + ex.Message);
+                }
+            }
+        }
 
-						cmdLog.ExecuteNonQuery();
-					}
+        // ──────────────────────────────────────────────────────────
+        // HELPERS
+        // ──────────────────────────────────────────────────────────
 
-					trans.Commit();
+        private void LoadVaccineDropdown()
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT vaccine_id, vaccine_name FROM Vaccine WHERE is_active = 'Yes' ORDER BY vaccine_name";
+                SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
 
-					ClearAddStockFields();
-					LoadOverview();
-					BindInventoryGrid();
+                ddlVaccineName.DataSource = dt;
+                ddlVaccineName.DataTextField = "vaccine_name";
+                ddlVaccineName.DataValueField = "vaccine_id";
+                ddlVaccineName.DataBind();
+                ddlVaccineName.Items.Insert(0, new ListItem("-- Select Vaccine --", ""));
+            }
+        }
 
-					panelOverview.Visible = false;
-					panelAddStock.Visible = false;
-					panelInventory.Visible = true;
-					SetActiveTab("inventory");
+        private void ClearAddStockFields()
+        {
+            if (ddlVaccineName.Items.Count > 0)
+                ddlVaccineName.SelectedIndex = 0;
+            txtExpiryDate.Text = "";
+            txtQuantity.Text = "";
+        }
 
-					ShowAlert("Stock added successfully. Batch number was generated automatically.");
-				}
-				catch (Exception ex)
-				{
-					trans.Rollback();
-					ShowAlert("Error: " + ex.Message.Replace("'", ""));
-				}
-			}
-		}
+        /// <summary>
+        /// Returns an HTML badge span for a stock status string.
+        /// Called from the ASPX TemplateField via <%# FormatStockStatus(...) %>
+        /// </summary>
+        protected string FormatStockStatus(string status)
+        {
+            if (string.IsNullOrEmpty(status)) return "";
 
-		private void ClearAddStockFields()
-		{
-			if (ddlVaccineName.Items.Count > 0)
-				ddlVaccineName.SelectedIndex = 0;
+            string css;
+            switch (status.ToLower())
+            {
+                case "expired":
+                    css = "badge badge-exp";
+                    break;
+                case "expiring soon":
+                    css = "badge badge-warn";
+                    break;
+                case "available":
+                default:
+                    css = "badge badge-ok";
+                    break;
+            }
 
-			txtExpiryDate.Text = "";
-			txtQuantity.Text = "";
-		}
+            return $"<span class=\"{css}\">{System.Web.HttpUtility.HtmlEncode(status)}</span>";
+        }
 
-		// ============================================================
-		// INVENTORY GRID (NOW USES VIEW)
-		// ============================================================
-		private void BindInventoryGrid(string search = "")
-		{
-			using (SqlConnection conn = new SqlConnection(connectionString))
-			{
-				string query = @"
-        SELECT
-            vaccine_name,
-            total_batches,
-            total_stock
-        FROM vw_VaccineInventorySummary
-        WHERE (@search='' OR vaccine_name LIKE @search)
-        ORDER BY vaccine_name";
-
-				SqlDataAdapter da = new SqlDataAdapter(query, conn);
-
-				da.SelectCommand.Parameters.AddWithValue(
-					"@search",
-					string.IsNullOrWhiteSpace(search) ? "" : "%" + search + "%");
-
-				DataTable dt = new DataTable();
-				da.Fill(dt);
-
-				gvInventory.DataSource = dt;
-				gvInventory.DataBind();
-			}
-		}
-
-		protected void btnSearch_Click(object sender, EventArgs e)
-		{
-			BindInventoryGrid(txtSearch.Text.Trim());
-
-			panelOverview.Visible = false;
-			panelAddStock.Visible = false;
-			panelInventory.Visible = true;
-			SetActiveTab("inventory");
-		}
-
-		protected void btnClearSearch_Click(object sender, EventArgs e)
-		{
-			txtSearch.Text = "";
-			BindInventoryGrid();
-
-			panelOverview.Visible = false;
-			panelAddStock.Visible = false;
-			panelInventory.Visible = true;
-			SetActiveTab("inventory");
-		}
-
-		// ============================================================
-		// HELPER
-		// ============================================================
-		private void ShowAlert(string message)
-		{
-			ClientScript.RegisterStartupScript(
-				this.GetType(),
-				"alert",
-				$"alert('{message.Replace("'", "")}');",
-				true
-			);
-		}
-
-		protected void gvInventory_RowCommand(object sender, GridViewCommandEventArgs e)
-		{
-			if (e.CommandName == "ViewDetails")
-			{
-				int rowIndex = Convert.ToInt32(e.CommandArgument);
-
-				string vaccineName =
-					gvInventory.Rows[rowIndex].Cells[0].Text;
-
-				LoadBatchDetails(vaccineName);
-			}
-		}
-		private void LoadBatchDetails(string vaccineName)
-		{
-			using (SqlConnection conn = new SqlConnection(connectionString))
-			{
-				string query = @"
-        SELECT
-            batch_number,
-            manufacturing_date,
-            expiration_date,
-            quantity_received,
-            current_stock,
-            stock_status
-        FROM vw_VaccineInventoryDetails
-        WHERE vaccine_name = @vaccine_name
-        ORDER BY expiration_date";
-
-				SqlDataAdapter da = new SqlDataAdapter(query, conn);
-				da.SelectCommand.Parameters.AddWithValue("@vaccine_name", vaccineName);	
-
-				DataTable dt = new DataTable();
-				da.Fill(dt);
-
-				gvBatchDetails.DataSource = dt;
-				gvBatchDetails.DataBind();
-
-				panelBatchDetails.Visible = true;
-			}
-		}
-	}
+        private void ShowAlert(string message)
+        {
+            ClientScript.RegisterStartupScript(
+                this.GetType(), "alert",
+                $"alert('{message.Replace("'", "\\'")}');", true);
+        }
+    }
 }
