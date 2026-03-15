@@ -108,6 +108,9 @@
       <HintPath>..\packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
+    <Reference Include="Select.HtmlToPdf, Version=25.2.0.0, Culture=neutral, PublicKeyToken=e0ae9f6e27a97018, processorArchitecture=MSIL">
+      <HintPath>..\packages\Select.HtmlToPdf.25.2.0\lib\net40\Select.HtmlToPdf.dll</HintPath>
+    </Reference>
     <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.6.1\lib\net462\System.Buffers.dll</HintPath>
     </Reference>
@@ -216,7 +219,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="adminSideBarNavigation.ascx" />
-    <Content Include="Audit.aspx" />
     <Content Include="CaseSurveillance.aspx" />
     <Content Include="Dashboard.aspx" />
     <Content Include="Global.asax" />
@@ -224,12 +226,14 @@
     <Content Include="Icons\caseMonitoring.svg" />
     <Content Include="Icons\dashboard.svg" />
     <Content Include="Icons\eye.svg" />
+    <Content Include="Icons\hide.png" />
     <Content Include="Icons\logo.png" />
     <Content Include="Icons\patientRegistration.svg" />
     <Content Include="Icons\reports.svg" />
     <Content Include="Icons\sbi-bg.jpg" />
     <Content Include="Icons\settings.svg" />
     <Content Include="Icons\SignOut.svg" />
+    <Content Include="Icons\unhide.png" />
     <Content Include="Icons\userManagement.svg" />
     <Content Include="Icons\vaccineManagement.svg" />
     <Content Include="Login.aspx" />
@@ -248,13 +252,6 @@
     </Compile>
     <Compile Include="adminSideBarNavigation.ascx.designer.cs">
       <DependentUpon>adminSideBarNavigation.ascx</DependentUpon>
-    </Compile>
-    <Compile Include="Audit.aspx.cs">
-      <DependentUpon>Audit.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Audit.aspx.designer.cs">
-      <DependentUpon>Audit.aspx</DependentUpon>
     </Compile>
     <Compile Include="CaseSurveillance.aspx.cs">
       <DependentUpon>CaseSurveillance.aspx</DependentUpon>

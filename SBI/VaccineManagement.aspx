@@ -35,7 +35,7 @@
     <%-- ── Page Header ───────────────────────────────────────────── --%>
     <div class="flex justify-between items-start mb-6">
         <div>
-            <h1 class="text-4xl font-bold text-[#0b2a7a] font-hBruns">Vaccine Management</h1>
+            <h1 class="text-4xl text-[#0b2a7a] font-hBruns tracking-widest">Vaccine Management</h1>
             <p class="text-slate-500 text-sm mt-1">Inventory control and stock monitoring</p>
         </div>
         <asp:Button ID="btnOpenAddStock" runat="server" Text="+ Add New Stock" OnClick="btnOpenAddStock_Click"
