@@ -357,6 +357,7 @@
     <Content Include="Front.Master" />
     <Content Include="Admin.Master" />
     <Content Include="MapContent\morong.js" />
+    <Content Include="Fonts\Brunson.ttf" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\SBI20260304231953 - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">

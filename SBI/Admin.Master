@@ -59,6 +59,11 @@
             src: url('../Fonts/AwesomeSerif-BoldRegular.otf') format('opentype');
             font-weight: 700;
         }
+        @font-face {
+            font-family: 'Brunson';
+            src: url('../Brunson.ttf') format('truetype');
+            font-weight: 700;
+        }
     </style>
     <title>SBI System</title>
 
@@ -76,6 +81,7 @@
                     fontFamily: {
                         heading1: ['AlteHaasGrotesk', 'ui-sans-serif', 'system-ui'],
                         heading2: ['CreatoDisplay', 'ui-sans-serif', 'system-ui'],
+                        hBruns: ['Brunson', 'ui-sans-serif', 'system-ui'],
                         para1: ['AwesomeSerif', 'ui-sans-serif', 'system-ui'],
                         para2: ['LouisGeorgeCafe', 'ui-sans-serif', 'system-ui']
                     }
