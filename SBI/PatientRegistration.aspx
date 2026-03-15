@@ -33,13 +33,6 @@
         <!-- ====================== ADD PATIENT / CASE PANEL ====================== -->
         <div id="addPatientPanel" class="panel hidden">
 
-            <div class="mb-5">
-                <h2 class="text-4xl font-extrabold tracking-tight text-[#0b2a7a]">Patient Registration</h2>
-                <p class="mt-1 text-base text-slate-600">
-                    Register patient details and document biting incident history
-                </p>
-            </div>
-
             <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col min-h-[85vh]">
 
                 <div class="px-5 py-5 space-y-4 flex-1">
@@ -388,7 +381,7 @@
                                                 Text="Edit"
                                                 CommandName="EditPatient"
                                                 CommandArgument='<%# Eval("patient_id") %>'
-                                                CssClass="inline-flex items-center rounded-lg border border-slate-300 bg-blue-600 px-3 py-1.5 text-white text-xs font-semibold text-slate-700 hover:bg-blue-700" />
+                                                CssClass="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" />
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
@@ -477,7 +470,7 @@
                                                 Text="Edit"
                                                 CommandName="EditCase"
                                                 CommandArgument='<%# Eval("case_id") %>'
-                                                CssClass="inline-flex items-center rounded-lg border border-slate-300 bg-blue-600 px-3 py-1.5 text-white text-xs font-semibold text-slate-700 hover:bg-blue-700" />
+                                                CssClass="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" />
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
