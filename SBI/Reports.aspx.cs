@@ -5,9 +5,7 @@ using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
-using System.IO;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace SBI
 {
@@ -33,7 +31,8 @@ namespace SBI
 
 			if (!IsPostBack)
 			{
-				hfActiveReport.Value = "CaseSummary";
+				hfActiveReport.Value = "DailyInventorySummary";
+				ddlReportPeriod.SelectedValue = "Daily";
 				SetDefaultDates();
 				UpdateActiveTabStyles();
 				GenerateReport();
@@ -43,9 +42,7 @@ namespace SBI
 		private void SetDefaultDates()
 		{
 			DateTime today = DateTime.Today;
-			DateTime firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
-
-			txtFromDate.Text = firstDayOfMonth.ToString("yyyy-MM-dd");
+			txtFromDate.Text = today.ToString("yyyy-MM-dd");
 			txtToDate.Text = today.ToString("yyyy-MM-dd");
 		}
 
@@ -75,30 +72,16 @@ namespace SBI
 			}
 		}
 
-		protected void tabCaseSummary_Click(object sender, EventArgs e)
+		protected void tabDailyInventory_Click(object sender, EventArgs e)
 		{
-			hfActiveReport.Value = "CaseSummary";
+			hfActiveReport.Value = "DailyInventorySummary";
 			UpdateActiveTabStyles();
 			GenerateReport();
 		}
 
-		protected void tabHighRisk_Click(object sender, EventArgs e)
+		protected void tabDailyActivity_Click(object sender, EventArgs e)
 		{
-			hfActiveReport.Value = "HighRisk";
-			UpdateActiveTabStyles();
-			GenerateReport();
-		}
-
-		protected void tabVaxUtil_Click(object sender, EventArgs e)
-		{
-			hfActiveReport.Value = "VaccineUtilization";
-			UpdateActiveTabStyles();
-			GenerateReport();
-		}
-
-		protected void tabExpiry_Click(object sender, EventArgs e)
-		{
-			hfActiveReport.Value = "Expiry";
+			hfActiveReport.Value = "DailyActivitySummary";
 			UpdateActiveTabStyles();
 			GenerateReport();
 		}
@@ -157,136 +140,37 @@ namespace SBI
 		{
 			switch (reportType)
 			{
-				case "CaseSummary":
-					return GetCaseSummaryData(fromDate, toDate);
+				case "DailyInventorySummary":
+					return GetDailyInventorySummaryData(fromDate, toDate);
 
-				case "HighRisk":
-					return GetHighRiskData(fromDate, toDate);
-
-				case "VaccineUtilization":
-					return GetVaccineUtilizationData(fromDate, toDate);
-
-				case "Expiry":
-					return GetExpiryData(fromDate, toDate);
+				case "DailyActivitySummary":
+					return GetDailyActivitySummaryData(fromDate, toDate);
 
 				default:
 					return new DataTable();
 			}
 		}
 
-		private DataTable GetCaseSummaryData(DateTime fromDate, DateTime toDate)
-		{
-			using (SqlConnection conn = new SqlConnection(connectionString))
-			{
-				string query = @"
-                    SELECT 
-                        c.case_id AS [Case ID],
-                        c.patient_id AS [Patient ID],
-                        ISNULL(c.case_no, '') AS [Case No],
-                        c.date_of_bite AS [Date of Bite],
-                        ISNULL(c.place_of_bite, '') AS [Place of Bite],
-                        ISNULL(c.type_of_exposure, '') AS [Exposure Type],
-                        ISNULL(c.site_of_bite, '') AS [Site of Bite],
-                        ISNULL(c.category, '') AS [Category]
-                    FROM [Case] c
-                    WHERE c.date_of_bite >= @fromDate
-                      AND c.date_of_bite < DATEADD(DAY, 1, @toDate)
-                    ORDER BY c.date_of_bite DESC, c.case_id DESC";
-
-				SqlDataAdapter da = new SqlDataAdapter(query, conn);
-				da.SelectCommand.Parameters.AddWithValue("@fromDate", fromDate.Date);
-				da.SelectCommand.Parameters.AddWithValue("@toDate", toDate.Date);
-
-				DataTable dt = new DataTable();
-				da.Fill(dt);
-				return dt;
-			}
-		}
-
-		private DataTable GetHighRiskData(DateTime fromDate, DateTime toDate)
-		{
-			using (SqlConnection conn = new SqlConnection(connectionString))
-			{
-				string query = @"
-            SELECT 
-                c.case_id AS [Case ID],
-                c.patient_id AS [Patient ID],
-                ISNULL(c.case_no, '') AS [Case No],
-                c.date_of_bite AS [Date of Bite],
-                ISNULL(c.place_of_bite, '') AS [Place of Bite],
-                ISNULL(c.site_of_bite, '') AS [Wound Location],
-                ISNULL(c.category, '') AS [Category]
-            FROM dbo.[Case] c
-            WHERE c.date_of_bite >= @fromDate
-              AND c.date_of_bite < DATEADD(DAY, 1, @toDate)
-              AND c.category = 'III'
-            ORDER BY c.date_of_bite DESC, c.case_id DESC";
-
-				SqlDataAdapter da = new SqlDataAdapter(query, conn);
-				da.SelectCommand.Parameters.AddWithValue("@fromDate", fromDate.Date);
-				da.SelectCommand.Parameters.AddWithValue("@toDate", toDate.Date);
-
-				DataTable dt = new DataTable();
-				da.Fill(dt);
-				return dt;
-			}
-		}
-
-		private DataTable GetVaccineUtilizationData(DateTime fromDate, DateTime toDate)
+		private DataTable GetDailyInventorySummaryData(DateTime fromDate, DateTime toDate)
 		{
 			using (SqlConnection conn = new SqlConnection(connectionString))
 			{
 				string query = @"
             SELECT
-                il.inventory_id AS [Inventory Log ID],
-                v.vaccine_name AS [Vaccine Name],
-                vb.batch_number AS [Batch Number],
-                v.manufacturer AS [Manufacturer],
-                il.transaction_type AS [Transaction Type],
-                il.quantity AS [Quantity],
-                vb.current_stock AS [Current Stock],
-                il.transaction_date AS [Transaction Date],
-                il.updated_by AS [Updated By]
-            FROM dbo.InventoryLog il
-            INNER JOIN dbo.VaccineBatch vb
-                ON il.batch_id = vb.batch_id
-            INNER JOIN dbo.Vaccine v
-                ON vb.batch_id = v.batch_id
-            WHERE il.transaction_date >= @fromDate
-              AND il.transaction_date < DATEADD(DAY, 1, @toDate)
-            ORDER BY il.transaction_date DESC, il.inventory_id DESC";
-
-				SqlDataAdapter da = new SqlDataAdapter(query, conn);
-				da.SelectCommand.Parameters.AddWithValue("@fromDate", fromDate.Date);
-				da.SelectCommand.Parameters.AddWithValue("@toDate", toDate.Date);
-
-				DataTable dt = new DataTable();
-				da.Fill(dt);
-				return dt;
-			}
-		}
-
-		private DataTable GetExpiryData(DateTime fromDate, DateTime toDate)
-		{
-			using (SqlConnection conn = new SqlConnection(connectionString))
-			{
-				string query = @"
-            SELECT
-                v.vaccine_name AS [Vaccine Name],
-                vb.batch_number AS [Batch Number],
-                v.manufacturer AS [Manufacturer],
-                vb.quantity_received AS [Quantity Received],
-                vb.current_stock AS [Current Stock],
-                vb.manufacturing_date AS [Manufacturing Date],
-                vb.expiration_date AS [Expiration Date],
-                vb.date_received AS [Date Received],
-                v.is_active AS [Is Active]
+                v.vaccine_name AS [Vaccine],
+                ISNULL(SUM(vb.quantity_received), 0) AS [INV. BEG],
+                ISNULL(SUM(CASE WHEN il.transaction_type = 'Consumed' THEN il.quantity ELSE 0 END), 0) AS [CONSUMED],
+                ISNULL(SUM(CASE WHEN il.transaction_type = 'Pull-Out' THEN il.quantity ELSE 0 END), 0) AS [PULL-OUT],
+                ISNULL(SUM(vb.current_stock), 0) AS [INV. END]
             FROM dbo.VaccineBatch vb
             INNER JOIN dbo.Vaccine v
-                ON vb.batch_id = v.batch_id
-            WHERE vb.expiration_date >= @fromDate
-              AND vb.expiration_date < DATEADD(DAY, 1, @toDate)
-            ORDER BY vb.expiration_date ASC, vb.batch_id ASC";
+                ON vb.vaccine_id = v.vaccine_id
+            LEFT JOIN dbo.InventoryLog il
+                ON vb.batch_id = il.batch_id
+                AND il.transaction_date >= @fromDate
+                AND il.transaction_date < DATEADD(DAY, 1, @toDate)
+            GROUP BY v.vaccine_name
+            ORDER BY v.vaccine_name ASC";
 
 				SqlDataAdapter da = new SqlDataAdapter(query, conn);
 				da.SelectCommand.Parameters.AddWithValue("@fromDate", fromDate.Date);
@@ -296,6 +180,32 @@ namespace SBI
 				da.Fill(dt);
 				return dt;
 			}
+		}
+
+		private DataTable GetDailyActivitySummaryData(DateTime fromDate, DateTime toDate)
+		{
+			DataTable dt = new DataTable();
+
+			dt.Columns.Add("Name");
+			dt.Columns.Add("Position");
+			dt.Columns.Add("Work Hours");
+			dt.Columns.Add("Description of Activity");
+			dt.Columns.Add("No.");
+			dt.Columns.Add("Other Remarks");
+
+			for (int i = 1; i <= 8; i++)
+			{
+				DataRow dr = dt.NewRow();
+				dr["Name"] = "";
+				dr["Position"] = "";
+				dr["Work Hours"] = "";
+				dr["Description of Activity"] = "";
+				dr["No."] = i.ToString();
+				dr["Other Remarks"] = "";
+				dt.Rows.Add(dr);
+			}
+
+			return dt;
 		}
 
 		protected void btnExportExcel_Click(object sender, EventArgs e)
@@ -377,14 +287,10 @@ namespace SBI
 		{
 			switch (reportType)
 			{
-				case "CaseSummary":
-					return "Case Summary Report";
-				case "HighRisk":
-					return "High-Risk Cases Report";
-				case "VaccineUtilization":
-					return "Vaccine Utilization Report";
-				case "Expiry":
-					return "Expiry Report";
+				case "DailyInventorySummary":
+					return "Daily Inventory Summary";
+				case "DailyActivitySummary":
+					return "Daily Activity Summary";
 				default:
 					return "Report";
 			}
@@ -395,24 +301,16 @@ namespace SBI
 			string activeClass = "rounded-xl border border-blue-600 bg-blue-600 px-6 py-3 text-base font-semibold text-white transition";
 			string inactiveClass = "rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-50";
 
-			tabCaseSummary.CssClass = inactiveClass;
-			tabHighRisk.CssClass = inactiveClass;
-			tabVaxUtil.CssClass = inactiveClass;
-			tabExpiry.CssClass = inactiveClass;
+			tabDailyInventory.CssClass = inactiveClass;
+			tabDailyActivity.CssClass = inactiveClass;
 
 			switch (hfActiveReport.Value)
 			{
-				case "CaseSummary":
-					tabCaseSummary.CssClass = activeClass;
+				case "DailyInventorySummary":
+					tabDailyInventory.CssClass = activeClass;
 					break;
-				case "HighRisk":
-					tabHighRisk.CssClass = activeClass;
-					break;
-				case "VaccineUtilization":
-					tabVaxUtil.CssClass = activeClass;
-					break;
-				case "Expiry":
-					tabExpiry.CssClass = activeClass;
+				case "DailyActivitySummary":
+					tabDailyActivity.CssClass = activeClass;
 					break;
 			}
 		}
