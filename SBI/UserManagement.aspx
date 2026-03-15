@@ -25,7 +25,7 @@
         <asp:Panel runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                 <h3 class="font-extrabold text-slate-800">Users</h3>
-                <span class="text-xs font-semibold text-slate-400">Edit / Delete from the Actions column</span>
+                <span class="text-slate-500 text-sm">Edit / Delete from the Actions column</span>
             </div>
 
             <asp:GridView ID="gvUsers" runat="server"
@@ -37,16 +37,21 @@
                 OnRowDeleting="gvUsers_RowDeleting"
                 CssClass="w-full text-sm" GridLines="None">
                 <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
-                <RowStyle CssClass="border-b border-slate-100 transition-colors hover:bg-slate-50" />
-                <AlternatingRowStyle CssClass="border-b border-slate-100 hover:bg-slate-50" />
+                <RowStyle CssClass="border-b border-slate-100 transition-colors" />
+                <AlternatingRowStyle CssClass="border-b border-slate-100" />
                 <Columns>
-                    <asp:BoundField DataField="user_id"   HeaderText="Admin ID"  ReadOnly="True" ItemStyle-CssClass="p-4 text-slate-600" HeaderStyle-CssClass="p-4" />
-                    <asp:BoundField DataField="full_name" HeaderText="Full Name"               ItemStyle-CssClass="p-4 font-bold text-slate-700" HeaderStyle-CssClass="p-4" />
-                    <asp:BoundField DataField="username"  HeaderText="Username"                ItemStyle-CssClass="p-4 text-slate-600" HeaderStyle-CssClass="p-4" />
-                    <asp:BoundField DataField="password"  HeaderText="Password"                ItemStyle-CssClass="p-4 font-mono text-slate-500 text-xs" HeaderStyle-CssClass="p-4" />
-                    <asp:BoundField DataField="role"      HeaderText="Role"                    ItemStyle-CssClass="p-4 text-slate-600" HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="user_id"   HeaderText="Admin ID"  ReadOnly="True"
+                        ItemStyle-CssClass="p-4 text-slate-600" HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="full_name" HeaderText="Full Name"
+                        ItemStyle-CssClass="p-4 font-bold text-slate-700" HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="username"  HeaderText="Username"
+                        ItemStyle-CssClass="p-4 text-slate-600" HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="password"  HeaderText="Password"
+                        ItemStyle-CssClass="p-4 font-mono text-slate-500 text-xs" HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="role"      HeaderText="Role"
+                        ItemStyle-CssClass="p-4 text-slate-600" HeaderStyle-CssClass="p-4" />
                     <asp:CommandField ShowEditButton="True" ShowDeleteButton="True"
-                        ControlStyle-CssClass="font-bold text-blue-600 hover:text-blue-800 hover:underline transition mr-2" />
+                        ControlStyle-CssClass="inline-flex items-center gap-1 text-blue-600 font-semibold text-xs hover:text-blue-800 hover:underline transition mr-3" />
                 </Columns>
                 <EmptyDataTemplate>
                     <div class="p-10 text-center text-slate-400 text-sm">No users found.</div>
@@ -54,7 +59,7 @@
             </asp:GridView>
 
             <div class="px-5 py-3 border-t border-slate-200 bg-slate-50">
-                <p class="text-xs font-semibold text-slate-400">Tip: Avoid displaying raw passwords in production — use hashed passwords.</p>
+                <p class="text-slate-500 text-sm">Tip: Avoid displaying raw passwords in production — use hashed passwords.</p>
             </div>
         </asp:Panel>
 
@@ -66,11 +71,12 @@
 
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                 <div>
-                    <h3 class="font-extrabold text-slate-900">Add New User</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Fill in the details then click Save</p>
+                    <h3 class="font-extrabold text-slate-800">Add New User</h3>
+                    <p class="text-slate-500 text-sm mt-1">Fill in the details then click Save</p>
                 </div>
-                <button type="button" onclick="closeModal()"
-                    class="text-slate-400 hover:text-red-500 font-bold text-lg leading-none transition">✕</button>
+                <asp:LinkButton ID="btnCloseModal" runat="server"
+                    OnClientClick="closeModal(); return false;"
+                    CssClass="text-slate-400 hover:text-red-500 font-bold text-lg leading-none transition">✕</asp:LinkButton>
             </div>
 
             <div class="p-5 space-y-5">
@@ -105,13 +111,10 @@
             </div>
 
             <div class="px-5 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
-                <asp:Button ID="btnCancel" runat="server"
-                    Text="Cancel"
-                    UseSubmitBehavior="false"
-                    OnClientClick="closeModal(); return false;"
-                    CssClass="h-11 rounded-lg bg-white border border-slate-300 px-6 font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer" />
-                <asp:Button ID="btnSave" runat="server"
-                    Text="Save"
+                <asp:Button ID="btnCancel" runat="server" Text="Cancel"
+                    UseSubmitBehavior="false" OnClientClick="closeModal(); return false;"
+                    CssClass="bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold cursor-pointer hover:bg-slate-50 transition" />
+                <asp:Button ID="btnSave" runat="server" Text="Save"
                     OnClick="btnSave_Click"
                     CssClass="h-11 rounded-lg bg-blue-600 px-6 font-bold text-white shadow hover:bg-blue-700 transition cursor-pointer" />
             </div>
@@ -120,18 +123,9 @@
     </div>
 
     <script>
-        function openModal() {
-            var m = document.getElementById('userModal');
-            m.classList.remove('hidden'); m.classList.add('flex');
-        }
-        function closeModal() {
-            var m = document.getElementById('userModal');
-            m.classList.remove('flex'); m.classList.add('hidden');
-        }
-        document.addEventListener('click', function (e) {
-            var m = document.getElementById('userModal');
-            if (e.target === m) closeModal();
-        });
+        function openModal() { var m = document.getElementById('userModal'); m.classList.remove('hidden'); m.classList.add('flex'); }
+        function closeModal() { var m = document.getElementById('userModal'); m.classList.remove('flex'); m.classList.add('hidden'); }
+        document.addEventListener('click', function (e) { var m = document.getElementById('userModal'); if (e.target === m) closeModal(); });
     </script>
 
 </asp:Content>

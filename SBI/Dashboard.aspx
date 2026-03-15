@@ -5,12 +5,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        #map { height: 520px; width: 100%; border-radius: 12px; }
-    </style>
+    <style>#map { height: 520px; width: 100%; border-radius: 12px; }</style>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+
     <div class="p-6 font-heading2 text-slate-900 space-y-6">
 
         <%-- ── Page Header ───────────────────────────────────────────── --%>
@@ -23,10 +22,10 @@
                 </p>
             </div>
             <div class="flex gap-2">
-                <button class="h-11 rounded-lg bg-white border border-slate-300 px-5 font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer text-sm">
+                <button class="bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold cursor-pointer hover:bg-slate-50 transition">
                     Date Range
                 </button>
-                <button class="h-11 rounded-lg bg-blue-600 px-6 font-bold text-white shadow hover:bg-blue-700 transition cursor-pointer text-sm">
+                <button class="h-11 rounded-lg bg-blue-600 px-6 font-bold text-white shadow hover:bg-blue-700 transition cursor-pointer">
                     Generate Report
                 </button>
             </div>
@@ -64,11 +63,9 @@
         <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
                 <h3 class="font-extrabold text-slate-800">Barangay Case Map — Morong</h3>
-                <p class="text-xs text-slate-400 mt-0.5">Choropleth showing bite case density per barangay</p>
+                <p class="text-slate-500 text-sm mt-1">Choropleth showing bite case density per barangay</p>
             </div>
-            <div class="p-4">
-                <div id="map"></div>
-            </div>
+            <div class="p-4"><div id="map"></div></div>
         </div>
 
         <%-- ── Charts Row 1 ──────────────────────────────────────────── --%>
@@ -76,14 +73,14 @@
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
                     <h3 class="font-extrabold text-slate-800">Monthly Cases Overview</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Number of bite cases recorded per month</p>
+                    <p class="text-slate-500 text-sm mt-1">Number of bite cases recorded per month</p>
                 </div>
                 <div class="p-5 h-[260px]"><canvas id="casesChart"></canvas></div>
             </div>
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
                     <h3 class="font-extrabold text-slate-800">Vaccine Usage Trend (Weekly)</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Doses administered per week this month</p>
+                    <p class="text-slate-500 text-sm mt-1">Doses administered per week this month</p>
                 </div>
                 <div class="p-5 h-[260px]"><canvas id="vaccineChart"></canvas></div>
             </div>
@@ -94,14 +91,14 @@
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
                     <h3 class="font-extrabold text-slate-800">Cases by Category</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Distribution of bite cases by WHO exposure category</p>
+                    <p class="text-slate-500 text-sm mt-1">Distribution of bite cases by WHO exposure category</p>
                 </div>
                 <div class="p-5 h-[260px] flex items-center justify-center"><canvas id="categoryChart"></canvas></div>
             </div>
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
                     <h3 class="font-extrabold text-slate-800">Cases by Animal Type</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Breakdown of biting animal per recorded case</p>
+                    <p class="text-slate-500 text-sm mt-1">Breakdown of biting animal per recorded case</p>
                 </div>
                 <div class="p-5 h-[260px] flex items-center justify-center"><canvas id="animalChart"></canvas></div>
             </div>
@@ -112,14 +109,14 @@
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
                     <h3 class="font-extrabold text-slate-800">Cases by Exposure Type</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Bite vs. Non-bite / Play bite exposures</p>
+                    <p class="text-slate-500 text-sm mt-1">Bite vs. Non-bite / Play bite exposures</p>
                 </div>
                 <div class="p-5 h-[260px] flex items-center justify-center"><canvas id="exposureChart"></canvas></div>
             </div>
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
                     <h3 class="font-extrabold text-slate-800">Cases by Wound Type</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Type of wound recorded across all bite cases</p>
+                    <p class="text-slate-500 text-sm mt-1">Type of wound recorded across all bite cases</p>
                 </div>
                 <div class="p-5 h-[260px]"><canvas id="woundChart"></canvas></div>
             </div>
@@ -129,13 +126,13 @@
         <asp:Panel runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
                 <h3 class="font-extrabold text-slate-800">Previous Cases</h3>
-                <p class="text-xs text-slate-400 mt-0.5">Recently recorded bite cases</p>
+                <p class="text-slate-500 text-sm mt-1">Recently recorded bite cases</p>
             </div>
             <asp:GridView ID="gvPreviousCases" runat="server"
                 CssClass="w-full text-sm" GridLines="None"
                 AutoGenerateColumns="true">
                 <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
-                <RowStyle CssClass="border-b border-slate-100 transition-colors hover:bg-slate-50" />
+                <RowStyle CssClass="border-b border-slate-100 transition-colors" />
                 <EmptyDataTemplate>
                     <div class="p-10 text-center text-slate-400 text-sm">No previous cases on record.</div>
                 </EmptyDataTemplate>
@@ -147,135 +144,87 @@
     <script src="MapContent/morong.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-
-            // ─── Map setup ───
             const mapDiv = document.getElementById("map");
-            if (!mapDiv || mapDiv.offsetHeight === 0) { console.error("Map div has no height."); return; }
-            if (typeof morongData === "undefined") { console.error("morongData is undefined."); return; }
+            if (!mapDiv || mapDiv.offsetHeight === 0 || typeof morongData === "undefined") return;
 
             const map = L.map("map", { zoomControl: true, maxZoom: 18 });
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                attribution: "&copy; OpenStreetMap contributors"
-            }).addTo(map);
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap contributors" }).addTo(map);
 
             function utmToLatLon(easting, northing, zone = 51) {
-                const a = 6378137.0, f = 1 / 298.257223563, b = a * (1 - f), e2 = 1 - (b / a) ** 2;
-                const k0 = 0.9996, E0 = 500000, N0 = 0, x = easting - E0, y = northing - N0;
-                const M = y / k0, mu = M / (a * (1 - e2 / 4 - 3 * e2 ** 2 / 64 - 5 * e2 ** 3 / 256));
-                const e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
-                let phi1 = mu + (3*e1/2 - 27*e1**3/32)*Math.sin(2*mu) + (21*e1**2/16 - 55*e1**4/32)*Math.sin(4*mu)
-                    + (151*e1**3/96)*Math.sin(6*mu) + (1097*e1**4/512)*Math.sin(8*mu);
-                const N1=a/Math.sqrt(1-e2*Math.sin(phi1)**2), T1=Math.tan(phi1)**2, C1=e2*Math.cos(phi1)**2/(1-e2);
-                const R1=a*(1-e2)/(1-e2*Math.sin(phi1)**2)**1.5, D=x/(N1*k0);
-                const lat = phi1 - (N1*Math.tan(phi1)/R1)*(D**2/2-(5+3*T1+10*C1-4*C1**2-9*e2)*D**4/24+(61+90*T1+298*C1+45*T1**2-252*e2-3*C1**2)*D**6/720);
-                const lon0 = ((zone-1)*6-180+3)*Math.PI/180;
-                const lon = lon0+(D-(1+2*T1+C1)*D**3/6+(5-2*C1+28*T1-3*C1**2+8*e2+24*T1**2)*D**5/120)/Math.cos(phi1);
-                return [lat*180/Math.PI, lon*180/Math.PI];
+                const a=6378137.0,f=1/298.257223563,b=a*(1-f),e2=1-(b/a)**2,k0=0.9996,E0=500000,x=easting-E0,y=northing;
+                const M=y/k0,mu=M/(a*(1-e2/4-3*e2**2/64-5*e2**3/256));
+                const e1=(1-Math.sqrt(1-e2))/(1+Math.sqrt(1-e2));
+                let p=mu+(3*e1/2-27*e1**3/32)*Math.sin(2*mu)+(21*e1**2/16-55*e1**4/32)*Math.sin(4*mu)+(151*e1**3/96)*Math.sin(6*mu)+(1097*e1**4/512)*Math.sin(8*mu);
+                const N1=a/Math.sqrt(1-e2*Math.sin(p)**2),T1=Math.tan(p)**2,C1=e2*Math.cos(p)**2/(1-e2),R1=a*(1-e2)/(1-e2*Math.sin(p)**2)**1.5,D=x/(N1*k0);
+                const lat=p-(N1*Math.tan(p)/R1)*(D**2/2-(5+3*T1+10*C1-4*C1**2-9*e2)*D**4/24+(61+90*T1+298*C1+45*T1**2-252*e2-3*C1**2)*D**6/720);
+                const lon0=((zone-1)*6-180+3)*Math.PI/180,lon=lon0+(D-(1+2*T1+C1)*D**3/6+(5-2*C1+28*T1-3*C1**2+8*e2+24*T1**2)*D**5/120)/Math.cos(p);
+                return [lat*180/Math.PI,lon*180/Math.PI];
             }
 
-            function reprojectFeatureCollection(fc) {
-                return { ...fc, features: fc.features.map(f => ({ ...f, geometry: { ...f.geometry,
-                    coordinates: f.geometry.coordinates.map(ring => ring.map(([e, n]) => { const [lat,lon]=utmToLatLon(e,n); return [lon,lat]; }))
-                }}))};
-            }
+            const geoData = { ...morongData, features: morongData.features.map(f => ({ ...f, geometry: { ...f.geometry,
+                coordinates: f.geometry.coordinates.map(ring => ring.map(([e,n]) => { const [lat,lon]=utmToLatLon(e,n); return [lon,lat]; }))
+            }}))};
 
-            const geoData = reprojectFeatureCollection(morongData);
             function getColor(c) { return c>=30?'#dc2626':c>=20?'#f97316':c>=10?'#ffce00':c>=1?'#eab308':'#22c55e'; }
 
-            function addLegend() {
-                const legend = L.control({ position: 'bottomright' });
-                legend.onAdd = function () {
-                    const div = L.DomUtil.create('div','legend');
-                    div.style.cssText = 'background:white;padding:12px;border-radius:8px;box-shadow:0 0 15px rgba(0,0,0,0.2);line-height:24px;min-width:180px;font-family:Arial,sans-serif;';
-                    div.innerHTML = `<h4 style="margin:0 0 10px 0;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:5px;color:#333;">Cases per Barangay</h4>`
-                        + [['#dc2626','30+ cases'],['#f97316','20–29 cases'],['#ffce00','10–19 cases'],['#eab308','1–9 cases'],['#22c55e','No cases']]
-                        .map(([c,l]) => `<div style="display:flex;align-items:center;margin-bottom:8px;"><div style="width:20px;height:20px;background:${c};margin-right:10px;border:1px solid #999;"></div><span><b>${l}</b></span></div>`).join('');
-                    return div;
-                };
-                legend.addTo(map);
-            }
+            const legend = L.control({ position: 'bottomright' });
+            legend.onAdd = function() {
+                const div = L.DomUtil.create('div');
+                div.style.cssText = 'background:white;padding:12px;border-radius:8px;box-shadow:0 0 15px rgba(0,0,0,0.2);line-height:24px;min-width:180px;font-family:Arial,sans-serif;';
+                div.innerHTML = '<h4 style="margin:0 0 8px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:5px;color:#333;">Cases per Barangay</h4>'
+                    + [['#dc2626','30+ cases'],['#f97316','20–29'],['#ffce00','10–19'],['#eab308','1–9'],['#22c55e','No cases']]
+                    .map(([c,l])=>`<div style="display:flex;align-items:center;margin-bottom:6px;"><div style="width:18px;height:18px;background:${c};margin-right:8px;border:1px solid #999;border-radius:2px;"></div><span style="font-size:13px;">${l}</span></div>`).join('');
+                return div;
+            };
+            legend.addTo(map);
 
-            function updateMapWithCaseData(caseData) {
+            function loadMap(caseData) {
                 const caseMap = {};
-                if (caseData && caseData.Barangays && caseData.CaseCounts)
-                    for (let i=0; i<caseData.Barangays.length; i++) caseMap[caseData.Barangays[i].toUpperCase().trim()] = caseData.CaseCounts[i];
+                if (caseData && caseData.Barangays) for (let i=0;i<caseData.Barangays.length;i++) caseMap[caseData.Barangays[i].toUpperCase().trim()]=caseData.CaseCounts[i];
                 if (window.currentLayer) map.removeLayer(window.currentLayer);
                 window.currentLayer = L.geoJSON(geoData, {
-                    style: function(f) { const n=(f?.properties?.adm4_en||"").toUpperCase().trim(), c=caseMap[n]||0; return {color:"#111827",weight:1,fillColor:getColor(c),fillOpacity:0.7}; },
-                    onEachFeature: function(f, layer) {
-                        const n=f?.properties?.adm4_en||"Unknown", c=caseMap[n.toUpperCase().trim()]||0;
-                        layer.bindPopup(`<b>${n}</b><br/><b style="color:${getColor(c)}">Cases: ${c}</b><br/>Status: ${c>=30?'HIGH':c>=20?'MEDIUM-HIGH':c>=10?'MEDIUM':c>=1?'LOW':'NO CASES'}`);
-                        layer.on({
-                            mouseover: e => { e.target.setStyle({weight:3,color:'#1e3a8a',fillOpacity:0.9}); e.target.bringToFront(); },
-                            mouseout: e => { window.currentLayer.resetStyle(e.target); }
-                        });
+                    style: f => { const c=caseMap[(f?.properties?.adm4_en||'').toUpperCase().trim()]||0; return {color:'#111827',weight:1,fillColor:getColor(c),fillOpacity:0.7}; },
+                    onEachFeature: (f, layer) => {
+                        const n=f?.properties?.adm4_en||'Unknown', c=caseMap[n.toUpperCase().trim()]||0;
+                        layer.bindPopup(`<b>${n}</b><br/><b style="color:${getColor(c)}">Cases: ${c}</b>`);
+                        layer.on({ mouseover: e=>{e.target.setStyle({weight:3,color:'#1e3a8a',fillOpacity:0.9});e.target.bringToFront();}, mouseout: e=>window.currentLayer.resetStyle(e.target) });
                     }
                 }).addTo(map);
                 map.fitBounds(window.currentLayer.getBounds(), {padding:[20,20]});
                 if (caseData && caseData.CaseCounts) document.getElementById('caseValue').textContent = caseData.CaseCounts.reduce((a,b)=>a+b,0);
             }
 
-            function fetchChart(endpoint) {
-                return fetch('Dashboard.aspx/'+endpoint, {method:'POST', headers:{'Content-Type':'application/json'}}).then(r=>r.json()).then(res=>res.d);
-            }
+            const tmp = L.geoJSON(geoData).addTo(map);
+            const bnds = tmp.getBounds(); map.fitBounds(bnds,{padding:[20,20]}); map.setMaxBounds(bnds); map.options.minZoom=map.getBoundsZoom(bnds); map.removeLayer(tmp);
 
-            fetch('Dashboard.aspx/GetBarangayCases',{method:'POST',headers:{'Content-Type':'application/json'}})
-                .then(r=>r.json()).then(res=>{ if(res.d && !res.d.Error) updateMapWithCaseData(res.d); }).catch(()=>{});
+            const api = ep => fetch('Dashboard.aspx/'+ep,{method:'POST',headers:{'Content-Type':'application/json'}}).then(r=>r.json()).then(r=>r.d);
 
-            addLegend();
-            const tempLayer=L.geoJSON(geoData).addTo(map);
-            const bounds=tempLayer.getBounds();
-            map.fitBounds(bounds,{padding:[20,20]});
-            map.setMaxBounds(bounds);
-            map.options.minZoom=map.getBoundsZoom(bounds);
-            map.removeLayer(tempLayer);
+            api('GetBarangayCases').then(d=>{ if(d&&!d.Error) loadMap(d); }).catch(()=>{});
 
             // Charts
-            let casesChartInst = new Chart(document.getElementById('casesChart'), {
-                type:'line', data:{ labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], datasets:[{label:'Cases',data:[0,0,0,0,0,0,0,0,0,0,0,0],borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#FF6B35',pointRadius:4}]},
-                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
-            });
-            fetchChart('GetMonthlyCases').then(d=>{ if(d&&d.Months&&d.Counts){ casesChartInst.data.labels=d.Months; casesChartInst.data.datasets[0].data=d.Counts; casesChartInst.update(); document.getElementById('monthlyCaseValue').textContent=d.Counts[new Date().getMonth()]||0; }}).catch(()=>{});
+            const casesChart = new Chart(document.getElementById('casesChart'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets:[{label:'Cases',data:[0,0,0,0,0,0,0,0,0,0,0,0],borderColor:'#FF6B35',backgroundColor:'rgba(255,107,53,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#FF6B35',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+            api('GetMonthlyCases').then(d=>{ if(d&&d.Months){ casesChart.data.labels=d.Months; casesChart.data.datasets[0].data=d.Counts; casesChart.update(); document.getElementById('monthlyCaseValue').textContent=d.Counts[new Date().getMonth()]||0; }}).catch(()=>{});
 
-            let vaccineChartInst = new Chart(document.getElementById('vaccineChart'), {
-                type:'bar', data:{labels:['Week 1','Week 2','Week 3','Week 4'],datasets:[{label:'Doses',data:[0,0,0,0],backgroundColor:'#2563eb',borderRadius:6}]},
-                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
-            });
-            fetchChart('GetWeeklyVaccineUsage').then(d=>{ if(d&&d.Weeks&&d.Counts){ vaccineChartInst.data.labels=d.Weeks; vaccineChartInst.data.datasets[0].data=d.Counts; vaccineChartInst.update(); }}).catch(()=>{});
+            const vaccineChart = new Chart(document.getElementById('vaccineChart'),{type:'bar',data:{labels:['Week 1','Week 2','Week 3','Week 4'],datasets:[{label:'Doses',data:[0,0,0,0],backgroundColor:'#2563eb',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+            api('GetWeeklyVaccineUsage').then(d=>{ if(d&&d.Weeks){ vaccineChart.data.labels=d.Weeks; vaccineChart.data.datasets[0].data=d.Counts; vaccineChart.update(); }}).catch(()=>{});
 
-            let categoryChartInst = new Chart(document.getElementById('categoryChart'), {
-                type:'doughnut', data:{labels:['Category I','Category II','Category III'],datasets:[{data:[0,0,0],backgroundColor:['#22c55e','#f59e0b','#ef4444'],borderWidth:2,borderColor:'#fff'}]},
-                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:12},padding:16}}},cutout:'60%'}
-            });
-            fetchChart('GetCasesByCategory').then(d=>{ if(d&&d.Labels&&d.Counts){ categoryChartInst.data.labels=d.Labels; categoryChartInst.data.datasets[0].data=d.Counts; categoryChartInst.update(); document.getElementById('highRiskCaseValue').textContent=d.Counts[d.Labels.indexOf('Category III')]||d.Counts[2]||0; }}).catch(()=>{});
+            const donutOpts = (pos='right') => ({responsive:true,maintainAspectRatio:false,plugins:{legend:{position:pos,labels:{font:{size:12},padding:16}}},cutout:'60%'});
+            const categoryChart = new Chart(document.getElementById('categoryChart'),{type:'doughnut',data:{labels:['Category I','Category II','Category III'],datasets:[{data:[0,0,0],backgroundColor:['#22c55e','#f59e0b','#ef4444'],borderWidth:2,borderColor:'#fff'}]},options:donutOpts()});
+            api('GetCasesByCategory').then(d=>{ if(d&&d.Labels){ categoryChart.data.labels=d.Labels; categoryChart.data.datasets[0].data=d.Counts; categoryChart.update(); document.getElementById('highRiskCaseValue').textContent=d.Counts[d.Labels.indexOf('Category III')]||0; }}).catch(()=>{});
 
-            let animalChartInst = new Chart(document.getElementById('animalChart'), {
-                type:'doughnut', data:{labels:['Dog','Cat','Others'],datasets:[{data:[0,0,0],backgroundColor:['#3b82f6','#f97316','#a855f7'],borderWidth:2,borderColor:'#fff'}]},
-                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:12},padding:16}}},cutout:'60%'}
-            });
-            fetchChart('GetCasesByAnimalType').then(d=>{ if(d&&d.Labels&&d.Counts){ animalChartInst.data.labels=d.Labels; animalChartInst.data.datasets[0].data=d.Counts; animalChartInst.update(); }}).catch(()=>{});
+            const animalChart = new Chart(document.getElementById('animalChart'),{type:'doughnut',data:{labels:['Dog','Cat','Others'],datasets:[{data:[0,0,0],backgroundColor:['#3b82f6','#f97316','#a855f7'],borderWidth:2,borderColor:'#fff'}]},options:donutOpts()});
+            api('GetCasesByAnimalType').then(d=>{ if(d&&d.Labels){ animalChart.data.labels=d.Labels; animalChart.data.datasets[0].data=d.Counts; animalChart.update(); }}).catch(()=>{});
 
-            let exposureChartInst = new Chart(document.getElementById('exposureChart'), {
-                type:'doughnut', data:{labels:['Bite','Non-Bite / Play Bite'],datasets:[{data:[0,0],backgroundColor:['#ef4444','#64748b'],borderWidth:2,borderColor:'#fff'}]},
-                options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:12},padding:16}}},cutout:'60%'}
-            });
-            fetchChart('GetCasesByExposureType').then(d=>{ if(d&&d.Labels&&d.Counts){ exposureChartInst.data.labels=d.Labels; exposureChartInst.data.datasets[0].data=d.Counts; exposureChartInst.update(); }}).catch(()=>{});
+            const exposureChart = new Chart(document.getElementById('exposureChart'),{type:'doughnut',data:{labels:['Bite','Non-Bite / Play Bite'],datasets:[{data:[0,0],backgroundColor:['#ef4444','#64748b'],borderWidth:2,borderColor:'#fff'}]},options:donutOpts()});
+            api('GetCasesByExposureType').then(d=>{ if(d&&d.Labels){ exposureChart.data.labels=d.Labels; exposureChart.data.datasets[0].data=d.Counts; exposureChart.update(); }}).catch(()=>{});
 
-            let woundChartInst = new Chart(document.getElementById('woundChart'), {
-                type:'bar', data:{labels:['Lacerated','Avulsion','Punctured','Abrasion','Scratches','Hematoma'],datasets:[{label:'Cases',data:[0,0,0,0,0,0],backgroundColor:'#0ea5e9',borderRadius:4}]},
-                options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{precision:0}}}}
-            });
-            fetchChart('GetCasesByWoundType').then(d=>{ if(d&&d.Labels&&d.Counts){ woundChartInst.data.labels=d.Labels; woundChartInst.data.datasets[0].data=d.Counts; woundChartInst.update(); }}).catch(()=>{});
+            const woundChart = new Chart(document.getElementById('woundChart'),{type:'bar',data:{labels:['Lacerated','Avulsion','Punctured','Abrasion','Scratches','Hematoma'],datasets:[{label:'Cases',data:[0,0,0,0,0,0],backgroundColor:'#0ea5e9',borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{precision:0}}}}});
+            api('GetCasesByWoundType').then(d=>{ if(d&&d.Labels){ woundChart.data.labels=d.Labels; woundChart.data.datasets[0].data=d.Counts; woundChart.update(); }}).catch(()=>{});
 
-            fetchChart('GetDashboardStats').then(d=>{
-                if(d){
-                    if(d.OngoingTreatments!==undefined) document.getElementById('treatmentCountValue').textContent=d.OngoingTreatments;
-                    if(d.CompletedCases!==undefined) document.getElementById('completedCaseValue').textContent=d.CompletedCases;
-                    if(d.StockAlerts!==undefined) document.getElementById('stockValue').textContent=d.StockAlerts;
-                }
-            }).catch(()=>{});
+            api('GetDashboardStats').then(d=>{ if(d){ if(d.OngoingTreatments!=null) document.getElementById('treatmentCountValue').textContent=d.OngoingTreatments; if(d.CompletedCases!=null) document.getElementById('completedCaseValue').textContent=d.CompletedCases; if(d.StockAlerts!=null) document.getElementById('stockValue').textContent=d.StockAlerts; }}).catch(()=>{});
 
-            document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+            document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
         });
     </script>
+
 </asp:Content>

@@ -17,6 +17,8 @@
         <asp:HiddenField ID="hfSelectedCaseId" runat="server" />
         <asp:HiddenField ID="hfSelectedScheduleId" runat="server" />
         <asp:HiddenField ID="hfEditMode" runat="server" />
+        <asp:HiddenField ID="hfSelectedVisitId" runat="server" />
+        <asp:HiddenField ID="hfVisitEditMode" runat="server" />
 
         <%-- ── Tab Navigation ────────────────────────────────────────── --%>
         <div class="flex gap-2 border-b border-slate-200 pb-px mb-6">
@@ -154,7 +156,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <%-- LEFT: Treatment Details + Animal Follow-Up + Assign Protocol --%>
+                <%-- LEFT: Treatment Details + Animal Follow-Up + Visit Form + Assign Protocol --%>
                 <div class="lg:col-span-1 space-y-6">
 
                     <%-- Animal Follow-Up --%>
@@ -216,10 +218,108 @@
                         </div>
                     </div>
 
-                    <%-- Assign Protocol --%>
+                    <%-- ── Visit Form ──────────────────────────────────────────── --%>
+                    <asp:Panel ID="panelVisitForm" runat="server"
+                        CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                        <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-extrabold text-slate-800">
+                                    <asp:Literal ID="litVisitFormTitle" runat="server" Text="Record Visit" />
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-0.5">A visit record is required before a schedule can be generated.</p>
+                            </div>
+                        </div>
+                        <div class="p-5 space-y-4">
+
+                            <%-- Visit Type --%>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Visit Type</label>
+                                <asp:DropDownList ID="ddlVisitType" runat="server"
+                                    CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                    <asp:ListItem Text="-- Select Type --" Value="" />
+                                    <asp:ListItem Text="Initial Visit" Value="Initial Visit" />
+                                    <asp:ListItem Text="Follow-up" Value="Follow-up" />
+                                    <asp:ListItem Text="Booster" Value="Booster" />
+                                    <asp:ListItem Text="Pre-Exposure" Value="Pre-Exposure" />
+                                </asp:DropDownList>
+                            </div>
+
+                            <%-- Dose Day — auto-generated, read-only display --%>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Dose Day</label>
+                                <asp:HiddenField ID="hfVisitDoseDay" runat="server" Value="" />
+                                <div class="flex items-center gap-2">
+                                    <div id="divDoseDayDisplay" runat="server"
+                                        class="flex-1 border border-slate-200 bg-slate-50 rounded-lg px-3 py-2.5 text-sm text-slate-700 font-semibold min-h-[42px]">
+                                        <asp:Literal ID="litDoseDayDisplay" runat="server" Text="— select a visit type and date —" />
+                                    </div>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">Calculated automatically from the visit type and visit date relative to Day 0.</p>
+                            </div>
+
+                            <%-- Visit Date --%>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Visit Date</label>
+                                <asp:TextBox ID="txtVisitDate" runat="server" TextMode="Date"
+                                    CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+
+                            <%-- Diagnosis --%>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Diagnosis</label>
+                                <asp:TextBox ID="txtVisitDiagnosis" runat="server"
+                                    CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="e.g. Category III Bite" />
+                            </div>
+
+                            <%-- Manifestation Notes --%>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Manifestation Notes</label>
+                                <asp:TextBox ID="txtManifestationNotes" runat="server" TextMode="MultiLine" Rows="3"
+                                    CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Describe wound, location, severity…" />
+                            </div>
+
+                            <%-- Visit Status --%>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Status</label>
+                                <asp:DropDownList ID="ddlVisitStatus" runat="server"
+                                    CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                    <asp:ListItem Text="Completed" Value="Completed" />
+                                    <asp:ListItem Text="Pending" Value="Pending" />
+                                    <asp:ListItem Text="Cancelled" Value="Cancelled" />
+                                </asp:DropDownList>
+                            </div>
+
+                            <%-- Validation message --%>
+                            <asp:Label ID="lblVisitError" runat="server" Visible="false"
+                                CssClass="block text-xs text-red-600 font-semibold" />
+
+                            <div class="flex gap-3 pt-1">
+                                <asp:Button ID="btnSaveVisit" runat="server" Text="Save Visit"
+                                    CssClass="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-bold cursor-pointer transition text-sm"
+                                    OnClick="btnSaveVisit_Click" />
+                                <asp:Button ID="btnCancelVisitEdit" runat="server" Text="Cancel"
+                                    CssClass="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 py-2.5 rounded-lg font-bold cursor-pointer transition text-sm"
+                                    OnClick="btnCancelVisitEdit_Click" Visible="false" />
+                            </div>
+                        </div>
+                    </asp:Panel>
+
+                    <%-- Assign Protocol — locked until a visit exists --%>
                     <asp:Panel ID="panelGenerate" runat="server"
                         CssClass="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
-                        <h3 class="font-extrabold text-slate-800 mb-4">Assign Protocol</h3>
+                        <h3 class="font-extrabold text-slate-800 mb-1">Assign Protocol</h3>
+
+                        <%-- Warning shown when no visit recorded yet --%>
+                        <asp:Panel ID="panelNoVisitWarning" runat="server" Visible="false"
+                            CssClass="mb-4 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <p class="text-xs text-amber-700 font-semibold">A visit must be recorded before a vaccination schedule can be generated.</p>
+                        </asp:Panel>
+
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Regimen Protocol</label>
@@ -241,10 +341,72 @@
                                 OnClick="btnGenerateSchedule_Click" />
                         </div>
                     </asp:Panel>
+
                 </div>
 
-                <%-- RIGHT: Administration Form + Schedule --%>
+                <%-- RIGHT: Visit History + Administration Form + Schedule --%>
                 <div class="lg:col-span-2 flex flex-col gap-6">
+
+                    <%-- ── Visit History ────────────────────────────────────────── --%>
+                    <asp:Panel runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                        <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-extrabold text-slate-800">Visit History</h3>
+                                <p class="text-xs text-slate-400 mt-0.5">All recorded visits for this case</p>
+                            </div>
+                        </div>
+
+                        <asp:GridView ID="gvVisits" runat="server"
+                                      CssClass="w-full text-sm" GridLines="None"
+                                      AutoGenerateColumns="False"
+                                      DataKeyNames="visit_id"
+                                      OnRowCommand="gvVisits_RowCommand">
+                            <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
+                            <RowStyle CssClass="border-b border-slate-100 transition-colors hover:bg-slate-50" />
+                            <Columns>
+                                <asp:BoundField DataField="visit_type" HeaderText="Type"
+                                    ItemStyle-CssClass="p-4 font-semibold text-slate-700"
+                                    HeaderStyle-CssClass="p-4" />
+                                <asp:BoundField DataField="visit_date" HeaderText="Date"
+                                    DataFormatString="{0:MMM dd, yyyy}"
+                                    ItemStyle-CssClass="p-4 text-slate-600"
+                                    HeaderStyle-CssClass="p-4" />
+                                <asp:BoundField DataField="dose_day" HeaderText="Day"
+                                    NullDisplayText="-"
+                                    ItemStyle-CssClass="p-4 text-slate-600 text-center"
+                                    HeaderStyle-CssClass="p-4 text-center" />
+                                <asp:BoundField DataField="diagnosis" HeaderText="Diagnosis"
+                                    NullDisplayText="-"
+                                    ItemStyle-CssClass="p-4 text-slate-500 text-center"
+                                    HeaderStyle-CssClass="p-4 text-center" />
+                                <asp:TemplateField HeaderText="Status" HeaderStyle-CssClass="p-4" ItemStyle-CssClass="p-4">
+                                    <ItemTemplate>
+                                        <span class='<%# Eval("status").ToString() == "Completed"
+                                            ? "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700 uppercase tracking-wide"
+                                            : Eval("status").ToString() == "Cancelled"
+                                                ? "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-red-100 text-red-700 uppercase tracking-wide"
+                                                : "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wide" %>'>
+                                            <%# Eval("status") %>
+                                        </span>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                <asp:TemplateField HeaderStyle-CssClass="p-4 text-right" ItemStyle-CssClass="p-4 text-right">
+                                    <ItemTemplate>
+                                        <asp:Button ID="btnEditVisit" runat="server"
+                                            CommandName="EditVisit"
+                                            CommandArgument='<%# Container.DataItemIndex %>'
+                                            Text="Edit"
+                                            CssClass="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer" />
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                            </Columns>
+                            <EmptyDataTemplate>
+                                <div class="p-10 text-center text-slate-400 text-sm">
+                                    No visits recorded yet. Use the <strong>Record Visit</strong> form on the left to add one.
+                                </div>
+                            </EmptyDataTemplate>
+                        </asp:GridView>
+                    </asp:Panel>
 
                     <%-- Record Dose Administration --%>
                     <asp:Panel ID="panelAdministration" runat="server" Visible="false"

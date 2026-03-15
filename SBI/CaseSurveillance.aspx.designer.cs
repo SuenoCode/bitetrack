@@ -51,6 +51,24 @@ namespace SBI
         protected global::System.Web.UI.WebControls.HiddenField hfEditMode;
 
         /// <summary>
+        /// hfSelectedVisitId control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfSelectedVisitId;
+
+        /// <summary>
+        /// hfVisitEditMode control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfVisitEditMode;
+
+        /// <summary>
         /// btnTabToday control.
         /// </summary>
         /// <remarks>
@@ -249,6 +267,123 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Literal litCategoryDisplay;
 
         /// <summary>
+        /// panelVisitForm control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel panelVisitForm;
+
+        /// <summary>
+        /// litVisitFormTitle control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litVisitFormTitle;
+
+        /// <summary>
+        /// ddlVisitType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlVisitType;
+
+        /// <summary>
+        /// hfVisitDoseDay control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfVisitDoseDay;
+
+        /// <summary>
+        /// divDoseDayDisplay control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl divDoseDayDisplay;
+
+        /// <summary>
+        /// litDoseDayDisplay control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litDoseDayDisplay;
+
+        /// <summary>
+        /// txtVisitDate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtVisitDate;
+
+        /// <summary>
+        /// txtVisitDiagnosis control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtVisitDiagnosis;
+
+        /// <summary>
+        /// txtManifestationNotes control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtManifestationNotes;
+
+        /// <summary>
+        /// ddlVisitStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlVisitStatus;
+
+        /// <summary>
+        /// lblVisitError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblVisitError;
+
+        /// <summary>
+        /// btnSaveVisit control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSaveVisit;
+
+        /// <summary>
+        /// btnCancelVisitEdit control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnCancelVisitEdit;
+
+        /// <summary>
         /// panelGenerate control.
         /// </summary>
         /// <remarks>
@@ -256,6 +391,15 @@ namespace SBI
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel panelGenerate;
+
+        /// <summary>
+        /// panelNoVisitWarning control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel panelNoVisitWarning;
 
         /// <summary>
         /// ddlProtocol control.
@@ -283,6 +427,15 @@ namespace SBI
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnGenerateSchedule;
+
+        /// <summary>
+        /// gvVisits control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gvVisits;
 
         /// <summary>
         /// panelAdministration control.

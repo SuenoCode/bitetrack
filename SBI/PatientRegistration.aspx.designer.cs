@@ -654,60 +654,6 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Panel pnlCasePreview;
 
         /// <summary>
-        /// rbDog control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton rbDog;
-
-        /// <summary>
-        /// rbCat control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton rbCat;
-
-        /// <summary>
-        /// rbOtherAnimal control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton rbOtherAnimal;
-
-        /// <summary>
-        /// txtOtherAnimal control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtOtherAnimal;
-
-        /// <summary>
-        /// rbProvoked control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton rbProvoked;
-
-        /// <summary>
-        /// rbUnprovoked control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButton rbUnprovoked;
-
-        /// <summary>
         /// txtPreviewCaseId control.
         /// </summary>
         /// <remarks>
