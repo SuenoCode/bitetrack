@@ -382,7 +382,7 @@ namespace SBI
         ORDER BY expiration_date";
 
 				SqlDataAdapter da = new SqlDataAdapter(query, conn);
-				da.SelectCommand.Parameters.AddWithValue("@vaccine_name", vaccineName);
+				da.SelectCommand.Parameters.AddWithValue("@vaccine_name", vaccineName);	
 
 				DataTable dt = new DataTable();
 				da.Fill(dt);
