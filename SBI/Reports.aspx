@@ -2,7 +2,7 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
-    <asp:HiddenField ID="hfActiveReport" runat="server" Value="CaseSummary" />
+    <asp:HiddenField ID="hfActiveReport" runat="server" Value="DailyInventorySummary" />
 
     <div class="px-2 py-5 font-sans text-slate-900">
 
@@ -10,39 +10,25 @@
         <div class="mb-4">
             <h1 class="text-4xl font-extrabold tracking-tight text-[#0b2a7a]">Reports</h1>
             <p class="mt-1 text-base text-slate-600">
-                Generate and export comprehensive health informatics reports
+                Generate and export daily inventory and activity reports
             </p>
         </div>
 
         <!-- Tabs -->
         <div class="mb-4 rounded-2xl border border-slate-200 bg-white shadow-sm p-3">
             <div class="flex flex-wrap gap-3">
-                <asp:LinkButton ID="tabCaseSummary" runat="server"
+                <asp:LinkButton ID="tabDailyInventory" runat="server"
                     CssClass="report-tab rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-50"
                     CausesValidation="false"
-                    OnClick="tabCaseSummary_Click">
-                    Case Summary
+                    OnClick="tabDailyInventory_Click">
+                    Daily Inventory Summary
                 </asp:LinkButton>
 
-                <asp:LinkButton ID="tabHighRisk" runat="server"
+                <asp:LinkButton ID="tabDailyActivity" runat="server"
                     CssClass="report-tab rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-50"
                     CausesValidation="false"
-                    OnClick="tabHighRisk_Click">
-                    High-Risk Cases
-                </asp:LinkButton>
-
-                <asp:LinkButton ID="tabVaxUtil" runat="server"
-                    CssClass="report-tab rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-50"
-                    CausesValidation="false"
-                    OnClick="tabVaxUtil_Click">
-                    Vaccine Utilization
-                </asp:LinkButton>
-
-                <asp:LinkButton ID="tabExpiry" runat="server"
-                    CssClass="report-tab rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-50"
-                    CausesValidation="false"
-                    OnClick="tabExpiry_Click">
-                    Expiry Report
+                    OnClick="tabDailyActivity_Click">
+                    Daily Activity Summary
                 </asp:LinkButton>
             </div>
         </div>
@@ -99,7 +85,7 @@
             <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div class="text-sm font-semibold text-slate-500">Active Report</div>
                 <div class="mt-2 text-2xl font-extrabold text-[#0b2a7a]">
-                    <asp:Label ID="lblActiveReport" runat="server" Text="Case Summary" />
+                    <asp:Label ID="lblActiveReport" runat="server" Text="Daily Inventory Summary" />
                 </div>
             </div>
 

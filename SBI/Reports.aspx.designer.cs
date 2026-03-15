@@ -24,40 +24,22 @@ namespace SBI
 		protected global::System.Web.UI.WebControls.HiddenField hfActiveReport;
 
 		/// <summary>
-		/// tabCaseSummary control.
+		/// tabDailyInventory control.
 		/// </summary>
 		/// <remarks>
 		/// Auto-generated field.
 		/// To modify move field declaration from designer file to code-behind file.
 		/// </remarks>
-		protected global::System.Web.UI.WebControls.LinkButton tabCaseSummary;
+		protected global::System.Web.UI.WebControls.LinkButton tabDailyInventory;
 
 		/// <summary>
-		/// tabHighRisk control.
+		/// tabDailyActivity control.
 		/// </summary>
 		/// <remarks>
 		/// Auto-generated field.
 		/// To modify move field declaration from designer file to code-behind file.
 		/// </remarks>
-		protected global::System.Web.UI.WebControls.LinkButton tabHighRisk;
-
-		/// <summary>
-		/// tabVaxUtil control.
-		/// </summary>
-		/// <remarks>
-		/// Auto-generated field.
-		/// To modify move field declaration from designer file to code-behind file.
-		/// </remarks>
-		protected global::System.Web.UI.WebControls.LinkButton tabVaxUtil;
-
-		/// <summary>
-		/// tabExpiry control.
-		/// </summary>
-		/// <remarks>
-		/// Auto-generated field.
-		/// To modify move field declaration from designer file to code-behind file.
-		/// </remarks>
-		protected global::System.Web.UI.WebControls.LinkButton tabExpiry;
+		protected global::System.Web.UI.WebControls.LinkButton tabDailyActivity;
 
 		/// <summary>
 		/// ddlReportPeriod control.
