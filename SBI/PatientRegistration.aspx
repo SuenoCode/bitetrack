@@ -134,7 +134,7 @@
                     <div class="pt-2 border-t border-slate-200">
                         <button type="button" onclick="toggleVitals()"
                             class="text-sm font-semibold text-blue-600 hover:text-blue-800">
-                            + Optional Vitals & Visit Information
+                            + Optional Vitals &amp; Visit Information
                         </button>
                     </div>
 
@@ -158,10 +158,13 @@
                     </div>
                 </div>
 
+                <!-- ===== SECTION B: HISTORY OF BITING INCIDENT ===== -->
                 <div class="px-5 py-5 border-t border-slate-200">
                     <h3 class="text-lg font-extrabold text-slate-900 mb-4">B. History of Biting Incident</h3>
 
                     <div class="space-y-4">
+
+                        <%-- Row 1: Date/Time + Place of Exposure --%>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Date and Time of Bite <span class="text-red-500">*</span></label>
@@ -176,7 +179,52 @@
                             </div>
                         </div>
 
+                        <%-- Row 2: Biting Animal + Ownership + Circumstance --%>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Biting Animal <span class="text-red-500">*</span></label>
+                                <asp:DropDownList ID="ddlBitingAnimal" runat="server"
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                    <asp:ListItem Text="Select Animal" Value="" Selected="True" />
+                                    <asp:ListItem Text="Dog" Value="Dog" />
+                                    <asp:ListItem Text="Cat" Value="Cat" />
+                                    <asp:ListItem Text="Others" Value="Others" />
+                                </asp:DropDownList>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Ownership</label>
+                                <asp:DropDownList ID="ddlOwnership" runat="server"
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                    <asp:ListItem Text="Select Ownership" Value="" Selected="True" />
+                                    <asp:ListItem Text="Owned" Value="Owned" />
+                                    <asp:ListItem Text="Stray" Value="Stray" />
+                                    <asp:ListItem Text="Leashed / Cage" Value="Leashed/Cage" />
+                                </asp:DropDownList>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Circumstance</label>
+                                <asp:DropDownList ID="ddlCircumstance" runat="server"
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                    <asp:ListItem Text="Select Circumstance" Value="" Selected="True" />
+                                    <asp:ListItem Text="Provoked / Intentional" Value="Provoked" />
+                                    <asp:ListItem Text="Unprovoked / Unintentional" Value="Unprovoked" />
+                                </asp:DropDownList>
+                            </div>
+                        </div>
+
+                        <%-- Row 3: Animal Status + Type of Exposure + Wound Location + Wound Type + Bleeding --%>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Status of Biting Animal</label>
+                                <asp:DropDownList ID="ddlAnimalStatus" runat="server"
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                    <asp:ListItem Text="Select Status" Value="" Selected="True" />
+                                    <asp:ListItem Text="Alive / Healthy" Value="Alive/Healthy" />
+                                    <asp:ListItem Text="Sick" Value="Sick" />
+                                    <asp:ListItem Text="Died / Killed" Value="Died/Killed" />
+                                    <asp:ListItem Text="Unknown" Value="Unknown" />
+                                </asp:DropDownList>
+                            </div>
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Type of Exposure</label>
                                 <asp:DropDownList ID="ddlExposureType" runat="server"
@@ -205,6 +253,10 @@
                                     <asp:ListItem Text="Hematoma" Value="Hematoma" />
                                 </asp:DropDownList>
                             </div>
+                        </div>
+
+                        <%-- Row 4: Bleeding + Washing + Category + Manifestation --%>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-sm font-semibold text-slate-700 mb-1">Bleeding</label>
                                 <asp:DropDownList ID="ddlBleeding" runat="server"
@@ -214,18 +266,42 @@
                                     <asp:ListItem Text="Yes" Value="Yes" />
                                 </asp:DropDownList>
                             </div>
-                        </div>
-
-                        <div class="rounded-xl border border-slate-200 p-4">
-                            <div class="mb-2 text-sm font-bold text-slate-900">Category</div>
-                            <div class="flex flex-wrap gap-4 text-sm font-semibold text-slate-700">
-                                <asp:RadioButton ID="rbCategory1" runat="server" GroupName="Category" Text="Category I" />
-                                <asp:RadioButton ID="rbCategory2" runat="server" GroupName="Category" Text="Category II" />
-                                <asp:RadioButton ID="rbCategory3" runat="server" GroupName="Category" Text="Category III" />
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Washing of Bite Wound</label>
+                                <asp:DropDownList ID="ddlWoundWashed" runat="server"
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                    <asp:ListItem Text="Select" Value="" Selected="True" />
+                                    <asp:ListItem Text="Washed (15 mins)" Value="Yes" />
+                                    <asp:ListItem Text="Unwashed" Value="No" />
+                                </asp:DropDownList>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Category</label>
+                                <asp:DropDownList ID="ddlCategory" runat="server"
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                    <asp:ListItem Text="Select Category" Value="" Selected="True" />
+                                    <asp:ListItem Text="Category I" Value="I" />
+                                    <asp:ListItem Text="Category II" Value="II" />
+                                    <asp:ListItem Text="Category III" Value="III" />
+                                </asp:DropDownList>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Manifestation</label>
+                                <asp:DropDownList ID="ddlManifestation" runat="server"
+                                    CssClass="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm">
+                                    <asp:ListItem Text="Select" Value="" Selected="True" />
+                                    <asp:ListItem Text="Head Ache" Value="Head Ache" />
+                                    <asp:ListItem Text="Fever" Value="Fever" />
+                                    <asp:ListItem Text="Numbness on Site of Bite" Value="Numbness on Site of Bite" />
+                                    <asp:ListItem Text="Tingling Sensation" Value="Tingling Sensation" />
+                                    <asp:ListItem Text="None" Value="None" />
+                                </asp:DropDownList>
                             </div>
                         </div>
+
                     </div>
                 </div>
+                <!-- ===== END SECTION B ===== -->
 
                 <div class="mt-auto px-5 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap justify-end gap-3">
                     <asp:Button ID="btnClear" runat="server" Text="Clear"
