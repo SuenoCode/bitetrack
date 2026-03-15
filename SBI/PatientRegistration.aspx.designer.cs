@@ -213,13 +213,40 @@ namespace SBI
         protected global::System.Web.UI.WebControls.TextBox txtBiteDateTime;
 
         /// <summary>
-        /// txtPlaceExposure control.
+        /// txtPlaceHouseNo control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtPlaceExposure;
+        protected global::System.Web.UI.WebControls.TextBox txtPlaceHouseNo;
+
+        /// <summary>
+        /// txtPlaceStreet control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPlaceStreet;
+
+        /// <summary>
+        /// txtPlaceBarangay control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPlaceBarangay;
+
+        /// <summary>
+        /// txtPlaceCity control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPlaceCity;
 
         /// <summary>
         /// ddlBitingAnimal control.
@@ -555,13 +582,40 @@ namespace SBI
         protected global::System.Web.UI.WebControls.DropDownList ddlPreviewOccupation;
 
         /// <summary>
-        /// txtPreviewAddress control.
+        /// txtPreviewHouseNo control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtPreviewAddress;
+        protected global::System.Web.UI.WebControls.TextBox txtPreviewHouseNo;
+
+        /// <summary>
+        /// txtPreviewStreet control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPreviewStreet;
+
+        /// <summary>
+        /// txtPreviewBarangay control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPreviewBarangay;
+
+        /// <summary>
+        /// txtPreviewCityProvince control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPreviewCityProvince;
 
         /// <summary>
         /// txtPreviewEmergencyPerson control.
@@ -708,13 +762,40 @@ namespace SBI
         protected global::System.Web.UI.WebControls.DropDownList ddlPreviewCaseExposureType;
 
         /// <summary>
-        /// txtPreviewCasePlaceOfBite control.
+        /// txtPreviewCasePlaceHouseNo control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtPreviewCasePlaceOfBite;
+        protected global::System.Web.UI.WebControls.TextBox txtPreviewCasePlaceHouseNo;
+
+        /// <summary>
+        /// txtPreviewCasePlaceStreet control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPreviewCasePlaceStreet;
+
+        /// <summary>
+        /// txtPreviewCasePlaceBarangay control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPreviewCasePlaceBarangay;
+
+        /// <summary>
+        /// txtPreviewCasePlaceCity control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPreviewCasePlaceCity;
 
         /// <summary>
         /// ddlPreviewCaseWoundType control.

@@ -2,7 +2,6 @@
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Web.UI.WebControls;
 
 namespace SBI
@@ -36,26 +35,28 @@ namespace SBI
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 string query = @"
-                    SELECT 
-                        patient_id,
-                        fname,
-                        lname,
-                        gender,
-                        contact_no,
-                        address,
-                        date_recorded AS date_added
-                    FROM dbo.Patient
+                    SELECT
+                        p.patient_id,
+                        p.fname,
+                        p.lname,
+                        p.gender,
+                        p.contact_no,
+                        ISNULL(a.barangay, '') + CASE WHEN a.city_province IS NOT NULL AND a.city_province != '' THEN ', ' + a.city_province ELSE '' END AS address,
+                        p.date_recorded AS date_added
+                    FROM dbo.Patient p
+                    LEFT JOIN dbo.Address a ON p.patient_id = a.patient_id
                     WHERE
                         (@search = '' OR
-                         CAST(patient_id AS NVARCHAR(50)) LIKE '%' + @search + '%' OR
-                         fname LIKE '%' + @search + '%' OR
-                         lname LIKE '%' + @search + '%' OR
-                         (fname + ' ' + lname) LIKE '%' + @search + '%' OR
-                         contact_no LIKE '%' + @search + '%' OR
-                         address LIKE '%' + @search + '%')
-                        AND (@fromDate IS NULL OR CAST(date_recorded AS DATE) >= @fromDate)
-                        AND (@toDate IS NULL OR CAST(date_recorded AS DATE) <= @toDate)
-                    ORDER BY date_recorded DESC";
+                         CAST(p.patient_id AS NVARCHAR(50)) LIKE '%' + @search + '%' OR
+                         p.fname LIKE '%' + @search + '%' OR
+                         p.lname LIKE '%' + @search + '%' OR
+                         (p.fname + ' ' + p.lname) LIKE '%' + @search + '%' OR
+                         p.contact_no LIKE '%' + @search + '%' OR
+                         ISNULL(a.barangay, '') LIKE '%' + @search + '%' OR
+                         ISNULL(a.city_province, '') LIKE '%' + @search + '%')
+                        AND (@fromDate IS NULL OR CAST(p.date_recorded AS DATE) >= @fromDate)
+                        AND (@toDate   IS NULL OR CAST(p.date_recorded AS DATE) <= @toDate)
+                    ORDER BY p.date_recorded DESC";
 
                 SqlDataAdapter da = new SqlDataAdapter(query, conn);
                 da.SelectCommand.Parameters.AddWithValue("@search", searchText);
@@ -64,7 +65,6 @@ namespace SBI
 
                 DataTable dt = new DataTable();
                 da.Fill(dt);
-
                 gvPatients.DataSource = dt;
                 gvPatients.DataBind();
             }
@@ -75,28 +75,30 @@ namespace SBI
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 string query = @"
-                    SELECT 
-                        case_id,
-                        patient_id,
-                        case_no,
-                        date_of_bite,
-                        place_of_bite,
-                        type_of_exposure,
-                        site_of_bite,
-                        category
-                    FROM dbo.[Case]
+                    SELECT
+                        c.case_id,
+                        c.patient_id,
+                        c.case_no,
+                        c.date_of_bite,
+                        ISNULL(pb.barangay, '') + CASE WHEN pb.city_province IS NOT NULL AND pb.city_province != '' THEN ', ' + pb.city_province ELSE '' END AS place_of_bite,
+                        c.type_of_exposure,
+                        c.site_of_bite,
+                        c.category
+                    FROM dbo.[Case] c
+                    LEFT JOIN dbo.PlaceOfBite pb ON c.case_id = pb.case_id
                     WHERE
                         (@search = '' OR
-                         CAST(case_id AS NVARCHAR(50)) LIKE '%' + @search + '%' OR
-                         CAST(patient_id AS NVARCHAR(50)) LIKE '%' + @search + '%' OR
-                         ISNULL(case_no, '') LIKE '%' + @search + '%' OR
-                         ISNULL(place_of_bite, '') LIKE '%' + @search + '%' OR
-                         ISNULL(type_of_exposure, '') LIKE '%' + @search + '%' OR
-                         ISNULL(site_of_bite, '') LIKE '%' + @search + '%' OR
-                         ISNULL(category, '') LIKE '%' + @search + '%')
-                        AND (@fromDate IS NULL OR date_of_bite >= @fromDate)
-                        AND (@toDate IS NULL OR date_of_bite <= @toDate)
-                    ORDER BY date_of_bite DESC, case_id DESC";
+                         CAST(c.case_id AS NVARCHAR(50)) LIKE '%' + @search + '%' OR
+                         CAST(c.patient_id AS NVARCHAR(50)) LIKE '%' + @search + '%' OR
+                         ISNULL(c.case_no, '') LIKE '%' + @search + '%' OR
+                         ISNULL(pb.barangay, '') LIKE '%' + @search + '%' OR
+                         ISNULL(pb.city_province, '') LIKE '%' + @search + '%' OR
+                         ISNULL(c.type_of_exposure, '') LIKE '%' + @search + '%' OR
+                         ISNULL(c.site_of_bite, '') LIKE '%' + @search + '%' OR
+                         ISNULL(c.category, '') LIKE '%' + @search + '%')
+                        AND (@fromDate IS NULL OR c.date_of_bite >= @fromDate)
+                        AND (@toDate   IS NULL OR c.date_of_bite <= @toDate)
+                    ORDER BY c.date_of_bite DESC, c.case_id DESC";
 
                 SqlDataAdapter da = new SqlDataAdapter(query, conn);
                 da.SelectCommand.Parameters.AddWithValue("@search", searchText);
@@ -105,7 +107,6 @@ namespace SBI
 
                 DataTable dt = new DataTable();
                 da.Fill(dt);
-
                 gvCases.DataSource = dt;
                 gvCases.DataBind();
             }
@@ -116,11 +117,9 @@ namespace SBI
             if (e.CommandName == "EditPatient")
             {
                 string patientId = e.CommandArgument.ToString();
-
                 hfSelectedPatientId.Value = patientId;
                 hfSelectedCaseId.Value = "";
                 hfEditMode.Value = "PATIENT";
-
                 LoadPatientPreview(patientId);
                 ShowRecordPreview();
                 hfActivePanel.Value = "viewPatientPanel";
@@ -132,11 +131,9 @@ namespace SBI
             if (e.CommandName == "EditCase")
             {
                 int caseId = Convert.ToInt32(e.CommandArgument);
-
                 hfSelectedCaseId.Value = caseId.ToString();
                 hfSelectedPatientId.Value = "";
                 hfEditMode.Value = "CASE";
-
                 LoadCasePreview(caseId);
                 ShowRecordPreview();
                 hfActivePanel.Value = "viewPatientPanel";
@@ -155,18 +152,22 @@ namespace SBI
                         p.date_of_birth,
                         p.gender,
                         p.civil_status,
-                        p.address,
                         p.contact_no,
                         p.occupation,
-                        p.emergency_contact_person,
-                        p.emergency_contact_no,
                         p.date_recorded,
                         vs.blood_pressure,
                         vs.temperature,
-                        vs.wt
+                        vs.wt,
+                        a.house_no,
+                        a.street,
+                        a.barangay,
+                        a.city_province,
+                        ec.emergency_contact_person,
+                        ec.emergency_contact_number
                     FROM dbo.Patient p
-                    LEFT JOIN dbo.VitalSigns vs
-                        ON p.patient_id = vs.patient_id
+                    LEFT JOIN dbo.VitalSigns      vs ON p.patient_id = vs.patient_id
+                    LEFT JOIN dbo.Address          a  ON p.patient_id = a.patient_id
+                    LEFT JOIN dbo.EmergencyContact ec ON p.patient_id = ec.patient_id
                     WHERE p.patient_id = @id";
 
                 SqlCommand cmd = new SqlCommand(query, conn);
@@ -186,11 +187,20 @@ namespace SBI
                     txtPreviewDOB.Text = dr["date_of_birth"] == DBNull.Value ? "" : Convert.ToDateTime(dr["date_of_birth"]).ToString("yyyy-MM-dd");
                     ddlPreviewGender.SelectedValue = SafeDropdownValue(ddlPreviewGender, dr["gender"].ToString());
                     ddlPreviewCivilStatus.SelectedValue = SafeDropdownValue(ddlPreviewCivilStatus, dr["civil_status"].ToString());
-                    txtPreviewAddress.Text = dr["address"].ToString();
                     txtPreviewContactNo.Text = dr["contact_no"].ToString();
                     ddlPreviewOccupation.SelectedValue = SafeDropdownValue(ddlPreviewOccupation, dr["occupation"].ToString());
-                    txtPreviewEmergencyPerson.Text = dr["emergency_contact_person"].ToString();
-                    txtPreviewEmergencyNo.Text = dr["emergency_contact_no"].ToString();
+
+                    // Address (dbo.Address)
+                    txtPreviewHouseNo.Text = dr["house_no"] == DBNull.Value ? "" : dr["house_no"].ToString();
+                    txtPreviewStreet.Text = dr["street"] == DBNull.Value ? "" : dr["street"].ToString();
+                    txtPreviewBarangay.Text = dr["barangay"] == DBNull.Value ? "" : dr["barangay"].ToString();
+                    txtPreviewCityProvince.Text = dr["city_province"] == DBNull.Value ? "" : dr["city_province"].ToString();
+
+                    // Emergency Contact (dbo.EmergencyContact)
+                    txtPreviewEmergencyPerson.Text = dr["emergency_contact_person"] == DBNull.Value ? "" : dr["emergency_contact_person"].ToString();
+                    txtPreviewEmergencyNo.Text = dr["emergency_contact_number"] == DBNull.Value ? "" : dr["emergency_contact_number"].ToString();
+
+                    // Vitals
                     txtPreviewBP.Text = dr["blood_pressure"] == DBNull.Value ? "" : dr["blood_pressure"].ToString();
                     txtPreviewTemp.Text = dr["temperature"] == DBNull.Value ? "" : dr["temperature"].ToString();
                     txtPreviewWeight.Text = dr["wt"] == DBNull.Value ? "" : dr["wt"].ToString();
@@ -204,7 +214,26 @@ namespace SBI
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                string query = @"SELECT * FROM dbo.[Case] WHERE case_id = @id";
+                string query = @"
+                    SELECT 
+                        c.case_id,
+                        c.patient_id,
+                        c.case_no,
+                        c.date_of_bite,
+                        c.time_of_bite,
+                        c.type_of_exposure,
+                        c.wound_type,
+                        c.bleeding,
+                        c.site_of_bite,
+                        c.category,
+                        c.washed,
+                        pb.house_no,
+                        pb.street,
+                        pb.barangay,
+                        pb.city_province
+                    FROM dbo.[Case] c
+                    LEFT JOIN dbo.PlaceOfBite pb ON c.case_id = pb.case_id
+                    WHERE c.case_id = @id";
 
                 SqlCommand cmd = new SqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@id", caseId);
@@ -229,13 +258,16 @@ namespace SBI
                     else
                     {
                         TimeSpan biteTime;
-                        if (TimeSpan.TryParse(dr["time_of_bite"].ToString(), out biteTime))
-                            txtPreviewCaseTimeOfBite.Text = biteTime.ToString(@"hh\:mm");
-                        else
-                            txtPreviewCaseTimeOfBite.Text = "";
+                        txtPreviewCaseTimeOfBite.Text = TimeSpan.TryParse(dr["time_of_bite"].ToString(), out biteTime)
+                            ? biteTime.ToString(@"hh\:mm") : "";
                     }
 
-                    txtPreviewCasePlaceOfBite.Text = dr["place_of_bite"] == DBNull.Value ? "" : dr["place_of_bite"].ToString();
+                    // Place of Bite (dbo.PlaceOfBite)
+                    txtPreviewCasePlaceHouseNo.Text = dr["house_no"] == DBNull.Value ? "" : dr["house_no"].ToString();
+                    txtPreviewCasePlaceStreet.Text = dr["street"] == DBNull.Value ? "" : dr["street"].ToString();
+                    txtPreviewCasePlaceBarangay.Text = dr["barangay"] == DBNull.Value ? "" : dr["barangay"].ToString();
+                    txtPreviewCasePlaceCity.Text = dr["city_province"] == DBNull.Value ? "" : dr["city_province"].ToString();
+
                     ddlPreviewCaseExposureType.SelectedValue = SafeDropdownValue(ddlPreviewCaseExposureType, dr["type_of_exposure"].ToString());
                     ddlPreviewCaseWoundType.SelectedValue = SafeDropdownValue(ddlPreviewCaseWoundType, dr["wound_type"].ToString());
                     ddlPreviewCaseBleeding.SelectedValue = SafeDropdownValue(ddlPreviewCaseBleeding, dr["bleeding"].ToString());
@@ -248,467 +280,395 @@ namespace SBI
 
         protected void btnPreviewUpdatePatient_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtPreviewPatientId.Text))
-            {
-                ShowAlert("No patient selected.");
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(txtPreviewPatientId.Text)) { ShowAlert("No patient selected."); return; }
 
             DateTime dob;
-            if (!DateTime.TryParse(txtPreviewDOB.Text, out dob))
+            if (!DateTime.TryParse(txtPreviewDOB.Text, out dob)) { ShowAlert("Invalid Date of Birth."); return; }
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                ShowAlert("Invalid Date of Birth.");
-                return;
+                conn.Open();
+                SqlTransaction trans = conn.BeginTransaction();
+                try
+                {
+                    string pid = txtPreviewPatientId.Text.Trim();
+
+                    // UPDATE Patient
+                    new SqlCommand(@"
+                        UPDATE dbo.Patient
+                        SET fname=@fn, lname=@ln, date_of_birth=@dob, gender=@g,
+                            civil_status=@cs, contact_no=@cn, occupation=@oc
+                        WHERE patient_id=@pid", conn, trans)
+                    {
+                        Parameters = {
+                            new SqlParameter("@fn",  txtPreviewFirstName.Text.Trim()),
+                            new SqlParameter("@ln",  txtPreviewLastName.Text.Trim()),
+                            new SqlParameter("@dob", dob),
+                            new SqlParameter("@g",   ddlPreviewGender.SelectedValue),
+                            new SqlParameter("@cs",  ddlPreviewCivilStatus.SelectedValue),
+                            new SqlParameter("@cn",  txtPreviewContactNo.Text.Trim()),
+                            new SqlParameter("@oc",  ddlPreviewOccupation.SelectedValue),
+                            new SqlParameter("@pid", pid)
+                        }
+                    }.ExecuteNonQuery();
+
+                    // UPSERT Address
+                    UpsertRecord(conn, trans,
+                        "SELECT COUNT(*) FROM dbo.Address WHERE patient_id=@k",
+                        "UPDATE dbo.Address SET house_no=@h,street=@s,barangay=@b,city_province=@c WHERE patient_id=@k",
+                        "INSERT INTO dbo.Address (patient_id,house_no,street,barangay,city_province) VALUES (@k,@h,@s,@b,@c)",
+                        pid,
+                        txtPreviewHouseNo.Text.Trim(), txtPreviewStreet.Text.Trim(),
+                        txtPreviewBarangay.Text.Trim(), txtPreviewCityProvince.Text.Trim());
+
+                    // UPSERT EmergencyContact
+                    UpsertEC(conn, trans, pid,
+                        txtPreviewEmergencyPerson.Text.Trim(),
+                        txtPreviewEmergencyNo.Text.Trim());
+
+                    // UPSERT VitalSigns
+                    UpsertVitals(conn, trans, pid,
+                        txtPreviewBP.Text.Trim(),
+                        txtPreviewTemp.Text.Trim(),
+                        txtPreviewWeight.Text.Trim());
+
+                    trans.Commit();
+                    FBindGrid();
+                    LoadPatientPreview(pid);
+                    ShowAlert("Patient information updated successfully.");
+                }
+                catch (Exception ex) { trans.Rollback(); ShowAlert(ex.Message.Replace("'", "")); }
+            }
+        }
+
+        protected void btnPreviewCancelPatient_Click(object sender, EventArgs e) { HideRecordPreview(); }
+
+        protected void btnPreviewUpdateCase_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtPreviewCaseId.Text)) { ShowAlert("No case selected."); return; }
+
+            DateTime biteDate;
+            if (!DateTime.TryParse(txtPreviewCaseDateOfBite.Text, out biteDate)) { ShowAlert("Invalid Date of Bite."); return; }
+
+            object timeValue = DBNull.Value;
+            if (!string.IsNullOrWhiteSpace(txtPreviewCaseTimeOfBite.Text))
+            {
+                TimeSpan biteTime;
+                if (!TimeSpan.TryParse(txtPreviewCaseTimeOfBite.Text, out biteTime)) { ShowAlert("Invalid Time of Bite."); return; }
+                timeValue = biteTime;
             }
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
                 SqlTransaction trans = conn.BeginTransaction();
-
                 try
                 {
-                    string updatePatientQuery = @"
-                        UPDATE dbo.Patient
-                        SET fname = @fname,
-                            lname = @lname,
-                            date_of_birth = @dob,
-                            gender = @gender,
-                            civil_status = @civil_status,
-                            address = @address,
-                            contact_no = @contact_no,
-                            occupation = @occupation,
-                            emergency_contact_person = @emergency_contact_person,
-                            emergency_contact_no = @emergency_contact_no
-                        WHERE patient_id = @patient_id";
+                    int caseId = Convert.ToInt32(txtPreviewCaseId.Text.Trim());
 
-                    SqlCommand cmdPatient = new SqlCommand(updatePatientQuery, conn, trans);
-                    cmdPatient.Parameters.AddWithValue("@fname", txtPreviewFirstName.Text.Trim());
-                    cmdPatient.Parameters.AddWithValue("@lname", txtPreviewLastName.Text.Trim());
-                    cmdPatient.Parameters.AddWithValue("@dob", dob);
-                    cmdPatient.Parameters.AddWithValue("@gender", ddlPreviewGender.SelectedValue);
-                    cmdPatient.Parameters.AddWithValue("@civil_status", ddlPreviewCivilStatus.SelectedValue);
-                    cmdPatient.Parameters.AddWithValue("@address", txtPreviewAddress.Text.Trim());
-                    cmdPatient.Parameters.AddWithValue("@contact_no", txtPreviewContactNo.Text.Trim());
-                    cmdPatient.Parameters.AddWithValue("@occupation", ddlPreviewOccupation.SelectedValue);
-                    cmdPatient.Parameters.AddWithValue("@emergency_contact_person", txtPreviewEmergencyPerson.Text.Trim());
-                    cmdPatient.Parameters.AddWithValue("@emergency_contact_no", txtPreviewEmergencyNo.Text.Trim());
-                    cmdPatient.Parameters.AddWithValue("@patient_id", txtPreviewPatientId.Text.Trim());
-                    cmdPatient.ExecuteNonQuery();
-
-                    string checkVitalQuery = @"SELECT COUNT(*) FROM dbo.VitalSigns WHERE patient_id = @patient_id";
-                    SqlCommand cmdCheck = new SqlCommand(checkVitalQuery, conn, trans);
-                    cmdCheck.Parameters.AddWithValue("@patient_id", txtPreviewPatientId.Text.Trim());
-
-                    int count = Convert.ToInt32(cmdCheck.ExecuteScalar());
-
-                    if (count > 0)
+                    // UPDATE Case
+                    new SqlCommand(@"
+                        UPDATE dbo.[Case]
+                        SET date_of_bite=@d, time_of_bite=@t, type_of_exposure=@et,
+                            wound_type=@wt, bleeding=@bl, site_of_bite=@sb,
+                            category=@cat, washed=@w
+                        WHERE case_id=@cid", conn, trans)
                     {
-                        string updateVitalQuery = @"
-                            UPDATE dbo.VitalSigns
-                            SET blood_pressure = @blood_pressure,
-                                temperature = @temperature,
-                                wt = @wt
-                            WHERE patient_id = @patient_id";
+                        Parameters = {
+                            new SqlParameter("@d",   biteDate),
+                            new SqlParameter("@t",   timeValue),
+                            new SqlParameter("@et",  ddlPreviewCaseExposureType.SelectedValue),
+                            new SqlParameter("@wt",  ddlPreviewCaseWoundType.SelectedValue),
+                            new SqlParameter("@bl",  ddlPreviewCaseBleeding.SelectedValue),
+                            new SqlParameter("@sb",  txtPreviewCaseSiteOfBite.Text.Trim()),
+                            new SqlParameter("@cat", ddlPreviewCaseCategory.SelectedValue),
+                            new SqlParameter("@w",   ddlPreviewCaseWashed.SelectedValue),
+                            new SqlParameter("@cid", caseId)
+                        }
+                    }.ExecuteNonQuery();
 
-                        SqlCommand cmdVital = new SqlCommand(updateVitalQuery, conn, trans);
-                        cmdVital.Parameters.AddWithValue("@blood_pressure", txtPreviewBP.Text.Trim());
-                        cmdVital.Parameters.AddWithValue("@temperature", string.IsNullOrWhiteSpace(txtPreviewTemp.Text) ? (object)DBNull.Value : txtPreviewTemp.Text.Trim());
-                        cmdVital.Parameters.AddWithValue("@wt", string.IsNullOrWhiteSpace(txtPreviewWeight.Text) ? (object)DBNull.Value : txtPreviewWeight.Text.Trim());
-                        cmdVital.Parameters.AddWithValue("@patient_id", txtPreviewPatientId.Text.Trim());
-                        cmdVital.ExecuteNonQuery();
-                    }
-                    else
-                    {
-                        string insertVitalQuery = @"
-                            INSERT INTO dbo.VitalSigns (patient_id, blood_pressure, temperature, wt)
-                            VALUES (@patient_id, @blood_pressure, @temperature, @wt)";
-
-                        SqlCommand cmdVital = new SqlCommand(insertVitalQuery, conn, trans);
-                        cmdVital.Parameters.AddWithValue("@patient_id", txtPreviewPatientId.Text.Trim());
-                        cmdVital.Parameters.AddWithValue("@blood_pressure", txtPreviewBP.Text.Trim());
-                        cmdVital.Parameters.AddWithValue("@temperature", string.IsNullOrWhiteSpace(txtPreviewTemp.Text) ? (object)DBNull.Value : txtPreviewTemp.Text.Trim());
-                        cmdVital.Parameters.AddWithValue("@wt", string.IsNullOrWhiteSpace(txtPreviewWeight.Text) ? (object)DBNull.Value : txtPreviewWeight.Text.Trim());
-                        cmdVital.ExecuteNonQuery();
-                    }
+                    // UPSERT PlaceOfBite
+                    UpsertPlaceOfBite(conn, trans, caseId,
+                        txtPreviewCasePlaceHouseNo.Text.Trim(), txtPreviewCasePlaceStreet.Text.Trim(),
+                        txtPreviewCasePlaceBarangay.Text.Trim(), txtPreviewCasePlaceCity.Text.Trim());
 
                     trans.Commit();
-
                     FBindGrid();
-                    LoadPatientPreview(txtPreviewPatientId.Text.Trim());
-                    ShowAlert("Patient information updated successfully.");
+                    LoadCasePreview(caseId);
+                    ShowAlert("Case information updated successfully.");
                 }
-                catch (Exception ex)
-                {
-                    trans.Rollback();
-                    ShowAlert(ex.Message.Replace("'", ""));
-                }
+                catch (Exception ex) { trans.Rollback(); ShowAlert(ex.Message.Replace("'", "")); }
             }
         }
 
-        protected void btnPreviewCancelPatient_Click(object sender, EventArgs e)
-        {
-            HideRecordPreview();
-        }
-
-        protected void btnPreviewUpdateCase_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtPreviewCaseId.Text))
-            {
-                ShowAlert("No case selected.");
-                return;
-            }
-
-            DateTime biteDate;
-            if (!DateTime.TryParse(txtPreviewCaseDateOfBite.Text, out biteDate))
-            {
-                ShowAlert("Invalid Date of Bite.");
-                return;
-            }
-
-            object timeValue = DBNull.Value;
-            if (!string.IsNullOrWhiteSpace(txtPreviewCaseTimeOfBite.Text))
-            {
-                TimeSpan biteTime;
-                if (!TimeSpan.TryParse(txtPreviewCaseTimeOfBite.Text, out biteTime))
-                {
-                    ShowAlert("Invalid Time of Bite.");
-                    return;
-                }
-                timeValue = biteTime;
-            }
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                string query = @"
-                    UPDATE dbo.[Case]
-                    SET date_of_bite = @date_of_bite,
-                        time_of_bite = @time_of_bite,
-                        place_of_bite = @place_of_bite,
-                        type_of_exposure = @type_of_exposure,
-                        wound_type = @wound_type,
-                        bleeding = @bleeding,
-                        site_of_bite = @site_of_bite,
-                        category = @category,
-                        washed = @washed
-                    WHERE case_id = @case_id";
-
-                SqlCommand cmd = new SqlCommand(query, conn);
-
-                cmd.Parameters.AddWithValue("@date_of_bite", biteDate);
-                cmd.Parameters.AddWithValue("@time_of_bite", timeValue);
-                cmd.Parameters.AddWithValue("@place_of_bite", txtPreviewCasePlaceOfBite.Text.Trim());
-                cmd.Parameters.AddWithValue("@type_of_exposure", ddlPreviewCaseExposureType.SelectedValue);
-                cmd.Parameters.AddWithValue("@wound_type", ddlPreviewCaseWoundType.SelectedValue);
-                cmd.Parameters.AddWithValue("@bleeding", ddlPreviewCaseBleeding.SelectedValue);
-                cmd.Parameters.AddWithValue("@site_of_bite", txtPreviewCaseSiteOfBite.Text.Trim());
-                cmd.Parameters.AddWithValue("@category", ddlPreviewCaseCategory.SelectedValue);
-                cmd.Parameters.AddWithValue("@washed", ddlPreviewCaseWashed.SelectedValue);
-                cmd.Parameters.AddWithValue("@case_id", txtPreviewCaseId.Text.Trim());
-
-                conn.Open();
-                cmd.ExecuteNonQuery();
-            }
-
-            FBindGrid();
-            LoadCasePreview(Convert.ToInt32(txtPreviewCaseId.Text.Trim()));
-            ShowAlert("Case information updated successfully.");
-        }
-
-        protected void btnPreviewCancelCase_Click(object sender, EventArgs e)
-        {
-            HideRecordPreview();
-        }
+        protected void btnPreviewCancelCase_Click(object sender, EventArgs e) { HideRecordPreview(); }
 
         protected void btnSearchPatient_Click(object sender, EventArgs e)
         {
-            BindPatients(
-                txtSearchPatient.Text.Trim(),
-                ParseNullableDate(txtPatientDateFrom.Text),
-                ParseNullableDate(txtPatientDateTo.Text)
-            );
+            BindPatients(txtSearchPatient.Text.Trim(), ParseNullableDate(txtPatientDateFrom.Text), ParseNullableDate(txtPatientDateTo.Text));
             HideRecordPreview();
             hfActivePanel.Value = "viewPatientPanel";
         }
 
         protected void btnResetPatientSearch_Click(object sender, EventArgs e)
         {
-            txtSearchPatient.Text = "";
-            txtPatientDateFrom.Text = "";
-            txtPatientDateTo.Text = "";
-            BindPatients();
-            HideRecordPreview();
+            txtSearchPatient.Text = txtPatientDateFrom.Text = txtPatientDateTo.Text = "";
+            BindPatients(); HideRecordPreview();
             hfActivePanel.Value = "viewPatientPanel";
         }
 
         protected void btnSearchCase_Click(object sender, EventArgs e)
         {
-            BindCases(
-                txtSearchCase.Text.Trim(),
-                ParseNullableDate(txtCaseDateFrom.Text),
-                ParseNullableDate(txtCaseDateTo.Text)
-            );
+            BindCases(txtSearchCase.Text.Trim(), ParseNullableDate(txtCaseDateFrom.Text), ParseNullableDate(txtCaseDateTo.Text));
             HideRecordPreview();
             hfActivePanel.Value = "viewPatientPanel";
         }
 
         protected void btnResetCaseSearch_Click(object sender, EventArgs e)
         {
-            txtSearchCase.Text = "";
-            txtCaseDateFrom.Text = "";
-            txtCaseDateTo.Text = "";
-            BindCases();
-            HideRecordPreview();
+            txtSearchCase.Text = txtCaseDateFrom.Text = txtCaseDateTo.Text = "";
+            BindCases(); HideRecordPreview();
             hfActivePanel.Value = "viewPatientPanel";
         }
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
-            DateTime dob;
-            DateTime biteDateTime;
-
-            if (!DateTime.TryParse(txtDOB.Text, out dob))
-            {
-                ShowAlert("Invalid Date of Birth");
-                return;
-            }
-
-            if (!DateTime.TryParse(txtBiteDateTime.Text, out biteDateTime))
-            {
-                ShowAlert("Invalid Bite Date and Time");
-                return;
-            }
-
-            string fullAddress = BuildFullAddress();
+            DateTime dob, biteDateTime;
+            if (!DateTime.TryParse(txtDOB.Text, out dob)) { ShowAlert("Invalid Date of Birth"); return; }
+            if (!DateTime.TryParse(txtBiteDateTime.Text, out biteDateTime)) { ShowAlert("Invalid Bite Date and Time"); return; }
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
                 SqlTransaction trans = conn.BeginTransaction();
-
                 try
                 {
                     string newPatientId = GenerateNextPatientId(conn, trans);
 
-                    string patientQuery = @"
-                        INSERT INTO dbo.Patient
-                        (patient_id, fname, lname, date_of_birth, gender, civil_status, address, contact_no, occupation,
-                         emergency_contact_person, emergency_contact_no, date_recorded)
-                        VALUES
-                        (@patient_id, @fname, @lname, @dob, @gender, @civil, @address, @contact, @occupation,
-                         @eperson, @eno, GETDATE())";
+                    // INSERT Patient
+                    new SqlCommand(@"
+                        INSERT INTO dbo.Patient (patient_id,fname,lname,date_of_birth,gender,civil_status,contact_no,occupation,date_recorded)
+                        VALUES (@pid,@fn,@ln,@dob,@g,@cs,@cn,@oc,GETDATE())", conn, trans)
+                    {
+                        Parameters = {
+                            new SqlParameter("@pid", newPatientId),
+                            new SqlParameter("@fn",  txtFirstName.Text.Trim()),
+                            new SqlParameter("@ln",  txtLastName.Text.Trim()),
+                            new SqlParameter("@dob", dob),
+                            new SqlParameter("@g",   ddlGender.SelectedValue),
+                            new SqlParameter("@cs",  ddlCivilStatus.SelectedValue),
+                            new SqlParameter("@cn",  txtContactNo.Text.Trim()),
+                            new SqlParameter("@oc",  ddlOccupation.SelectedValue)
+                        }
+                    }.ExecuteNonQuery();
 
-                    SqlCommand cmdPatient = new SqlCommand(patientQuery, conn, trans);
+                    // INSERT Address
+                    new SqlCommand(@"
+                        INSERT INTO dbo.Address (patient_id,house_no,street,barangay,city_province)
+                        VALUES (@pid,@h,@s,@b,@c)", conn, trans)
+                    {
+                        Parameters = {
+                            new SqlParameter("@pid", newPatientId),
+                            new SqlParameter("@h",   txtHouseNo.Text.Trim()),
+                            new SqlParameter("@s",   txtSubdivision.Text.Trim()),
+                            new SqlParameter("@b",   txtBarangay.Text.Trim()),
+                            new SqlParameter("@c",   txtProvinceCity.Text.Trim())
+                        }
+                    }.ExecuteNonQuery();
 
-                    cmdPatient.Parameters.AddWithValue("@patient_id", newPatientId);
-                    cmdPatient.Parameters.AddWithValue("@fname", txtFirstName.Text.Trim());
-                    cmdPatient.Parameters.AddWithValue("@lname", txtLastName.Text.Trim());
-                    cmdPatient.Parameters.AddWithValue("@dob", dob);
-                    cmdPatient.Parameters.AddWithValue("@gender", ddlGender.SelectedValue);
-                    cmdPatient.Parameters.AddWithValue("@civil", ddlCivilStatus.SelectedValue);
-                    cmdPatient.Parameters.AddWithValue("@address", fullAddress);
-                    cmdPatient.Parameters.AddWithValue("@contact", txtContactNo.Text.Trim());
-                    cmdPatient.Parameters.AddWithValue("@occupation", ddlOccupation.SelectedValue);
-                    cmdPatient.Parameters.AddWithValue("@eperson", txtEmergencyContactPerson.Text.Trim());
-                    cmdPatient.Parameters.AddWithValue("@eno", txtEmergencyContactNo.Text.Trim());
+                    // INSERT EmergencyContact
+                    new SqlCommand(@"
+                        INSERT INTO dbo.EmergencyContact (patient_id,emergency_contact_person,emergency_contact_number)
+                        VALUES (@pid,@p,@n)", conn, trans)
+                    {
+                        Parameters = {
+                            new SqlParameter("@pid", newPatientId),
+                            new SqlParameter("@p",   txtEmergencyContactPerson.Text.Trim()),
+                            new SqlParameter("@n",   txtEmergencyContactNo.Text.Trim())
+                        }
+                    }.ExecuteNonQuery();
 
-                    cmdPatient.ExecuteNonQuery();
-
+                    // INSERT VitalSigns (optional)
                     if (!string.IsNullOrWhiteSpace(txtBloodPressure.Text) ||
                         !string.IsNullOrWhiteSpace(txtTemperature.Text) ||
                         !string.IsNullOrWhiteSpace(txtWeight.Text))
                     {
-                        string vitalQuery = @"
-                            INSERT INTO dbo.VitalSigns
-                            (patient_id, blood_pressure, temperature, wt)
-                            VALUES
-                            (@patient_id, @bp, @temp, @wt)";
-
-                        SqlCommand cmdVital = new SqlCommand(vitalQuery, conn, trans);
-                        cmdVital.Parameters.AddWithValue("@patient_id", newPatientId);
-                        cmdVital.Parameters.AddWithValue("@bp", txtBloodPressure.Text.Trim());
-                        cmdVital.Parameters.AddWithValue("@temp", string.IsNullOrWhiteSpace(txtTemperature.Text) ? (object)DBNull.Value : txtTemperature.Text.Trim());
-                        cmdVital.Parameters.AddWithValue("@wt", string.IsNullOrWhiteSpace(txtWeight.Text) ? (object)DBNull.Value : txtWeight.Text.Trim());
-                        cmdVital.ExecuteNonQuery();
+                        UpsertVitals(conn, trans, newPatientId,
+                            txtBloodPressure.Text.Trim(),
+                            txtTemperature.Text.Trim(),
+                            txtWeight.Text.Trim());
                     }
 
-                    // -------------------------------------------------------
-                    // INSERT CASE — matches dbo.[Case] schema exactly
-                    // Returns the new case_id via OUTPUT for child inserts
-                    // -------------------------------------------------------
-                    string caseQuery = @"
+                    // INSERT Case
+                    SqlCommand cmdCase = new SqlCommand(@"
                         INSERT INTO dbo.[Case]
-                        (patient_id, date_of_bite, place_of_bite, time_of_bite, type_of_exposure,
-                         wound_type, bleeding, site_of_bite, category, washed)
+                        (patient_id,date_of_bite,time_of_bite,type_of_exposure,wound_type,bleeding,site_of_bite,category,washed)
                         OUTPUT INSERTED.case_id
-                        VALUES
-                        (@pid, @date, @place, @time, @exposure, @wound, @bleeding, @site, @category, @washed)";
-
-                    SqlCommand cmdCase = new SqlCommand(caseQuery, conn, trans);
-
+                        VALUES (@pid,@date,@time,@et,@wt,@bl,@sb,@cat,@w)", conn, trans);
                     cmdCase.Parameters.AddWithValue("@pid", newPatientId);
                     cmdCase.Parameters.AddWithValue("@date", biteDateTime.Date);
-                    cmdCase.Parameters.AddWithValue("@place", txtPlaceExposure.Text.Trim());
                     cmdCase.Parameters.AddWithValue("@time", biteDateTime.TimeOfDay);
-                    cmdCase.Parameters.AddWithValue("@exposure", ddlExposureType.SelectedValue);
-                    cmdCase.Parameters.AddWithValue("@wound", ddlWoundType.SelectedValue);
-                    cmdCase.Parameters.AddWithValue("@bleeding", ddlBleeding.SelectedValue);
-                    cmdCase.Parameters.AddWithValue("@site", txtWoundLocation.Text.Trim());
-                    cmdCase.Parameters.AddWithValue("@category", GetSelectedCategory());
-                    cmdCase.Parameters.AddWithValue("@washed", GetWashed());
-
+                    cmdCase.Parameters.AddWithValue("@et", ddlExposureType.SelectedValue);
+                    cmdCase.Parameters.AddWithValue("@wt", ddlWoundType.SelectedValue);
+                    cmdCase.Parameters.AddWithValue("@bl", ddlBleeding.SelectedValue);
+                    cmdCase.Parameters.AddWithValue("@sb", txtWoundLocation.Text.Trim());
+                    cmdCase.Parameters.AddWithValue("@cat", GetSelectedCategory());
+                    cmdCase.Parameters.AddWithValue("@w", GetWashed());
                     int newCaseId = Convert.ToInt32(cmdCase.ExecuteScalar());
 
-                    // -------------------------------------------------------
-                    // INSERT ANIMAL — dbo.Animal (animal_type, ownership,
-                    //                  animal_status, circumstances)
-                    // -------------------------------------------------------
-                    string animalQuery = @"
-                        INSERT INTO dbo.Animal
-                        (case_id, animal_type, ownership, animal_status, circumstances)
-                        VALUES
-                        (@case_id, @animal_type, @ownership, @animal_status, @circumstances)";
+                    // INSERT PlaceOfBite
+                    UpsertPlaceOfBite(conn, trans, newCaseId,
+                        txtPlaceHouseNo.Text.Trim(), txtPlaceStreet.Text.Trim(),
+                        txtPlaceBarangay.Text.Trim(), txtPlaceCity.Text.Trim());
 
-                    SqlCommand cmdAnimal = new SqlCommand(animalQuery, conn, trans);
+                    // INSERT Animal
+                    new SqlCommand(@"
+                        INSERT INTO dbo.Animal (case_id,animal_type,ownership,animal_status,circumstances)
+                        VALUES (@cid,@at,@ow,@as,@ci)", conn, trans)
+                    {
+                        Parameters = {
+                            new SqlParameter("@cid", newCaseId),
+                            new SqlParameter("@at",  GetBitingAnimal()),
+                            new SqlParameter("@ow",  string.IsNullOrEmpty(GetOwnership())    ? (object)DBNull.Value : GetOwnership()),
+                            new SqlParameter("@as",  string.IsNullOrEmpty(GetAnimalStatus()) ? (object)DBNull.Value : GetAnimalStatus()),
+                            new SqlParameter("@ci",  string.IsNullOrEmpty(GetCircumstance()) ? (object)DBNull.Value : GetCircumstance())
+                        }
+                    }.ExecuteNonQuery();
 
-                    cmdAnimal.Parameters.AddWithValue("@case_id", newCaseId);
-                    cmdAnimal.Parameters.AddWithValue("@animal_type", GetBitingAnimal());
-                    cmdAnimal.Parameters.AddWithValue("@ownership", string.IsNullOrEmpty(GetOwnership()) ? (object)DBNull.Value : GetOwnership());
-                    cmdAnimal.Parameters.AddWithValue("@animal_status", string.IsNullOrEmpty(GetAnimalStatus()) ? (object)DBNull.Value : GetAnimalStatus());
-                    cmdAnimal.Parameters.AddWithValue("@circumstances", string.IsNullOrEmpty(GetCircumstance()) ? (object)DBNull.Value : GetCircumstance());
-
-                    cmdAnimal.ExecuteNonQuery();
-
-                    // -------------------------------------------------------
-                    // INSERT MANIFESTATION — dbo.Manifestation
-                    // Inserts one row per selected symptom (present = 'Yes')
-                    // -------------------------------------------------------
+                    // INSERT Manifestation
                     string symptom = GetManifestation();
                     if (!string.IsNullOrEmpty(symptom) && symptom != "None")
                     {
-                        string manifestQuery = @"
-                            INSERT INTO dbo.Manifestation
-                            (case_id, symptom, present)
-                            VALUES
-                            (@case_id, @symptom, 'Yes')";
-
-                        SqlCommand cmdManifest = new SqlCommand(manifestQuery, conn, trans);
-                        cmdManifest.Parameters.AddWithValue("@case_id", newCaseId);
-                        cmdManifest.Parameters.AddWithValue("@symptom", symptom);
-                        cmdManifest.ExecuteNonQuery();
+                        new SqlCommand(@"
+                            INSERT INTO dbo.Manifestation (case_id,symptom,present)
+                            VALUES (@cid,@sym,'Yes')", conn, trans)
+                        {
+                            Parameters = {
+                                new SqlParameter("@cid", newCaseId),
+                                new SqlParameter("@sym", symptom)
+                            }
+                        }.ExecuteNonQuery();
                     }
 
                     trans.Commit();
-
                     FBindGrid();
                     ClearFormFields();
                     HideRecordPreview();
                     hfActivePanel.Value = "viewPatientPanel";
-
                     ShowAlert("Patient Registered Successfully");
                 }
-                catch (Exception ex)
-                {
-                    trans.Rollback();
-                    ShowAlert(ex.Message.Replace("'", ""));
-                }
+                catch (Exception ex) { trans.Rollback(); ShowAlert(ex.Message.Replace("'", "")); }
             }
         }
 
-        protected void btnUpdateRecord_Click(object sender, EventArgs e)
-        {
-            ShowAlert("Use the Update button inside the Record Preview.");
-        }
-
-        protected void btnCancelEditForm_Click(object sender, EventArgs e)
-        {
-            ClearFormFields();
-            hfEditMode.Value = "";
-            hfActivePanel.Value = "viewPatientPanel";
-        }
-
-        protected void btnClear_Click(object sender, EventArgs e)
-        {
-            ClearFormFields();
-        }
+        protected void btnUpdateRecord_Click(object sender, EventArgs e) { ShowAlert("Use the Update button inside the Record Preview."); }
+        protected void btnCancelEditForm_Click(object sender, EventArgs e) { ClearFormFields(); hfEditMode.Value = ""; hfActivePanel.Value = "viewPatientPanel"; }
+        protected void btnClear_Click(object sender, EventArgs e) { ClearFormFields(); }
 
         private void ClearFormFields()
         {
-            // Section A
-            txtFirstName.Text = "";
-            txtLastName.Text = "";
-            txtDOB.Text = "";
-            txtContactNo.Text = "";
-            txtHouseNo.Text = "";
-            txtSubdivision.Text = "";
-            txtBarangay.Text = "";
-            txtProvinceCity.Text = "";
-            txtEmergencyContactPerson.Text = "";
-            txtEmergencyContactNo.Text = "";
-            txtBloodPressure.Text = "";
-            txtTemperature.Text = "";
-            txtWeight.Text = "";
-            txtCapillaryRefill.Text = "";
-            ddlGender.SelectedIndex = 0;
-            ddlCivilStatus.SelectedIndex = 0;
-            ddlOccupation.SelectedIndex = 0;
+            txtFirstName.Text = txtLastName.Text = txtDOB.Text = txtContactNo.Text = "";
+            ddlGender.SelectedIndex = ddlCivilStatus.SelectedIndex = ddlOccupation.SelectedIndex = 0;
 
-            // Section B — existing fields
-            txtBiteDateTime.Text = "";
-            txtPlaceExposure.Text = "";
-            txtWoundLocation.Text = "";
-            ddlExposureType.SelectedIndex = 0;
-            ddlWoundType.SelectedIndex = 0;
-            ddlBleeding.SelectedIndex = 0;
+            txtHouseNo.Text = txtSubdivision.Text = txtBarangay.Text = txtProvinceCity.Text = "";
+            txtEmergencyContactPerson.Text = txtEmergencyContactNo.Text = "";
+            txtBloodPressure.Text = txtTemperature.Text = txtWeight.Text = txtCapillaryRefill.Text = "";
 
-            // Section B — NEW dropdown fields
-            ddlBitingAnimal.SelectedIndex = 0;
-            ddlOwnership.SelectedIndex = 0;
-            ddlCircumstance.SelectedIndex = 0;
-            ddlAnimalStatus.SelectedIndex = 0;
-            ddlWoundWashed.SelectedIndex = 0;
-            ddlCategory.SelectedIndex = 0;
+            txtBiteDateTime.Text = txtWoundLocation.Text = "";
+            ddlExposureType.SelectedIndex = ddlWoundType.SelectedIndex = ddlBleeding.SelectedIndex = 0;
+
+            txtPlaceHouseNo.Text = txtPlaceStreet.Text = txtPlaceBarangay.Text = txtPlaceCity.Text = "";
+
+            ddlBitingAnimal.SelectedIndex = ddlOwnership.SelectedIndex = ddlCircumstance.SelectedIndex = 0;
+            ddlAnimalStatus.SelectedIndex = ddlWoundWashed.SelectedIndex = ddlCategory.SelectedIndex = 0;
             ddlManifestation.SelectedIndex = 0;
         }
 
-        private void ShowRecordPreview()
+        // ── Upsert helpers ─────────────────────────────────────────────────
+
+        private void UpsertRecord(SqlConnection conn, SqlTransaction trans,
+            string checkSql, string updateSql, string insertSql,
+            string key, string h, string s, string b, string c)
         {
-            pnlRecordPreviewContainer.Visible = true;
+            SqlCommand chk = new SqlCommand(checkSql, conn, trans);
+            chk.Parameters.AddWithValue("@k", key);
+            bool exists = Convert.ToInt32(chk.ExecuteScalar()) > 0;
+
+            SqlCommand cmd = new SqlCommand(exists ? updateSql : insertSql, conn, trans);
+            cmd.Parameters.AddWithValue("@k", key);
+            cmd.Parameters.AddWithValue("@h", h);
+            cmd.Parameters.AddWithValue("@s", s);
+            cmd.Parameters.AddWithValue("@b", b);
+            cmd.Parameters.AddWithValue("@c", c);
+            cmd.ExecuteNonQuery();
         }
+
+        private void UpsertEC(SqlConnection conn, SqlTransaction trans, string pid, string person, string number)
+        {
+            string chk = "SELECT COUNT(*) FROM dbo.EmergencyContact WHERE patient_id=@pid";
+            bool exists = Convert.ToInt32(new SqlCommand(chk, conn, trans) { Parameters = { new SqlParameter("@pid", pid) } }.ExecuteScalar()) > 0;
+
+            string sql = exists
+                ? "UPDATE dbo.EmergencyContact SET emergency_contact_person=@p, emergency_contact_number=@n WHERE patient_id=@pid"
+                : "INSERT INTO dbo.EmergencyContact (patient_id,emergency_contact_person,emergency_contact_number) VALUES (@pid,@p,@n)";
+
+            SqlCommand cmd = new SqlCommand(sql, conn, trans);
+            cmd.Parameters.AddWithValue("@pid", pid);
+            cmd.Parameters.AddWithValue("@p", person);
+            cmd.Parameters.AddWithValue("@n", number);
+            cmd.ExecuteNonQuery();
+        }
+
+        private void UpsertVitals(SqlConnection conn, SqlTransaction trans, string pid, string bp, string temp, string wt)
+        {
+            string chk = "SELECT COUNT(*) FROM dbo.VitalSigns WHERE patient_id=@pid";
+            bool exists = Convert.ToInt32(new SqlCommand(chk, conn, trans) { Parameters = { new SqlParameter("@pid", pid) } }.ExecuteScalar()) > 0;
+
+            string sql = exists
+                ? "UPDATE dbo.VitalSigns SET blood_pressure=@bp,temperature=@t,wt=@w WHERE patient_id=@pid"
+                : "INSERT INTO dbo.VitalSigns (patient_id,blood_pressure,temperature,wt) VALUES (@pid,@bp,@t,@w)";
+
+            SqlCommand cmd = new SqlCommand(sql, conn, trans);
+            cmd.Parameters.AddWithValue("@pid", pid);
+            cmd.Parameters.AddWithValue("@bp", bp);
+            cmd.Parameters.AddWithValue("@t", string.IsNullOrWhiteSpace(temp) ? (object)DBNull.Value : temp);
+            cmd.Parameters.AddWithValue("@w", string.IsNullOrWhiteSpace(wt) ? (object)DBNull.Value : wt);
+            cmd.ExecuteNonQuery();
+        }
+
+        private void UpsertPlaceOfBite(SqlConnection conn, SqlTransaction trans, int caseId, string h, string s, string b, string c)
+        {
+            string chk = "SELECT COUNT(*) FROM dbo.PlaceOfBite WHERE case_id=@cid";
+            bool exists = Convert.ToInt32(new SqlCommand(chk, conn, trans) { Parameters = { new SqlParameter("@cid", caseId) } }.ExecuteScalar()) > 0;
+
+            string sql = exists
+                ? "UPDATE dbo.PlaceOfBite SET house_no=@h,street=@s,barangay=@b,city_province=@c WHERE case_id=@cid"
+                : "INSERT INTO dbo.PlaceOfBite (case_id,house_no,street,barangay,city_province) VALUES (@cid,@h,@s,@b,@c)";
+
+            SqlCommand cmd = new SqlCommand(sql, conn, trans);
+            cmd.Parameters.AddWithValue("@cid", caseId);
+            cmd.Parameters.AddWithValue("@h", h);
+            cmd.Parameters.AddWithValue("@s", s);
+            cmd.Parameters.AddWithValue("@b", b);
+            cmd.Parameters.AddWithValue("@c", c);
+            cmd.ExecuteNonQuery();
+        }
+
+        // ── Helpers ────────────────────────────────────────────────────────
+
+        private void ShowRecordPreview() { pnlRecordPreviewContainer.Visible = true; }
 
         private void HideRecordPreview()
         {
             pnlRecordPreviewContainer.Visible = false;
             pnlPatientPreview.Visible = false;
             pnlCasePreview.Visible = false;
-
             hfSelectedPatientId.Value = "";
             hfSelectedCaseId.Value = "";
             hfEditMode.Value = "";
         }
 
-        private string BuildFullAddress()
-        {
-            string[] parts = new string[]
-            {
-                txtHouseNo.Text.Trim(),
-                txtSubdivision.Text.Trim(),
-                txtBarangay.Text.Trim(),
-                txtProvinceCity.Text.Trim()
-            };
-
-            return string.Join(", ", parts.Where(x => !string.IsNullOrWhiteSpace(x)));
-        }
-
-        private string GetSelectedCategory()
-        {
-            return ddlCategory.SelectedValue;
-        }
-
-        // -------------------------------------------------------
-        // NEW HELPER METHODS for the added Section B fields
-        // -------------------------------------------------------
-
+        private string GetSelectedCategory() { return ddlCategory.SelectedValue; }
         private string GetBitingAnimal() { return ddlBitingAnimal.SelectedValue; }
         private string GetOwnership() { return ddlOwnership.SelectedValue; }
         private string GetCircumstance() { return ddlCircumstance.SelectedValue; }
@@ -716,63 +676,38 @@ namespace SBI
         private string GetWashed() { return ddlWoundWashed.SelectedValue; }
         private string GetManifestation() { return ddlManifestation.SelectedValue; }
 
-        // -------------------------------------------------------
-
         private string SafeDropdownValue(DropDownList ddl, string value)
         {
-            ListItem item = ddl.Items.FindByValue(value);
-            return item != null ? value : "";
+            return ddl.Items.FindByValue(value) != null ? value : "";
         }
 
         private DateTime? ParseNullableDate(string value)
         {
-            DateTime parsedDate;
-            if (DateTime.TryParse(value, out parsedDate))
-                return parsedDate.Date;
-
-            return null;
+            DateTime d;
+            return DateTime.TryParse(value, out d) ? (DateTime?)d.Date : null;
         }
 
         private string GenerateNextPatientId(SqlConnection conn, SqlTransaction trans)
         {
-            string yearPrefix = DateTime.Now.Year.ToString();
-
-            string query = @"
-                SELECT TOP 1 patient_id
-                FROM dbo.Patient
-                WHERE patient_id LIKE @prefix
-                ORDER BY patient_id DESC";
-
-            SqlCommand cmd = new SqlCommand(query, conn, trans);
-            cmd.Parameters.AddWithValue("@prefix", yearPrefix + "-%");
+            string year = DateTime.Now.Year.ToString();
+            SqlCommand cmd = new SqlCommand(
+                "SELECT TOP 1 patient_id FROM dbo.Patient WHERE patient_id LIKE @prefix ORDER BY patient_id DESC",
+                conn, trans);
+            cmd.Parameters.AddWithValue("@prefix", year + "-%");
 
             object result = cmd.ExecuteScalar();
+            if (result == null || result == DBNull.Value) return year + "-0001";
 
-            if (result == null || result == DBNull.Value)
-                return yearPrefix + "-0001";
-
-            string lastId = result.ToString();
-            string[] parts = lastId.Split('-');
-
-            int nextNumber = 1;
-            if (parts.Length == 2)
-            {
-                int currentNumber;
-                if (int.TryParse(parts[1], out currentNumber))
-                    nextNumber = currentNumber + 1;
-            }
-
-            return yearPrefix + "-" + nextNumber.ToString("D4");
+            string[] parts = result.ToString().Split('-');
+            int next = 1;
+            if (parts.Length == 2) { int n; if (int.TryParse(parts[1], out n)) next = n + 1; }
+            return year + "-" + next.ToString("D4");
         }
 
         private void ShowAlert(string message)
         {
-            ClientScript.RegisterStartupScript(
-                this.GetType(),
-                Guid.NewGuid().ToString(),
-                "alert('" + message.Replace("'", "").Replace(Environment.NewLine, " ") + "');",
-                true
-            );
+            ClientScript.RegisterStartupScript(this.GetType(), Guid.NewGuid().ToString(),
+                "alert('" + message.Replace("'", "").Replace(Environment.NewLine, " ") + "');", true);
         }
     }
 }
