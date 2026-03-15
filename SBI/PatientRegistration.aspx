@@ -7,23 +7,27 @@
     <asp:HiddenField ID="hfSelectedCaseId" runat="server" Value="" />
     <asp:HiddenField ID="hfEditMode" runat="server" Value="" />
 
-    <div class="px-3 py-6 font-sans text-slate-900">
+    <div class="px-6 py-6 font-sans text-slate-900">
+
+        <!-- PAGE TITLE -->
+        <div class="mb-6">
+            <h2 class="text-3xl font-bold text-[#0b2a7a]">Patient Registration</h2>
+            <p class="mt-1 text-sm text-slate-500">Register patients, manage bite cases, and update records.</p>
+        </div>
 
         <!-- PANEL TOGGLE BUTTONS -->
-        <div class="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm p-3">
-            <div class="flex flex-wrap gap-3">
-                <button type="button" id="btnViewPanel"
-                    class="panel-tab rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-50"
-                    onclick="showPanel('viewPatientPanel')">
-                    View Patient / Case Details
-                </button>
+        <div class="mb-6 flex flex-wrap gap-3">
+            <button type="button" id="btnViewPanel"
+                class="panel-tab rounded-lg border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                onclick="showPanel('viewPatientPanel')">
+                View Patient / Case Details
+            </button>
 
-                <button type="button" id="btnAddPanel"
-                    class="panel-tab rounded-xl border border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-50"
-                    onclick="showPanel('addPatientPanel')">
-                    Add New Patient / Case
-                </button>
-            </div>
+            <button type="button" id="btnAddPanel"
+                class="panel-tab rounded-lg border border-slate-300 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                onclick="showPanel('addPatientPanel')">
+                Add New Patient / Case
+            </button>
         </div>
 
         <!-- ====================== ADD PATIENT / CASE PANEL ====================== -->
@@ -333,43 +337,33 @@
                 <div id="detailsPane" class="space-y-6 min-w-0">
 
                     <!-- Patient Table -->
-                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                        <div class="flex flex-col gap-3 px-5 py-4 border-b border-slate-200 bg-slate-50">
-                            <div>
-                                <h4 class="text-lg font-bold text-slate-900">Patient Details</h4>
-                                <p class="text-sm text-slate-500">List of registered patients</p>
-                            </div>
+                    <div class="rounded-xl bg-white border border-slate-200 overflow-hidden">
+                        <div class="px-6 py-5 border-b border-slate-100">
+                            <h4 class="text-lg font-semibold text-slate-800">Patient Details</h4>
+                            <p class="text-sm text-slate-400 mt-0.5">List of registered patients</p>
+                        </div>
 
-                            <div class="flex flex-wrap gap-3 items-end">
-                                <div>
-                                    <asp:TextBox ID="txtSearchPatient" runat="server"
-                                        CssClass="h-10 w-80 rounded-lg border border-slate-200 px-3 text-sm"
-                                        placeholder="Search by Patient ID, Name, Contact, Address" />
-                                </div>
+                        <div class="px-6 py-4 border-b border-slate-100">
+                            <div class="flex flex-wrap gap-3 items-center">
+                                <asp:TextBox ID="txtSearchPatient" runat="server"
+                                    CssClass="h-10 w-80 rounded-lg border border-slate-200 px-3 text-sm text-slate-700 placeholder-slate-400"
+                                    placeholder="Search by Patient ID, Name, Contact, Address" />
 
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">From</label>
-                                    <asp:TextBox ID="txtPatientDateFrom" runat="server" TextMode="Date"
-                                        CssClass="h-10 rounded-lg border border-slate-200 px-3 text-sm" />
-                                </div>
+                                <asp:TextBox ID="txtPatientDateFrom" runat="server" TextMode="Date"
+                                    CssClass="h-10 rounded-lg border border-slate-200 px-3 text-sm text-slate-700" />
 
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">To</label>
-                                    <asp:TextBox ID="txtPatientDateTo" runat="server" TextMode="Date"
-                                        CssClass="h-10 rounded-lg border border-slate-200 px-3 text-sm" />
-                                </div>
+                                <span class="text-sm text-slate-400">to</span>
 
-                                <div>
-                                    <asp:Button ID="btnSearchPatient" runat="server" Text="Search"
-                                        CssClass="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700"
-                                        OnClick="btnSearchPatient_Click" />
-                                </div>
+                                <asp:TextBox ID="txtPatientDateTo" runat="server" TextMode="Date"
+                                    CssClass="h-10 rounded-lg border border-slate-200 px-3 text-sm text-slate-700" />
 
-                                <div>
-                                    <asp:Button ID="btnResetPatientSearch" runat="server" Text="Reset"
-                                        CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
-                                        OnClick="btnResetPatientSearch_Click" />
-                                </div>
+                                <asp:Button ID="btnSearchPatient" runat="server" Text="Search"
+                                    CssClass="h-10 px-5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700"
+                                    OnClick="btnSearchPatient_Click" />
+
+                                <asp:Button ID="btnResetPatientSearch" runat="server" Text="Clear"
+                                    CssClass="h-10 px-5 rounded-lg border border-slate-300 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50"
+                                    OnClick="btnResetPatientSearch_Click" />
                             </div>
                         </div>
 
@@ -380,72 +374,85 @@
                                 EmptyDataText="No patient records found."
                                 DataKeyNames="patient_id"
                                 OnRowCommand="gvPatients_RowCommand"
-                                HeaderStyle-CssClass="bg-slate-100 text-slate-800"
-                                RowStyle-CssClass="border-b border-slate-200 hover:bg-slate-50"
-                                AlternatingRowStyle-CssClass="bg-slate-50/50"
-                                EmptyDataRowStyle-CssClass="text-center text-slate-500 italic py-6">
+                                HeaderStyle-CssClass="text-xs font-semibold text-slate-500 uppercase tracking-wide border-b border-slate-200"
+                                RowStyle-CssClass="border-b border-slate-100 hover:bg-slate-50"
+                                AlternatingRowStyle-CssClass="border-b border-slate-100 hover:bg-slate-50"
+                                EmptyDataRowStyle-CssClass="text-center text-slate-400 italic py-8">
 
                                 <Columns>
                                     <asp:TemplateField HeaderText="Action">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
                                         <ItemTemplate>
                                             <asp:LinkButton ID="btnEditPatient" runat="server"
                                                 Text="Edit"
                                                 CommandName="EditPatient"
                                                 CommandArgument='<%# Eval("patient_id") %>'
-                                                CssClass="inline-flex items-center rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600" />
+                                                CssClass="inline-flex items-center rounded-lg border border-slate-300 bg-blue-600 px-3 py-1.5 text-white text-xs font-semibold text-slate-700 hover:bg-blue-700" />
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
-                                    <asp:BoundField DataField="patient_id" HeaderText="Patient ID" />
-                                    <asp:BoundField DataField="fname" HeaderText="First Name" />
-                                    <asp:BoundField DataField="lname" HeaderText="Last Name" />
-                                    <asp:BoundField DataField="gender" HeaderText="Gender" />
-                                    <asp:BoundField DataField="contact_no" HeaderText="Contact No" />
-                                    <asp:BoundField DataField="address" HeaderText="Address" />
-                                    <asp:BoundField DataField="date_added" HeaderText="Date Added" DataFormatString="{0:MMM dd, yyyy}" />
+                                    <asp:BoundField DataField="patient_id" HeaderText="Patient ID">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="fname" HeaderText="First Name">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="lname" HeaderText="Last Name">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="gender" HeaderText="Gender">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="contact_no" HeaderText="Contact No">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="address" HeaderText="Address">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="date_added" HeaderText="Date Added" DataFormatString="{0:MMM dd, yyyy}">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
                                 </Columns>
                             </asp:GridView>
                         </div>
                     </div>
 
                     <!-- Case Table -->
-                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                        <div class="flex flex-col gap-3 px-5 py-4 border-b border-slate-200 bg-slate-50">
-                            <div>
-                                <h4 class="text-lg font-bold text-slate-900">Case Details</h4>
-                                <p class="text-sm text-slate-500">Recorded bite exposure cases</p>
-                            </div>
+                    <div class="rounded-xl bg-white border border-slate-200 overflow-hidden">
+                        <div class="px-6 py-5 border-b border-slate-100">
+                            <h4 class="text-lg font-semibold text-slate-800">Case Details</h4>
+                            <p class="text-sm text-slate-400 mt-0.5">Recorded bite exposure cases</p>
+                        </div>
 
-                            <div class="flex flex-wrap gap-3 items-end">
-                                <div>
-                                    <asp:TextBox ID="txtSearchCase" runat="server"
-                                        CssClass="h-10 w-80 rounded-lg border border-slate-200 px-3 text-sm"
-                                        placeholder="Search by Case ID, Patient ID, Case No, Place, Category" />
-                                </div>
+                        <div class="px-6 py-4 border-b border-slate-100">
+                            <div class="flex flex-wrap gap-3 items-center">
+                                <asp:TextBox ID="txtSearchCase" runat="server"
+                                    CssClass="h-10 w-80 rounded-lg border border-slate-200 px-3 text-sm text-slate-700 placeholder-slate-400"
+                                    placeholder="Search by Case ID, Patient ID, Case No, Place, Category" />
 
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">From</label>
-                                    <asp:TextBox ID="txtCaseDateFrom" runat="server" TextMode="Date"
-                                        CssClass="h-10 rounded-lg border border-slate-200 px-3 text-sm" />
-                                </div>
+                                <asp:TextBox ID="txtCaseDateFrom" runat="server" TextMode="Date"
+                                    CssClass="h-10 rounded-lg border border-slate-200 px-3 text-sm text-slate-700" />
 
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">To</label>
-                                    <asp:TextBox ID="txtCaseDateTo" runat="server" TextMode="Date"
-                                        CssClass="h-10 rounded-lg border border-slate-200 px-3 text-sm" />
-                                </div>
+                                <span class="text-sm text-slate-400">to</span>
 
-                                <div>
-                                    <asp:Button ID="btnSearchCase" runat="server" Text="Search"
-                                        CssClass="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700"
-                                        OnClick="btnSearchCase_Click" />
-                                </div>
+                                <asp:TextBox ID="txtCaseDateTo" runat="server" TextMode="Date"
+                                    CssClass="h-10 rounded-lg border border-slate-200 px-3 text-sm text-slate-700" />
 
-                                <div>
-                                    <asp:Button ID="btnResetCaseSearch" runat="server" Text="Reset"
-                                        CssClass="px-4 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100"
-                                        OnClick="btnResetCaseSearch_Click" />
-                                </div>
+                                <asp:Button ID="btnSearchCase" runat="server" Text="Search"
+                                    CssClass="h-10 px-5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700"
+                                    OnClick="btnSearchCase_Click" />
+
+                                <asp:Button ID="btnResetCaseSearch" runat="server" Text="Clear"
+                                    CssClass="h-10 px-5 rounded-lg border border-slate-300 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50"
+                                    OnClick="btnResetCaseSearch_Click" />
                             </div>
                         </div>
 
@@ -456,30 +463,56 @@
                                 EmptyDataText="No case records found."
                                 DataKeyNames="case_id"
                                 OnRowCommand="gvCases_RowCommand"
-                                HeaderStyle-CssClass="bg-slate-100 text-slate-800"
-                                RowStyle-CssClass="border-b border-slate-200 hover:bg-slate-50"
-                                AlternatingRowStyle-CssClass="bg-slate-50/50"
-                                EmptyDataRowStyle-CssClass="text-center text-slate-500 italic py-6">
+                                HeaderStyle-CssClass="text-xs font-semibold text-slate-500 uppercase tracking-wide border-b border-slate-200"
+                                RowStyle-CssClass="border-b border-slate-100 hover:bg-slate-50"
+                                AlternatingRowStyle-CssClass="border-b border-slate-100 hover:bg-slate-50"
+                                EmptyDataRowStyle-CssClass="text-center text-slate-400 italic py-8">
 
                                 <Columns>
                                     <asp:TemplateField HeaderText="Action">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
                                         <ItemTemplate>
                                             <asp:LinkButton ID="btnEditCase" runat="server"
                                                 Text="Edit"
                                                 CommandName="EditCase"
                                                 CommandArgument='<%# Eval("case_id") %>'
-                                                CssClass="inline-flex items-center rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-600" />
+                                                CssClass="inline-flex items-center rounded-lg border border-slate-300 bg-blue-600 px-3 py-1.5 text-white text-xs font-semibold text-slate-700 hover:bg-blue-700" />
                                         </ItemTemplate>
                                     </asp:TemplateField>
 
-                                    <asp:BoundField DataField="case_id" HeaderText="Case ID" />
-                                    <asp:BoundField DataField="patient_id" HeaderText="Patient ID" />
-                                    <asp:BoundField DataField="case_no" HeaderText="Case Number" />
-                                    <asp:BoundField DataField="date_of_bite" HeaderText="Date of Bite" DataFormatString="{0:MMM dd, yyyy}" />
-                                    <asp:BoundField DataField="place_of_bite" HeaderText="Place of Bite" />
-                                    <asp:BoundField DataField="type_of_exposure" HeaderText="Type of Exposure" />
-                                    <asp:BoundField DataField="site_of_bite" HeaderText="Site of Bite" />
-                                    <asp:BoundField DataField="category" HeaderText="Category" />
+                                    <asp:BoundField DataField="case_id" HeaderText="Case ID">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="patient_id" HeaderText="Patient ID">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="case_no" HeaderText="Case Number">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="date_of_bite" HeaderText="Date of Bite" DataFormatString="{0:MMM dd, yyyy}">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="place_of_bite" HeaderText="Place of Bite">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="type_of_exposure" HeaderText="Type of Exposure">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="site_of_bite" HeaderText="Site of Bite">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
+                                    <asp:BoundField DataField="category" HeaderText="Category">
+                                        <HeaderStyle CssClass="px-6 py-3" />
+                                        <ItemStyle CssClass="px-6 py-3" />
+                                    </asp:BoundField>
                                 </Columns>
                             </asp:GridView>
                         </div>
@@ -869,21 +902,21 @@
 
             if (btnView) {
                 btnView.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
-                btnView.classList.add('bg-white', 'text-slate-800', 'border-slate-300');
+                btnView.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
             }
 
             if (btnAdd) {
                 btnAdd.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
-                btnAdd.classList.add('bg-white', 'text-slate-800', 'border-slate-300');
+                btnAdd.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
             }
 
             if (panelId === 'viewPatientPanel' && btnView) {
-                btnView.classList.remove('bg-white', 'text-slate-800', 'border-slate-300');
+                btnView.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
                 btnView.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
             }
 
             if (panelId === 'addPatientPanel' && btnAdd) {
-                btnAdd.classList.remove('bg-white', 'text-slate-800', 'border-slate-300');
+                btnAdd.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
                 btnAdd.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
             }
         }
