@@ -810,5 +810,28 @@ namespace SBI
             ClientScript.RegisterStartupScript(GetType(), Guid.NewGuid().ToString(),
                 "alert('" + message.Replace("'", "").Replace(Environment.NewLine, " ") + "');", true);
         }
+        protected void gvPatients_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType != DataControlRowType.DataRow) return;
+
+            string role = Session["userRole"]?.ToString().ToUpper() ?? "";
+            if (role == "C")
+            {
+                LinkButton btnEdit = e.Row.FindControl("btnEditPatient") as LinkButton;
+                if (btnEdit != null) btnEdit.Visible = false;
+            }
+        }
+
+        protected void gvCases_RowDataBound(object sender, GridViewRowEventArgs e)
+        {
+            if (e.Row.RowType != DataControlRowType.DataRow) return;
+
+            string role = Session["userRole"]?.ToString().ToUpper() ?? "";
+            if (role == "C")
+            {
+                LinkButton btnEdit = e.Row.FindControl("btnEditCase") as LinkButton;
+                if (btnEdit != null) btnEdit.Visible = false;
+            }
+        }
     }
 }

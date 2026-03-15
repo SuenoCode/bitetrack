@@ -24,22 +24,22 @@ namespace SBI
         protected global::System.Web.UI.WebControls.HiddenField hfActiveReport;
 
         /// <summary>
-        /// tabDailyInventory control.
+        /// btnTabInventory control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton tabDailyInventory;
+        protected global::System.Web.UI.WebControls.Button btnTabInventory;
 
         /// <summary>
-        /// tabBiteCaseReport control.
+        /// btnTabBiteCase control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton tabBiteCaseReport;
+        protected global::System.Web.UI.WebControls.Button btnTabBiteCase;
 
         /// <summary>
         /// lblActiveReport control.
@@ -105,13 +105,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.TextBox txtToDate;
 
         /// <summary>
-        /// btnGenerateReport control.
+        /// btnGenerate control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnGenerateReport;
+        protected global::System.Web.UI.WebControls.Button btnGenerate;
 
         /// <summary>
         /// btnExportPdf control.
@@ -132,15 +132,6 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Button btnExportExcel;
 
         /// <summary>
-        /// pnlGridReport control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlGridReport;
-
-        /// <summary>
         /// lblMessage control.
         /// </summary>
         /// <remarks>
@@ -150,22 +141,31 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Label lblMessage;
 
         /// <summary>
-        /// gvReport control.
+        /// pnlInventory control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gvReport;
+        protected global::System.Web.UI.WebControls.Panel pnlInventory;
 
         /// <summary>
-        /// pnlBiteCaseReport control.
+        /// gvInventory control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlBiteCaseReport;
+        protected global::System.Web.UI.WebControls.GridView gvInventory;
+
+        /// <summary>
+        /// pnlBiteCase control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlBiteCase;
 
         /// <summary>
         /// lblPatientId control.
@@ -258,13 +258,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Label lblEmergencyContact;
 
         /// <summary>
-        /// lblCaseNumber control.
+        /// lblCaseNo control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblCaseNumber;
+        protected global::System.Web.UI.WebControls.Label lblCaseNo;
 
         /// <summary>
         /// lblBiteDate control.
@@ -303,24 +303,6 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Label lblExposureType;
 
         /// <summary>
-        /// lblAnimalType control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblAnimalType;
-
-        /// <summary>
-        /// lblCircumstance control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblCircumstance;
-
-        /// <summary>
         /// lblWoundType control.
         /// </summary>
         /// <remarks>
@@ -348,13 +330,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Label lblBleeding;
 
         /// <summary>
-        /// lblBiteCategory control.
+        /// lblCategory control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblBiteCategory;
+        protected global::System.Web.UI.WebControls.Label lblCategory;
 
         /// <summary>
         /// lblWashed control.
@@ -364,6 +346,42 @@ namespace SBI
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblWashed;
+
+        /// <summary>
+        /// lblAnimalType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblAnimalType;
+
+        /// <summary>
+        /// lblAnimalOwnership control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblAnimalOwnership;
+
+        /// <summary>
+        /// lblAnimalStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblAnimalStatus;
+
+        /// <summary>
+        /// lblCircumstances control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblCircumstances;
 
         /// <summary>
         /// lblBP control.
@@ -393,22 +411,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Label lblWeight;
 
         /// <summary>
-        /// lblCapRefill control.
+        /// lblCR control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblCapRefill;
-
-        /// <summary>
-        /// lblRiskClass control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblRiskClass;
+        protected global::System.Web.UI.WebControls.Label lblCR;
 
         /// <summary>
         /// lblDiagnosis control.
@@ -456,13 +465,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Label lblManufacturer;
 
         /// <summary>
-        /// lblVaccineStartDate control.
+        /// lblRegimenStart control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblVaccineStartDate;
+        protected global::System.Web.UI.WebControls.Label lblRegimenStart;
 
         /// <summary>
         /// lblTotalDoses control.
@@ -474,13 +483,22 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Label lblTotalDoses;
 
         /// <summary>
-        /// gvVaccinationSchedule control.
+        /// lblRegimenStatus control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gvVaccinationSchedule;
+        protected global::System.Web.UI.WebControls.Label lblRegimenStatus;
+
+        /// <summary>
+        /// gvSchedule control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gvSchedule;
 
         /// <summary>
         /// lblAnimalObsStatus control.
@@ -492,84 +510,84 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Label lblAnimalObsStatus;
 
         /// <summary>
-        /// lblAnimalObsDate control.
+        /// lblDay14Status control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblAnimalObsDate;
+        protected global::System.Web.UI.WebControls.Label lblDay14Status;
 
         /// <summary>
-        /// lblAnimalObsNotes control.
+        /// lblFollowupDate control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblAnimalObsNotes;
+        protected global::System.Web.UI.WebControls.Label lblFollowupDate;
 
         /// <summary>
-        /// lblVacContinuation control.
+        /// lblFollowupNotes control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblVacContinuation;
+        protected global::System.Web.UI.WebControls.Label lblFollowupNotes;
 
         /// <summary>
-        /// lblCompliance control.
+        /// gvTreatment control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblCompliance;
+        protected global::System.Web.UI.WebControls.GridView gvTreatment;
 
         /// <summary>
-        /// lblMissedDoses control.
+        /// lblHadPrevVaccine control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblMissedDoses;
+        protected global::System.Web.UI.WebControls.Label lblHadPrevVaccine;
 
         /// <summary>
-        /// lblCompletionStatus control.
+        /// lblPrevVaccineType control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblCompletionStatus;
+        protected global::System.Web.UI.WebControls.Label lblPrevVaccineType;
 
         /// <summary>
-        /// lblComplianceRate control.
+        /// lblPrevBrand control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblComplianceRate;
+        protected global::System.Web.UI.WebControls.Label lblPrevBrand;
 
         /// <summary>
-        /// gvTreatmentSummary control.
+        /// lblPrevDoseStatus control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gvTreatmentSummary;
+        protected global::System.Web.UI.WebControls.Label lblPrevDoseStatus;
 
         /// <summary>
-        /// lblAdditionalNotes control.
+        /// lblPrevVaccDate control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblAdditionalNotes;
+        protected global::System.Web.UI.WebControls.Label lblPrevVaccDate;
     }
 }

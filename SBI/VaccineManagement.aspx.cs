@@ -13,9 +13,7 @@ namespace SBI
             ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
 
         private string UserRole => Session["userRole"]?.ToString().ToUpper() ?? "";
-        private bool IsAdmin => UserRole == "A";
-        // Only Admin can add/receive stock
-        public bool CanAddStock => IsAdmin;
+        public bool CanAddStock => UserRole == "A" || UserRole == "C";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -290,6 +288,7 @@ namespace SBI
             txtExpiryDate.Text = "";
             txtQuantity.Text = "";
         }
+
 
         protected string FormatStockStatus(string status)
         {

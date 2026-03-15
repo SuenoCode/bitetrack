@@ -6,44 +6,57 @@
 
     <div class="p-6 font-heading2 text-slate-900">
 
-        <%-- ── Page Header ───────────────────────────────────────────── --%>
+        <%-- ── Page Header ─────────────────────────────────────────── --%>
         <div class="flex justify-between items-start mb-6">
             <div>
                 <h1 class="text-4xl font-bold text-[#0b2a7a] font-hBruns">Reports</h1>
-                <p class="text-slate-500 text-sm mt-1">Generate and export daily inventory, activity, and bite case reports</p>
+                <p class="text-slate-500 text-sm mt-1">Generate and export inventory and bite case reports</p>
             </div>
         </div>
 
-        <%-- ── Tab Navigation ────────────────────────────────────────── --%>
-        <div class="flex gap-2 border-b border-slate-200 pb-px mb-6">
-            <asp:LinkButton ID="tabDailyInventory" runat="server"
-                CausesValidation="false" OnClick="tabDailyInventory_Click" />
-            <asp:LinkButton ID="tabBiteCaseReport" runat="server"
-                CausesValidation="false" OnClick="tabBiteCaseReport_Click" />
+        <%-- ── Two Tab Buttons ─────────────────────────────────────── --%>
+        <div class="flex gap-3 mb-6">
+            <asp:Button ID="btnTabInventory" runat="server"
+                Text="Daily Inventory Summary"
+                CausesValidation="false" OnClick="btnTabInventory_Click"
+                CssClass="rounded-xl border px-6 py-3 text-sm font-semibold transition cursor-pointer shadow-sm" />
+            <asp:Button ID="btnTabBiteCase" runat="server"
+                Text="Bite Case Report"
+                CausesValidation="false" OnClick="btnTabBiteCase_Click"
+                CssClass="rounded-xl border px-6 py-3 text-sm font-semibold transition cursor-pointer shadow-sm" />
         </div>
 
-        <%-- ── Stat Cards ─────────────────────────────────────────────── --%>
+        <%-- ── Stat Cards ──────────────────────────────────────────── --%>
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
             <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
                 <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Active Report</div>
-                <div class="text-2xl font-extrabold text-[#0b2a7a]"><asp:Label ID="lblActiveReport" runat="server" Text="Daily Inventory Summary" /></div>
+                <div class="text-xl font-extrabold text-[#0b2a7a]">
+                    <asp:Label ID="lblActiveReport" runat="server" Text="Daily Inventory Summary" />
+                </div>
             </div>
             <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
                 <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">From Date</div>
-                <div class="text-3xl font-extrabold text-emerald-600"><asp:Label ID="lblFromDate" runat="server" Text="—" /></div>
+                <div class="text-2xl font-extrabold text-emerald-600">
+                    <asp:Label ID="lblFromDate" runat="server" Text="—" />
+                </div>
             </div>
             <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">To Date</div>
-                <div class="text-3xl font-extrabold text-amber-500"><asp:Label ID="lblToDate" runat="server" Text="—" /></div>
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">To Date</div>
+                <div class="text-2xl font-extrabold text-amber-500">
+                    <asp:Label ID="lblToDate" runat="server" Text="—" />
+                </div>
             </div>
             <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
                 <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Records</div>
-                <div class="text-3xl font-extrabold text-indigo-600"><asp:Label ID="lblTotalRecords" runat="server" Text="0" /></div>
+                <div class="text-3xl font-extrabold text-indigo-600">
+                    <asp:Label ID="lblTotalRecords" runat="server" Text="0" />
+                </div>
             </div>
         </div>
 
-        <%-- ── Filter + Export Bar ───────────────────────────────────── --%>
-        <asp:Panel runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-6">
+        <%-- ── Filter + Export Bar ─────────────────────────────────── --%>
+        <asp:Panel runat="server"
+            CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-6">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-3">
                 <h3 class="font-extrabold text-slate-800">Filter Report</h3>
                 <div class="flex gap-2 flex-wrap items-end">
@@ -69,190 +82,228 @@
                         <asp:TextBox ID="txtToDate" runat="server" TextMode="Date"
                             CssClass="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
-                    <asp:Button ID="btnGenerateReport" runat="server" Text="Generate" OnClick="btnGenerateReport_Click"
+                    <asp:Button ID="btnGenerate" runat="server" Text="Generate"
+                        OnClick="btnGenerateReport_Click"
                         CssClass="h-11 rounded-lg bg-blue-600 px-6 font-bold text-white shadow hover:bg-blue-700 transition cursor-pointer self-end" />
-                    <asp:Button ID="btnExportPdf" runat="server" Text="PDF" CausesValidation="false" OnClick="btnExportPdf_Click"
+                    <asp:Button ID="btnExportPdf" runat="server" Text="PDF"
+                        CausesValidation="false" OnClick="btnExportPdf_Click"
                         CssClass="bg-white border border-slate-300 text-red-600 px-4 py-2 rounded-lg text-sm font-bold cursor-pointer hover:bg-red-50 transition self-end" />
-                    <asp:Button ID="btnExportExcel" runat="server" Text="Excel" CausesValidation="false" OnClick="btnExportExcel_Click"
+                    <asp:Button ID="btnExportExcel" runat="server" Text="Excel"
+                        CausesValidation="false" OnClick="btnExportExcel_Click"
                         CssClass="bg-white border border-slate-300 text-emerald-600 px-4 py-2 rounded-lg text-sm font-bold cursor-pointer hover:bg-emerald-50 transition self-end" />
                 </div>
             </div>
         </asp:Panel>
 
-        <%-- ── Generated Report Table (Inventory tab) ─────────────────── --%>
-        <asp:Panel ID="pnlGridReport" runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <%-- Shared message label --%>
+        <asp:Label ID="lblMessage" runat="server"
+            CssClass="block mb-4 text-sm font-semibold text-red-600" />
+
+        <%-- ════════════════════════════════════════════════════════════
+             PANEL A — Daily Inventory Summary
+        ════════════════════════════════════════════════════════════ --%>
+        <asp:Panel ID="pnlInventory" runat="server"
+            CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
-                <h3 class="font-extrabold text-slate-800">Generated Report</h3>
-                <p class="text-slate-500 text-sm mt-1">Filtered report data based on selected date range</p>
+                <h3 class="font-extrabold text-slate-800">Vaccine Inventory</h3>
+                <p class="text-slate-500 text-sm mt-1">Stock movement for the selected date range</p>
             </div>
-            <div class="p-5">
-                <asp:Label ID="lblMessage" runat="server" CssClass="block mb-4 text-sm font-semibold text-red-600" />
-                <asp:GridView ID="gvReport" runat="server" AutoGenerateColumns="true"
+            <div class="p-5 overflow-x-auto">
+                <asp:GridView ID="gvInventory" runat="server" AutoGenerateColumns="true"
                     CssClass="w-full text-sm" GridLines="None">
                     <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
-                    <RowStyle CssClass="border-b border-slate-100 transition-colors" />
-                    <AlternatingRowStyle CssClass="border-b border-slate-100" />
+                    <RowStyle CssClass="border-b border-slate-100" />
+                    <AlternatingRowStyle CssClass="border-b border-slate-100 bg-slate-50/40" />
                     <EmptyDataTemplate>
-                        <div class="p-10 text-center text-slate-400 text-sm">No report data found for the selected date range.</div>
+                        <div class="p-10 text-center text-slate-400 text-sm">No inventory data for the selected range.</div>
                     </EmptyDataTemplate>
                 </asp:GridView>
             </div>
         </asp:Panel>
 
-        <%-- ── Bite Case Report Panel ─────────────────────────────────── --%>
-        <asp:Panel ID="pnlBiteCaseReport" runat="server" Visible="false" CssClass="space-y-6">
+        <%-- ════════════════════════════════════════════════════════════
+             PANEL B — Comprehensive Bite Case Report
+        ════════════════════════════════════════════════════════════ --%>
+        <asp:Panel ID="pnlBiteCase" runat="server" Visible="false" CssClass="space-y-5">
 
-            <%-- Patient Demographics --%>
+            <%-- I. Patient Demographics --%>
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
-                    <span class="w-2 h-5 rounded bg-[#0b2a7a] inline-block"></span>
-                    <h3 class="font-extrabold text-slate-800">Patient Demographics</h3>
+                <div class="px-5 py-3 border-b border-slate-200 bg-[#0b2a7a]">
+                    <h3 class="font-extrabold text-white text-sm tracking-wide">I. &nbsp;Patient Demographics</h3>
                 </div>
                 <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-sm">
-                    <div><span class="font-semibold text-slate-500">Patient ID:</span> <asp:Label ID="lblPatientId" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Full Name:</span> <asp:Label ID="lblPatientName" runat="server" CssClass="text-slate-800 font-bold" /></div>
-                    <div><span class="font-semibold text-slate-500">Date of Birth:</span> <asp:Label ID="lblDob" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Age:</span> <asp:Label ID="lblAge" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Gender:</span> <asp:Label ID="lblGender" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Civil Status:</span> <asp:Label ID="lblCivilStatus" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Contact Number:</span> <asp:Label ID="lblContact" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Occupation:</span> <asp:Label ID="lblOccupation" runat="server" CssClass="text-slate-800" /></div>
-                    <div class="sm:col-span-2 xl:col-span-3"><span class="font-semibold text-slate-500">Address:</span> <asp:Label ID="lblAddress" runat="server" CssClass="text-slate-800" /></div>
-                    <div class="sm:col-span-2 xl:col-span-3"><span class="font-semibold text-slate-500">Emergency Contact:</span> <asp:Label ID="lblEmergencyContact" runat="server" CssClass="text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Patient ID:</span>
+                        <asp:Label ID="lblPatientId" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Full Name:</span>
+                        <asp:Label ID="lblPatientName" runat="server" CssClass="ml-1 text-slate-800 font-bold" /></div>
+                    <div><span class="font-semibold text-slate-500">Date of Birth:</span>
+                        <asp:Label ID="lblDob" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Age:</span>
+                        <asp:Label ID="lblAge" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Gender:</span>
+                        <asp:Label ID="lblGender" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Civil Status:</span>
+                        <asp:Label ID="lblCivilStatus" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Contact Number:</span>
+                        <asp:Label ID="lblContact" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Occupation:</span>
+                        <asp:Label ID="lblOccupation" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div class="sm:col-span-2 xl:col-span-3"><span class="font-semibold text-slate-500">Address:</span>
+                        <asp:Label ID="lblAddress" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div class="sm:col-span-2 xl:col-span-3"><span class="font-semibold text-slate-500">Emergency Contact:</span>
+                        <asp:Label ID="lblEmergencyContact" runat="server" CssClass="ml-1 text-slate-800" /></div>
                 </div>
             </div>
 
-            <%-- Bite Incident Details --%>
+            <%-- II. Bite Incident Details --%>
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
-                    <span class="w-2 h-5 rounded bg-red-500 inline-block"></span>
-                    <h3 class="font-extrabold text-slate-800">Bite Incident Details</h3>
+                <div class="px-5 py-3 border-b border-red-200 bg-red-50">
+                    <h3 class="font-extrabold text-red-700 text-sm tracking-wide">II. &nbsp;Bite Incident Details</h3>
                 </div>
                 <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-sm">
-                    <div><span class="font-semibold text-slate-500">Case Number:</span> <asp:Label ID="lblCaseNumber" runat="server" CssClass="text-slate-800 font-bold" /></div>
-                    <div><span class="font-semibold text-slate-500">Date of Bite:</span> <asp:Label ID="lblBiteDate" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Time of Bite:</span> <asp:Label ID="lblBiteTime" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Place of Bite:</span> <asp:Label ID="lblBitePlace" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Type of Exposure:</span> <asp:Label ID="lblExposureType" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Animal Type:</span> <asp:Label ID="lblAnimalType" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Circumstance:</span> <asp:Label ID="lblCircumstance" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Wound Type:</span> <asp:Label ID="lblWoundType" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Site of Bite:</span> <asp:Label ID="lblBiteSite" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Bleeding:</span> <asp:Label ID="lblBleeding" runat="server" CssClass="text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Case Number:</span>
+                        <asp:Label ID="lblCaseNo" runat="server" CssClass="ml-1 text-slate-800 font-bold" /></div>
+                    <div><span class="font-semibold text-slate-500">Date of Bite:</span>
+                        <asp:Label ID="lblBiteDate" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Time of Bite:</span>
+                        <asp:Label ID="lblBiteTime" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Place of Bite:</span>
+                        <asp:Label ID="lblBitePlace" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Type of Exposure:</span>
+                        <asp:Label ID="lblExposureType" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Wound Type:</span>
+                        <asp:Label ID="lblWoundType" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Site of Bite:</span>
+                        <asp:Label ID="lblBiteSite" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Bleeding:</span>
+                        <asp:Label ID="lblBleeding" runat="server" CssClass="ml-1 text-slate-800" /></div>
                     <div><span class="font-semibold text-slate-500">Category:</span>
-                        <asp:Label ID="lblBiteCategory" runat="server" CssClass="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700" />
-                    </div>
-                    <div><span class="font-semibold text-slate-500">Washed Immediately:</span> <asp:Label ID="lblWashed" runat="server" CssClass="text-slate-800" /></div>
+                        <asp:Label ID="lblCategory" runat="server"
+                            CssClass="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700" /></div>
+                    <div><span class="font-semibold text-slate-500">Washed Immediately:</span>
+                        <asp:Label ID="lblWashed" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Animal Type:</span>
+                        <asp:Label ID="lblAnimalType" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Ownership:</span>
+                        <asp:Label ID="lblAnimalOwnership" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Animal Status:</span>
+                        <asp:Label ID="lblAnimalStatus" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div class="sm:col-span-2 xl:col-span-3"><span class="font-semibold text-slate-500">Circumstances:</span>
+                        <asp:Label ID="lblCircumstances" runat="server" CssClass="ml-1 text-slate-800" /></div>
                 </div>
             </div>
 
-            <%-- Medical Assessment --%>
+            <%-- III. Medical Assessment (VitalSigns + Visit diagnosis + Manifestation) --%>
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
-                    <span class="w-2 h-5 rounded bg-emerald-500 inline-block"></span>
-                    <h3 class="font-extrabold text-slate-800">Medical Assessment</h3>
+                <div class="px-5 py-3 border-b border-emerald-200 bg-emerald-50">
+                    <h3 class="font-extrabold text-emerald-700 text-sm tracking-wide">III. &nbsp;Medical Assessment</h3>
                 </div>
                 <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-sm">
-                    <div><span class="font-semibold text-slate-500">Blood Pressure:</span> <asp:Label ID="lblBP" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Temperature:</span> <asp:Label ID="lblTemp" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Weight:</span> <asp:Label ID="lblWeight" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Capillary Refill:</span> <asp:Label ID="lblCapRefill" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Risk Classification:</span>
-                        <asp:Label ID="lblRiskClass" runat="server" CssClass="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700" />
-                    </div>
-                    <div class="sm:col-span-2 xl:col-span-3"><span class="font-semibold text-slate-500">Diagnosis:</span> <asp:Label ID="lblDiagnosis" runat="server" CssClass="text-slate-800" /></div>
-                    <div class="sm:col-span-2 xl:col-span-3"><span class="font-semibold text-slate-500">Manifestation Symptoms:</span> <asp:Label ID="lblSymptoms" runat="server" CssClass="text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Blood Pressure:</span>
+                        <asp:Label ID="lblBP" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Temperature (°C):</span>
+                        <asp:Label ID="lblTemp" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Weight (kg):</span>
+                        <asp:Label ID="lblWeight" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Capillary Refill:</span>
+                        <asp:Label ID="lblCR" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div class="sm:col-span-2 xl:col-span-3"><span class="font-semibold text-slate-500">Diagnosis:</span>
+                        <asp:Label ID="lblDiagnosis" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div class="sm:col-span-2 xl:col-span-3"><span class="font-semibold text-slate-500">Manifestation / Symptoms:</span>
+                        <asp:Label ID="lblSymptoms" runat="server" CssClass="ml-1 text-slate-800" /></div>
                 </div>
             </div>
 
-            <%-- Vaccination Regimen --%>
+            <%-- IV. Vaccination Regimen (dbo.VaccineRegimen + dbo.Vaccine) --%>
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
-                    <span class="w-2 h-5 rounded bg-indigo-500 inline-block"></span>
-                    <h3 class="font-extrabold text-slate-800">Vaccination Regimen</h3>
+                <div class="px-5 py-3 border-b border-indigo-200 bg-indigo-50">
+                    <h3 class="font-extrabold text-indigo-700 text-sm tracking-wide">IV. &nbsp;Vaccination Regimen</h3>
                 </div>
                 <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-sm">
-                    <div><span class="font-semibold text-slate-500">Regimen Type:</span> <asp:Label ID="lblRegimenType" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Vaccine Name:</span> <asp:Label ID="lblVaccineName" runat="server" CssClass="text-slate-800 font-bold" /></div>
-                    <div><span class="font-semibold text-slate-500">Manufacturer:</span> <asp:Label ID="lblManufacturer" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Start Date:</span> <asp:Label ID="lblVaccineStartDate" runat="server" CssClass="text-slate-800" /></div>
-                    <div><span class="font-semibold text-slate-500">Total Doses:</span> <asp:Label ID="lblTotalDoses" runat="server" CssClass="text-slate-800 font-bold" /></div>
+                    <div><span class="font-semibold text-slate-500">Regimen Type:</span>
+                        <asp:Label ID="lblRegimenType" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Vaccine Name:</span>
+                        <asp:Label ID="lblVaccineName" runat="server" CssClass="ml-1 text-slate-800 font-bold" /></div>
+                    <div><span class="font-semibold text-slate-500">Manufacturer:</span>
+                        <asp:Label ID="lblManufacturer" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Start Date:</span>
+                        <asp:Label ID="lblRegimenStart" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Total Doses:</span>
+                        <asp:Label ID="lblTotalDoses" runat="server" CssClass="ml-1 text-slate-800 font-bold" /></div>
+                    <div><span class="font-semibold text-slate-500">Status:</span>
+                        <asp:Label ID="lblRegimenStatus" runat="server" CssClass="ml-1 text-slate-800" /></div>
                 </div>
             </div>
 
-            <%-- Vaccination Schedule --%>
+            <%-- V. Vaccination Schedule (dbo.ScheduledDose) --%>
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
-                    <h3 class="font-extrabold text-slate-800">Vaccination Schedule & Administration</h3>
-                    <p class="text-slate-500 text-sm mt-1">Per-dose schedule, visit dates, and administering personnel</p>
+                <div class="px-5 py-3 border-b border-slate-200 bg-slate-700">
+                    <h3 class="font-extrabold text-white text-sm tracking-wide">V. &nbsp;Vaccination Schedule &amp; Administration</h3>
                 </div>
-                <div class="p-5">
-                    <asp:GridView ID="gvVaccinationSchedule" runat="server" AutoGenerateColumns="true"
+                <div class="p-5 overflow-x-auto">
+                    <asp:GridView ID="gvSchedule" runat="server" AutoGenerateColumns="true"
                         CssClass="w-full text-sm" GridLines="None">
                         <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
-                        <RowStyle CssClass="border-b border-slate-100 transition-colors" />
+                        <RowStyle CssClass="border-b border-slate-100" />
                         <AlternatingRowStyle CssClass="border-b border-slate-100 bg-slate-50/40" />
                         <EmptyDataTemplate>
-                            <div class="p-10 text-center text-slate-400 text-sm">No vaccination schedule found.</div>
+                            <div class="p-8 text-center text-slate-400 text-sm">No scheduled doses found.</div>
                         </EmptyDataTemplate>
                     </asp:GridView>
                 </div>
             </div>
 
-            <%-- Animal Observation & Compliance --%>
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                    <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
-                        <span class="w-2 h-5 rounded bg-orange-400 inline-block"></span>
-                        <h3 class="font-extrabold text-slate-800">Animal Observation</h3>
-                    </div>
-                    <div class="p-5 grid grid-cols-1 gap-y-3 text-sm">
-                        <div><span class="font-semibold text-slate-500">Observation Status:</span> <asp:Label ID="lblAnimalObsStatus" runat="server" CssClass="text-slate-800" /></div>
-                        <div><span class="font-semibold text-slate-500">Completion Date:</span> <asp:Label ID="lblAnimalObsDate" runat="server" CssClass="text-slate-800" /></div>
-                        <div><span class="font-semibold text-slate-500">Follow-up Notes:</span> <asp:Label ID="lblAnimalObsNotes" runat="server" CssClass="text-slate-800" /></div>
-                        <div><span class="font-semibold text-slate-500">Vaccination Continuation:</span> <asp:Label ID="lblVacContinuation" runat="server" CssClass="text-slate-800" /></div>
-                    </div>
+            <%-- VI. Animal Follow-Up (dbo.Animal + dbo.AnimalFollowUp) --%>
+            <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                <div class="px-5 py-3 border-b border-orange-200 bg-orange-50">
+                    <h3 class="font-extrabold text-orange-700 text-sm tracking-wide">VI. &nbsp;Animal Observation &amp; Follow-Up</h3>
                 </div>
-                <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                    <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
-                        <span class="w-2 h-5 rounded bg-teal-500 inline-block"></span>
-                        <h3 class="font-extrabold text-slate-800">Case Compliance Status</h3>
-                    </div>
-                    <div class="p-5 grid grid-cols-1 gap-y-3 text-sm">
-                        <div><span class="font-semibold text-slate-500">Overall Compliance:</span> <asp:Label ID="lblCompliance" runat="server" CssClass="text-slate-800 font-bold" /></div>
-                        <div><span class="font-semibold text-slate-500">Missed Doses:</span> <asp:Label ID="lblMissedDoses" runat="server" CssClass="text-slate-800" /></div>
-                        <div><span class="font-semibold text-slate-500">Completion Status:</span> <asp:Label ID="lblCompletionStatus" runat="server" CssClass="text-slate-800" /></div>
-                        <div><span class="font-semibold text-slate-500">Compliance Rate:</span> <asp:Label ID="lblComplianceRate" runat="server" CssClass="text-slate-800 font-bold text-emerald-600" /></div>
-                    </div>
+                <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-sm">
+                    <div><span class="font-semibold text-slate-500">Animal Status:</span>
+                        <asp:Label ID="lblAnimalObsStatus" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Day-14 Status:</span>
+                        <asp:Label ID="lblDay14Status" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Follow-up Date:</span>
+                        <asp:Label ID="lblFollowupDate" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div class="sm:col-span-2 xl:col-span-3"><span class="font-semibold text-slate-500">Notes:</span>
+                        <asp:Label ID="lblFollowupNotes" runat="server" CssClass="ml-1 text-slate-800" /></div>
                 </div>
             </div>
 
-            <%-- Treatment Summary --%>
+            <%-- VII. Treatment Summary (dbo.Visit + dbo.Treatment) --%>
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
-                    <h3 class="font-extrabold text-slate-800">Treatment Summary</h3>
-                    <p class="text-slate-500 text-sm mt-1">Visit history and vaccine administration records</p>
+                <div class="px-5 py-3 border-b border-teal-200 bg-teal-50">
+                    <h3 class="font-extrabold text-teal-700 text-sm tracking-wide">VII. &nbsp;Treatment Summary</h3>
                 </div>
-                <div class="p-5">
-                    <asp:GridView ID="gvTreatmentSummary" runat="server" AutoGenerateColumns="true"
+                <div class="p-5 overflow-x-auto">
+                    <asp:GridView ID="gvTreatment" runat="server" AutoGenerateColumns="true"
                         CssClass="w-full text-sm" GridLines="None">
                         <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
-                        <RowStyle CssClass="border-b border-slate-100 transition-colors" />
+                        <RowStyle CssClass="border-b border-slate-100" />
                         <AlternatingRowStyle CssClass="border-b border-slate-100 bg-slate-50/40" />
                         <EmptyDataTemplate>
-                            <div class="p-10 text-center text-slate-400 text-sm">No treatment records found.</div>
+                            <div class="p-8 text-center text-slate-400 text-sm">No treatment records found.</div>
                         </EmptyDataTemplate>
                     </asp:GridView>
                 </div>
             </div>
 
-            <%-- Additional Notes --%>
+            <%-- VIII. Previous Vaccine History (dbo.PreviousVaccineHistory) --%>
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
-                    <h3 class="font-extrabold text-slate-800">Additional Notes</h3>
+                <div class="px-5 py-3 border-b border-purple-200 bg-purple-50">
+                    <h3 class="font-extrabold text-purple-700 text-sm tracking-wide">VIII. &nbsp;Previous Vaccine History</h3>
                 </div>
-                <div class="p-5 text-sm text-slate-700">
-                    <asp:Label ID="lblAdditionalNotes" runat="server" />
+                <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-sm">
+                    <div><span class="font-semibold text-slate-500">Had Previous Vaccine:</span>
+                        <asp:Label ID="lblHadPrevVaccine" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Previous Type:</span>
+                        <asp:Label ID="lblPrevVaccineType" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Brand:</span>
+                        <asp:Label ID="lblPrevBrand" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Dose Status:</span>
+                        <asp:Label ID="lblPrevDoseStatus" runat="server" CssClass="ml-1 text-slate-800" /></div>
+                    <div><span class="font-semibold text-slate-500">Vaccination Date:</span>
+                        <asp:Label ID="lblPrevVaccDate" runat="server" CssClass="ml-1 text-slate-800" /></div>
                 </div>
             </div>
 
