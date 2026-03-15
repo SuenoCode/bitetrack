@@ -796,13 +796,13 @@ namespace SBI
             SqlCommand cmd = new SqlCommand(
                 "SELECT TOP 1 case_no FROM dbo.[Case] WHERE case_no LIKE @prefix ORDER BY case_no DESC",
                 conn, trans);
-            cmd.Parameters.AddWithValue("@prefix", "CASE-" + year + "-%");
+            cmd.Parameters.AddWithValue("@prefix", "C" + year + "-%");
             object result = cmd.ExecuteScalar();
             if (result == null || result == DBNull.Value) return "CASE-" + year + "-0001";
             string[] parts = result.ToString().Split('-');
             int next = 1;
             if (parts.Length == 3) { int n; if (int.TryParse(parts[2], out n)) next = n + 1; }
-            return "CASE-" + year + "-" + next.ToString("D4");
+            return "C" + year + "-" + next.ToString("D4");
         }
 
         private void ShowAlert(string message)

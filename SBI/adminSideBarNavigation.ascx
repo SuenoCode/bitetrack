@@ -65,17 +65,6 @@
             <span class="font-heading2 tracking-widest text-sm">User Management</span>
         </asp:LinkButton>
 
-        <asp:LinkButton ID="lnkAudit" runat="server" 
-            Style="display: flex; align-items: center; gap: 8px;"
-            CssClass="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors w-full"
-            OnClick="btnAudit_Click">
-            <img src="Icons/Audit.svg" class="h-5 w-5 flex-shrink-0" />
-            <span class="font-heading2 tracking-widest text-sm">Audit Logs</span>
-
-        </asp:LinkButton>
-
-
-       
 
     </div>
     <asp:LinkButton ID="lnkSignOut" runat="server"

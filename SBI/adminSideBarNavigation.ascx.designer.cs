@@ -87,15 +87,6 @@ namespace SBI
         protected global::System.Web.UI.WebControls.LinkButton lnkUserManagement;
 
         /// <summary>
-        /// lnkAudit control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton lnkAudit;
-
-        /// <summary>
         /// lnkSignOut control.
         /// </summary>
         /// <remarks>
