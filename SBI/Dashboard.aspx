@@ -25,9 +25,6 @@
                 <button class="bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold cursor-pointer hover:bg-slate-50 transition">
                     Date Range
                 </button>
-                <button class="h-11 rounded-lg bg-blue-600 px-6 font-bold text-white shadow hover:bg-blue-700 transition cursor-pointer">
-                    Generate Report
-                </button>
             </div>
         </div>
 

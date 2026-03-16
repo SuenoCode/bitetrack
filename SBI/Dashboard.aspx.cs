@@ -7,7 +7,6 @@ using System.Web.Services;
 using System.Web.UI;
 using System.Web.Script.Services;
 
-
 namespace SBI
 {
     public partial class Dashboard : System.Web.UI.Page
@@ -26,44 +25,38 @@ namespace SBI
             {
                 string connectionString = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
 
+                // Join PlaceOfBite to get barangay correctly
                 string query = @"
-                    SELECT TOP 10 
-                        patient_id AS 'ID',
-                        FORMAT(date_of_bite, 'MMM dd, yyyy') AS 'Date',
-                        place_of_bite AS 'Barangay'
-                    FROM [Case]
-                    WHERE place_of_bite IS NOT NULL 
-                          AND place_of_bite <> '' 
-                          AND place_of_bite <> 'NULL'
-                          AND patient_id IS NOT NULL
-                          AND patient_id <> ''
-                          AND date_of_bite IS NOT NULL
-                    ORDER BY date_of_bite DESC";
+                    SELECT TOP 10
+                        c.patient_id                          AS 'ID',
+                        FORMAT(c.date_of_bite, 'MMM dd, yyyy') AS 'Date',
+                        ISNULL(pb.barangay, c.place_of_bite)  AS 'Barangay'
+                    FROM dbo.[Case] c
+                    LEFT JOIN dbo.PlaceOfBite pb ON pb.case_id = c.case_id
+                    WHERE c.patient_id IS NOT NULL
+                      AND c.date_of_bite IS NOT NULL
+                    ORDER BY c.date_of_bite DESC";
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
+                using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        conn.Open();
-
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-
-                        gvPreviousCases.DataSource = dt;
-                        gvPreviousCases.DataBind();
-                    }
+                    conn.Open();
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    gvPreviousCases.DataSource = dt;
+                    gvPreviousCases.DataBind();
                 }
             }
             catch (Exception ex)
             {
-                // Log the error and show a friendly message
                 gvPreviousCases.EmptyDataText = "Error loading data: " + ex.Message;
                 gvPreviousCases.DataBind();
             }
         }
 
         [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object GetBarangayCases()
         {
             try
@@ -72,34 +65,35 @@ namespace SBI
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
+                    // Use dbo.PlaceOfBite.barangay directly — no more LIKE hacks
                     string query = @"
-                        SELECT 
-                            CASE 
-                                WHEN place_of_bite LIKE '%San Pedro%' THEN 'San Pedro'
-                                WHEN place_of_bite LIKE '%San Juan%' THEN 'San Juan'
-                                WHEN place_of_bite LIKE '%San Guillermo%' THEN 'San Guillermo'
-                                WHEN place_of_bite LIKE '%CCL%' THEN 'CCL'
-                                WHEN place_of_bite LIKE '%San Jose%' THEN 'San Jose'
-                                WHEN place_of_bite LIKE '%Bombongan%' THEN 'Bombongan'
-                                WHEN place_of_bite LIKE '%Lagundi%' THEN 'Lagundi'
-                                WHEN place_of_bite LIKE '%Maybancal%' THEN 'Maybancal'
+                        SELECT
+                            CASE
+                                WHEN pb.barangay LIKE '%San Pedro%'    THEN 'San Pedro'
+                                WHEN pb.barangay LIKE '%San Juan%'     THEN 'San Juan'
+                                WHEN pb.barangay LIKE '%San Guillermo%'THEN 'San Guillermo'
+                                WHEN pb.barangay LIKE '%CCL%'          THEN 'CCL'
+                                WHEN pb.barangay LIKE '%San Jose%'     THEN 'San Jose'
+                                WHEN pb.barangay LIKE '%Bombongan%'    THEN 'Bombongan'
+                                WHEN pb.barangay LIKE '%Lagundi%'      THEN 'Lagundi'
+                                WHEN pb.barangay LIKE '%Maybancal%'    THEN 'Maybancal'
                                 ELSE 'Other'
                             END AS Barangay,
                             COUNT(*) AS CaseCount
-                        FROM [Case]
-                        WHERE place_of_bite IS NOT NULL 
-                              AND place_of_bite <> '' 
-                              AND place_of_bite <> 'NULL'
-                        GROUP BY 
-                            CASE 
-                                WHEN place_of_bite LIKE '%San Pedro%' THEN 'San Pedro'
-                                WHEN place_of_bite LIKE '%San Juan%' THEN 'San Juan'
-                                WHEN place_of_bite LIKE '%San Guillermo%' THEN 'San Guillermo'
-                                WHEN place_of_bite LIKE '%CCL%' THEN 'CCL'
-                                WHEN place_of_bite LIKE '%San Jose%' THEN 'San Jose'
-                                WHEN place_of_bite LIKE '%Bombongan%' THEN 'Bombongan'
-                                WHEN place_of_bite LIKE '%Lagundi%' THEN 'Lagundi'
-                                WHEN place_of_bite LIKE '%Maybancal%' THEN 'Maybancal'
+                        FROM dbo.[Case] c
+                        INNER JOIN dbo.PlaceOfBite pb ON pb.case_id = c.case_id
+                        WHERE pb.barangay IS NOT NULL
+                          AND pb.barangay <> ''
+                        GROUP BY
+                            CASE
+                                WHEN pb.barangay LIKE '%San Pedro%'    THEN 'San Pedro'
+                                WHEN pb.barangay LIKE '%San Juan%'     THEN 'San Juan'
+                                WHEN pb.barangay LIKE '%San Guillermo%'THEN 'San Guillermo'
+                                WHEN pb.barangay LIKE '%CCL%'          THEN 'CCL'
+                                WHEN pb.barangay LIKE '%San Jose%'     THEN 'San Jose'
+                                WHEN pb.barangay LIKE '%Bombongan%'    THEN 'Bombongan'
+                                WHEN pb.barangay LIKE '%Lagundi%'      THEN 'Lagundi'
+                                WHEN pb.barangay LIKE '%Maybancal%'    THEN 'Maybancal'
                                 ELSE 'Other'
                             END
                         ORDER BY CaseCount DESC";
@@ -107,23 +101,16 @@ namespace SBI
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         conn.Open();
-
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
                             DataTable dt = new DataTable();
                             dt.Load(reader);
 
-                            var result = new
+                            return new
                             {
-                                Barangays = dt.AsEnumerable()
-                                    .Select(r => r["Barangay"].ToString())
-                                    .ToArray(),
-                                CaseCounts = dt.AsEnumerable()
-                                    .Select(r => Convert.ToInt32(r["CaseCount"]))
-                                    .ToArray()
+                                Barangays = dt.AsEnumerable().Select(r => r["Barangay"].ToString()).ToArray(),
+                                CaseCounts = dt.AsEnumerable().Select(r => Convert.ToInt32(r["CaseCount"])).ToArray()
                             };
-
-                            return result;
                         }
                     }
                 }
@@ -135,6 +122,7 @@ namespace SBI
         }
 
         [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object GetDashboardStats()
         {
             try
@@ -146,22 +134,15 @@ namespace SBI
                     conn.Open();
 
                     string query = @"
-                        SELECT 
-                            COUNT(*) AS TotalCases,
-                            COUNT(DISTINCT 
-                                CASE 
-                                    WHEN place_of_bite IS NOT NULL 
-                                         AND place_of_bite <> '' 
-                                         AND place_of_bite <> 'NULL' 
-                                    THEN place_of_bite 
-                                END
-                            ) AS TotalBarangays
-                        FROM [Case]";
+                        SELECT
+                            COUNT(*)                                           AS TotalCases,
+                            COUNT(DISTINCT ISNULL(pb.barangay, ''))           AS TotalBarangays
+                        FROM dbo.[Case] c
+                        LEFT JOIN dbo.PlaceOfBite pb ON pb.case_id = c.case_id";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
+                    using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        SqlDataReader reader = cmd.ExecuteReader();
-
                         if (reader.Read())
                         {
                             return new
@@ -182,6 +163,7 @@ namespace SBI
         }
 
         [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object GetCaseSummary()
         {
             try
@@ -191,21 +173,19 @@ namespace SBI
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     string query = @"
-                        SELECT 
-                            COUNT(*) AS TotalCases,
-                            SUM(CASE WHEN category = 'I' THEN 1 ELSE 0 END) AS CategoryI,
-                            SUM(CASE WHEN category = 'II' THEN 1 ELSE 0 END) AS CategoryII,
-                            SUM(CASE WHEN category = 'III' THEN 1 ELSE 0 END) AS CategoryIII,
-                            SUM(CASE WHEN bleeding = 'Yes' THEN 1 ELSE 0 END) AS WithBleeding,
-                            SUM(CASE WHEN washed = 'Yes' THEN 1 ELSE 0 END) AS WashedWounds
-                        FROM [Case]
-                        WHERE patient_id IS NOT NULL 
-                              AND patient_id <> ''";
+                        SELECT
+                            COUNT(*)                                                   AS TotalCases,
+                            SUM(CASE WHEN category = 'I'   THEN 1 ELSE 0 END)         AS CategoryI,
+                            SUM(CASE WHEN category = 'II'  THEN 1 ELSE 0 END)         AS CategoryII,
+                            SUM(CASE WHEN category = 'III' THEN 1 ELSE 0 END)         AS CategoryIII,
+                            SUM(CASE WHEN bleeding = 'Yes' THEN 1 ELSE 0 END)         AS WithBleeding,
+                            SUM(CASE WHEN washed   = 'Yes' THEN 1 ELSE 0 END)         AS WashedWounds
+                        FROM dbo.[Case]
+                        WHERE patient_id IS NOT NULL AND patient_id <> ''";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         conn.Open();
-
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
@@ -230,6 +210,221 @@ namespace SBI
             {
                 return new { Error = ex.Message };
             }
+        }
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public static object GetMonthlyCases()
+        {
+            try
+            {
+                string connectionString = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
+                string[] months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+                int[] counts = new int[12];
+
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT MONTH(date_of_bite) AS Month, COUNT(*) AS Total
+                        FROM dbo.[Case]
+                        WHERE YEAR(date_of_bite) = YEAR(GETDATE())
+                        GROUP BY MONTH(date_of_bite)";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                            while (dr.Read())
+                                counts[Convert.ToInt32(dr["Month"]) - 1] = Convert.ToInt32(dr["Total"]);
+                    }
+                }
+                return new { Months = months, Counts = counts };
+            }
+            catch (Exception ex) { return new { Error = ex.Message }; }
+        }
+
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public static object GetWeeklyVaccineUsage()
+        {
+            try
+            {
+                string connectionString = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
+                string[] weeks = { "Week 1", "Week 2", "Week 3", "Week 4" };
+                int[] counts = new int[4];
+
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT CEILING(DAY(transaction_date) / 7.0) AS WeekNum, COUNT(*) AS Total
+                        FROM dbo.InventoryLog
+                        WHERE transaction_type = 'Consumed'
+                          AND MONTH(transaction_date) = MONTH(GETDATE())
+                          AND YEAR(transaction_date)  = YEAR(GETDATE())
+                        GROUP BY CEILING(DAY(transaction_date) / 7.0)";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        using (SqlDataReader dr = cmd.ExecuteReader())
+                            while (dr.Read())
+                            {
+                                int w = Convert.ToInt32(dr["WeekNum"]);
+                                if (w >= 1 && w <= 4) counts[w - 1] = Convert.ToInt32(dr["Total"]);
+                            }
+                    }
+                }
+                return new { Weeks = weeks, Counts = counts };
+            }
+            catch (Exception ex) { return new { Error = ex.Message }; }
+        }
+
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public static object GetCasesByCategory()
+        {
+            try
+            {
+                string connectionString = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT
+                            CASE category
+                                WHEN 'I'   THEN 'Category I'
+                                WHEN 'II'  THEN 'Category II'
+                                WHEN 'III' THEN 'Category III'
+                                ELSE 'Unknown'
+                            END AS Label,
+                            COUNT(*) AS Total
+                        FROM dbo.[Case]
+                        WHERE category IS NOT NULL AND category <> ''
+                        GROUP BY category
+                        ORDER BY category";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        DataTable dt = new DataTable();
+                        new SqlDataAdapter(cmd).Fill(dt);
+                        return new
+                        {
+                            Labels = dt.AsEnumerable().Select(r => r["Label"].ToString()).ToArray(),
+                            Counts = dt.AsEnumerable().Select(r => Convert.ToInt32(r["Total"])).ToArray()
+                        };
+                    }
+                }
+            }
+            catch (Exception ex) { return new { Error = ex.Message }; }
+        }
+
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public static object GetCasesByAnimalType()
+        {
+            try
+            {
+                string connectionString = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT
+                            CASE
+                                WHEN LOWER(animal_type) = 'dog' THEN 'Dog'
+                                WHEN LOWER(animal_type) = 'cat' THEN 'Cat'
+                                ELSE 'Others'
+                            END AS Label,
+                            COUNT(*) AS Total
+                        FROM dbo.Animal
+                        WHERE animal_type IS NOT NULL AND animal_type <> ''
+                        GROUP BY
+                            CASE
+                                WHEN LOWER(animal_type) = 'dog' THEN 'Dog'
+                                WHEN LOWER(animal_type) = 'cat' THEN 'Cat'
+                                ELSE 'Others'
+                            END
+                        ORDER BY Total DESC";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        DataTable dt = new DataTable();
+                        new SqlDataAdapter(cmd).Fill(dt);
+                        return new
+                        {
+                            Labels = dt.AsEnumerable().Select(r => r["Label"].ToString()).ToArray(),
+                            Counts = dt.AsEnumerable().Select(r => Convert.ToInt32(r["Total"])).ToArray()
+                        };
+                    }
+                }
+            }
+            catch (Exception ex) { return new { Error = ex.Message }; }
+        }
+
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public static object GetCasesByExposureType()
+        {
+            try
+            {
+                string connectionString = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT
+                            ISNULL(NULLIF(type_of_exposure,''), 'Unknown') AS Label,
+                            COUNT(*) AS Total
+                        FROM dbo.[Case]
+                        GROUP BY type_of_exposure
+                        ORDER BY Total DESC";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        DataTable dt = new DataTable();
+                        new SqlDataAdapter(cmd).Fill(dt);
+                        return new
+                        {
+                            Labels = dt.AsEnumerable().Select(r => r["Label"].ToString()).ToArray(),
+                            Counts = dt.AsEnumerable().Select(r => Convert.ToInt32(r["Total"])).ToArray()
+                        };
+                    }
+                }
+            }
+            catch (Exception ex) { return new { Error = ex.Message }; }
+        }
+
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public static object GetCasesByWoundType()
+        {
+            try
+            {
+                string connectionString = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT
+                            ISNULL(NULLIF(wound_type,''), 'Unknown') AS Label,
+                            COUNT(*) AS Total
+                        FROM dbo.[Case]
+                        WHERE wound_type IS NOT NULL AND wound_type <> ''
+                        GROUP BY wound_type
+                        ORDER BY Total DESC";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        conn.Open();
+                        DataTable dt = new DataTable();
+                        new SqlDataAdapter(cmd).Fill(dt);
+                        return new
+                        {
+                            Labels = dt.AsEnumerable().Select(r => r["Label"].ToString()).ToArray(),
+                            Counts = dt.AsEnumerable().Select(r => Convert.ToInt32(r["Total"])).ToArray()
+                        };
+                    }
+                }
+            }
+            catch (Exception ex) { return new { Error = ex.Message }; }
         }
     }
 }

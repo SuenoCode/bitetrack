@@ -888,7 +888,7 @@ namespace SBI
         // ── Excel Helper ──────────────────────────────────────────────
         private void ExportToExcel(DataTable dt, string title, DateTime from, DateTime to)
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage.License.SetNonCommercialPersonal("SBI Medical");
             using (ExcelPackage pkg = new ExcelPackage())
             {
                 ExcelWorksheet ws = pkg.Workbook.Worksheets.Add("Report");
