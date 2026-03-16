@@ -15,45 +15,10 @@ namespace SBI
         {
             if (!IsPostBack)
             {
-                BindPreviousCases();
             }
         }
 
-        private void BindPreviousCases()
-        {
-            try
-            {
-                string connectionString = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
-
-                // Join PlaceOfBite to get barangay correctly
-                string query = @"
-                    SELECT TOP 10
-                        c.patient_id                          AS 'ID',
-                        FORMAT(c.date_of_bite, 'MMM dd, yyyy') AS 'Date',
-                        ISNULL(pb.barangay, c.place_of_bite)  AS 'Barangay'
-                    FROM dbo.[Case] c
-                    LEFT JOIN dbo.PlaceOfBite pb ON pb.case_id = c.case_id
-                    WHERE c.patient_id IS NOT NULL
-                      AND c.date_of_bite IS NOT NULL
-                    ORDER BY c.date_of_bite DESC";
-
-                using (SqlConnection conn = new SqlConnection(connectionString))
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    conn.Open();
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    gvPreviousCases.DataSource = dt;
-                    gvPreviousCases.DataBind();
-                }
-            }
-            catch (Exception ex)
-            {
-                gvPreviousCases.EmptyDataText = "Error loading data: " + ex.Message;
-                gvPreviousCases.DataBind();
-            }
-        }
+       
 
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]

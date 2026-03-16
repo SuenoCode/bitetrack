@@ -236,6 +236,7 @@
     <Content Include="Icons\unhide.png" />
     <Content Include="Icons\userManagement.svg" />
     <Content Include="Icons\vaccineManagement.svg" />
+    <Content Include="Icons\warning.svg" />
     <Content Include="Login.aspx" />
     <Content Include="Home.aspx" />
     <Content Include="MapContent\JavaScript.js" />

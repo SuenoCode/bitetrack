@@ -190,17 +190,14 @@ namespace SBI
                     txtPreviewContactNo.Text = dr["contact_no"].ToString();
                     ddlPreviewOccupation.SelectedValue = SafeDropdownValue(ddlPreviewOccupation, dr["occupation"].ToString());
 
-                    // Address (dbo.Address)
                     txtPreviewHouseNo.Text = dr["house_no"] == DBNull.Value ? "" : dr["house_no"].ToString();
                     txtPreviewStreet.Text = dr["street"] == DBNull.Value ? "" : dr["street"].ToString();
                     txtPreviewBarangay.Text = dr["barangay"] == DBNull.Value ? "" : dr["barangay"].ToString();
                     txtPreviewCityProvince.Text = dr["city_province"] == DBNull.Value ? "" : dr["city_province"].ToString();
 
-                    // Emergency Contact (dbo.EmergencyContact)
                     txtPreviewEmergencyPerson.Text = dr["emergency_contact_person"] == DBNull.Value ? "" : dr["emergency_contact_person"].ToString();
                     txtPreviewEmergencyNo.Text = dr["emergency_contact_number"] == DBNull.Value ? "" : dr["emergency_contact_number"].ToString();
 
-                    // Vitals
                     txtPreviewBP.Text = dr["blood_pressure"] == DBNull.Value ? "" : dr["blood_pressure"].ToString();
                     txtPreviewTemp.Text = dr["temperature"] == DBNull.Value ? "" : dr["temperature"].ToString();
                     txtPreviewWeight.Text = dr["wt"] == DBNull.Value ? "" : dr["wt"].ToString();
@@ -262,7 +259,6 @@ namespace SBI
                             ? biteTime.ToString(@"hh\:mm") : "";
                     }
 
-                    // Place of Bite (dbo.PlaceOfBite)
                     txtPreviewCasePlaceHouseNo.Text = dr["house_no"] == DBNull.Value ? "" : dr["house_no"].ToString();
                     txtPreviewCasePlaceStreet.Text = dr["street"] == DBNull.Value ? "" : dr["street"].ToString();
                     txtPreviewCasePlaceBarangay.Text = dr["barangay"] == DBNull.Value ? "" : dr["barangay"].ToString();
@@ -294,7 +290,6 @@ namespace SBI
                 {
                     string pid = txtPreviewPatientId.Text.Trim();
 
-                    // UPDATE Patient
                     new SqlCommand(@"
                         UPDATE dbo.Patient
                         SET fname=@fn, lname=@ln, date_of_birth=@dob, gender=@g,
@@ -313,7 +308,6 @@ namespace SBI
                         }
                     }.ExecuteNonQuery();
 
-                    // UPSERT Address
                     UpsertRecord(conn, trans,
                         "SELECT COUNT(*) FROM dbo.Address WHERE patient_id=@k",
                         "UPDATE dbo.Address SET house_no=@h,street=@s,barangay=@b,city_province=@c WHERE patient_id=@k",
@@ -322,12 +316,10 @@ namespace SBI
                         txtPreviewHouseNo.Text.Trim(), txtPreviewStreet.Text.Trim(),
                         txtPreviewBarangay.Text.Trim(), txtPreviewCityProvince.Text.Trim());
 
-                    // UPSERT EmergencyContact
                     UpsertEC(conn, trans, pid,
                         txtPreviewEmergencyPerson.Text.Trim(),
                         txtPreviewEmergencyNo.Text.Trim());
 
-                    // UPSERT VitalSigns
                     UpsertVitals(conn, trans, pid,
                         txtPreviewBP.Text.Trim(),
                         txtPreviewTemp.Text.Trim(),
@@ -357,7 +349,6 @@ namespace SBI
             {
                 TimeSpan biteTime;
                 if (!TimeSpan.TryParse(txtPreviewCaseTimeOfBite.Text, out biteTime)) { ShowAlert("Invalid Time of Bite.", "warning"); return; }
-                // If bite date is today, time cannot be in the future
                 if (biteDate.Date == DateTime.Today && biteTime > DateTime.Now.TimeOfDay)
                 { ShowAlert("Time of Bite cannot be a future time.", "warning"); return; }
                 timeValue = biteTime;
@@ -371,7 +362,6 @@ namespace SBI
                 {
                     int caseId = Convert.ToInt32(txtPreviewCaseId.Text.Trim());
 
-                    // UPDATE Case
                     new SqlCommand(@"
                         UPDATE dbo.[Case]
                         SET date_of_bite=@d, time_of_bite=@t, type_of_exposure=@et,
@@ -392,7 +382,6 @@ namespace SBI
                         }
                     }.ExecuteNonQuery();
 
-                    // UPSERT PlaceOfBite
                     UpsertPlaceOfBite(conn, trans, caseId,
                         txtPreviewCasePlaceHouseNo.Text.Trim(), txtPreviewCasePlaceStreet.Text.Trim(),
                         txtPreviewCasePlaceBarangay.Text.Trim(), txtPreviewCasePlaceCity.Text.Trim());
@@ -450,7 +439,7 @@ namespace SBI
                 SqlTransaction trans = conn.BeginTransaction();
                 try
                 {
-                    // INSERT Patient — do NOT pass patient_id so the DEFAULT sequence fires
+                    // ── INSERT Patient ──────────────────────────────────────
                     new SqlCommand(@"
                         INSERT INTO dbo.Patient (fname,lname,date_of_birth,gender,civil_status,contact_no,occupation,date_recorded)
                         VALUES (@fn,@ln,@dob,@g,@cs,@cn,@oc,GETDATE())", conn, trans)
@@ -466,12 +455,11 @@ namespace SBI
                         }
                     }.ExecuteNonQuery();
 
-                    // Read back the generated patient_id (the sequence DEFAULT just created it)
                     string newPatientId = new SqlCommand(
                         "SELECT TOP 1 patient_id FROM dbo.Patient ORDER BY date_recorded DESC",
                         conn, trans).ExecuteScalar().ToString();
 
-                    // INSERT Address
+                    // ── INSERT Address ──────────────────────────────────────
                     new SqlCommand(@"
                         INSERT INTO dbo.Address (patient_id,house_no,street,barangay,city_province)
                         VALUES (@pid,@h,@s,@b,@c)", conn, trans)
@@ -485,7 +473,7 @@ namespace SBI
                         }
                     }.ExecuteNonQuery();
 
-                    // INSERT EmergencyContact
+                    // ── INSERT EmergencyContact ─────────────────────────────
                     new SqlCommand(@"
                         INSERT INTO dbo.EmergencyContact (patient_id,emergency_contact_person,emergency_contact_number)
                         VALUES (@pid,@p,@n)", conn, trans)
@@ -497,7 +485,7 @@ namespace SBI
                         }
                     }.ExecuteNonQuery();
 
-                    // INSERT VitalSigns (optional)
+                    // ── INSERT VitalSigns (optional) ────────────────────────
                     if (!string.IsNullOrWhiteSpace(txtBloodPressure.Text) ||
                         !string.IsNullOrWhiteSpace(txtTemperature.Text) ||
                         !string.IsNullOrWhiteSpace(txtWeight.Text))
@@ -508,12 +496,12 @@ namespace SBI
                             txtWeight.Text.Trim());
                     }
 
-                    // Generate case_no using SEQUENCE — format: C2026-0001
+                    // ── Generate case_no using SEQUENCE ────────────────────
                     string newCaseNo = new SqlCommand(
                         "SELECT 'C' + CAST(YEAR(GETDATE()) AS VARCHAR) + '-' + RIGHT('0000' + CAST(NEXT VALUE FOR dbo.SeqCase AS VARCHAR), 4)",
                         conn, trans).ExecuteScalar().ToString();
 
-                    // INSERT Case — use SCOPE_IDENTITY() to get case_id (no trigger conflict)
+                    // ── INSERT Case ─────────────────────────────────────────
                     SqlCommand cmdCase = new SqlCommand(@"
                         INSERT INTO dbo.[Case]
                         (patient_id,case_no,date_of_bite,time_of_bite,type_of_exposure,wound_type,bleeding,site_of_bite,category,washed)
@@ -531,12 +519,12 @@ namespace SBI
                     cmdCase.Parameters.AddWithValue("@w", GetWashed());
                     int newCaseId = Convert.ToInt32(cmdCase.ExecuteScalar());
 
-                    // INSERT PlaceOfBite
+                    // ── INSERT PlaceOfBite ──────────────────────────────────
                     UpsertPlaceOfBite(conn, trans, newCaseId,
                         txtPlaceHouseNo.Text.Trim(), txtPlaceStreet.Text.Trim(),
                         txtPlaceBarangay.Text.Trim(), txtPlaceCity.Text.Trim());
 
-                    // INSERT Animal
+                    // ── INSERT Animal ───────────────────────────────────────
                     new SqlCommand(@"
                         INSERT INTO dbo.Animal (case_id,animal_type,ownership,animal_status,circumstances)
                         VALUES (@cid,@at,@ow,@as,@ci)", conn, trans)
@@ -550,7 +538,7 @@ namespace SBI
                         }
                     }.ExecuteNonQuery();
 
-                    // INSERT Manifestation
+                    // ── INSERT Manifestation ────────────────────────────────
                     string symptom = GetManifestation();
                     if (!string.IsNullOrEmpty(symptom) && symptom != "None")
                     {
@@ -565,6 +553,30 @@ namespace SBI
                         }.ExecuteNonQuery();
                     }
 
+                    // ── AUTO-GENERATE Initial Visit ─────────────────────────
+                    // Derive a basic initial diagnosis from the category selected.
+                    // dose_day is set to 1 (first dose / Day 0 of PEP).
+                    // status defaults to 'Completed' for the initial consultation visit.
+                    string initialDiagnosis = BuildInitialDiagnosis(GetSelectedCategory(), GetBitingAnimal());
+
+                    new SqlCommand(@"
+                        INSERT INTO dbo.Visit
+                            (case_id, visit_type, visit_date, diagnosis, manifestation_notes, status)
+                        VALUES
+                            (@cid, 'Initial Visit', @vdate, @diag, @notes, 'Completed')",
+                        conn, trans)
+                    {
+                        Parameters = {
+                            new SqlParameter("@cid",   newCaseId),
+                            new SqlParameter("@vdate", biteDateTime.Date),
+                            new SqlParameter("@diag",  (object)initialDiagnosis ?? DBNull.Value),
+                            new SqlParameter("@notes", string.IsNullOrWhiteSpace(symptom) || symptom == "None"
+                                                            ? (object)DBNull.Value
+                                                            : (object)symptom)
+                        }
+                    }.ExecuteNonQuery();
+                    // ───────────────────────────────────────────────────────
+
                     trans.Commit();
                     FBindGrid();
                     ClearFormFields();
@@ -573,6 +585,28 @@ namespace SBI
                     ShowAlert("Patient Registered Successfully", "success");
                 }
                 catch (Exception ex) { trans.Rollback(); ShowAlert(ex.Message.Replace("'", ""), "error"); }
+            }
+        }
+
+        /// <summary>
+        /// Builds a plain-text initial diagnosis string based on the WHO exposure
+        /// category and biting animal — used to pre-fill Visit.diagnosis on save.
+        /// </summary>
+        private string BuildInitialDiagnosis(string category, string animalType)
+        {
+            string cat = string.IsNullOrWhiteSpace(category) ? "" : category.Trim().ToUpper();
+            string animal = string.IsNullOrWhiteSpace(animalType) ? "animal" : animalType.Trim();
+
+            switch (cat)
+            {
+                case "I":
+                    return $"WHO Category I exposure — {animal} contact, no skin break. No PEP indicated.";
+                case "II":
+                    return $"WHO Category II exposure — {animal} bite/scratch with minor skin break. PEP initiated.";
+                case "III":
+                    return $"WHO Category III exposure — {animal} bite/scratch penetrating skin or mucous membrane contact. Urgent PEP initiated.";
+                default:
+                    return $"Animal bite exposure — {animal}. Category pending assessment.";
             }
         }
 
@@ -599,7 +633,7 @@ namespace SBI
             ddlManifestation.SelectedIndex = 0;
         }
 
-        // ── Upsert helpers ─────────────────────────────────────────────────
+        // ── Upsert helpers ──────────────────────────────────────────────────
 
         private void UpsertRecord(SqlConnection conn, SqlTransaction trans,
             string checkSql, string updateSql, string insertSql,
@@ -669,7 +703,7 @@ namespace SBI
             cmd.ExecuteNonQuery();
         }
 
-        // ── Helpers ────────────────────────────────────────────────────────
+        // ── Helpers ─────────────────────────────────────────────────────────
 
         private void ShowRecordPreview() { pnlRecordPreviewContainer.Visible = true; }
 
@@ -704,7 +738,8 @@ namespace SBI
 
         private void ShowAlert(string message, string type = "info")
         {
-            string safe = message.Replace("\\", "\\\\").Replace("'", "\\'").Replace(Environment.NewLine, " ").Replace("\r", "").Replace("\n", " ");
+            string safe = message.Replace("\\", "\\\\").Replace("'", "\\'")
+                                 .Replace(Environment.NewLine, " ").Replace("\r", "").Replace("\n", " ");
             ClientScript.RegisterStartupScript(this.GetType(), Guid.NewGuid().ToString(),
                 "showNotifyModal('" + safe + "','" + type + "');", true);
         }
