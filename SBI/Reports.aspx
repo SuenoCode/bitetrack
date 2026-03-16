@@ -10,7 +10,7 @@
         <%-- Page Header --%>
         <div class="flex justify-between items-start mb-6">
             <div>
-                 <h1 class="text-4xl text-[#0b2a7a] font-hBruns tracking-widest">Reports</h1>
+                 <h1 class="text-4xl text-[#0b2a7a] font-heading2 tracking-widest">Reports</h1>
                 <p class="text-slate-500 text-sm mt-1">Generate and export inventory and bite case reports</p>
             </div>
         </div>

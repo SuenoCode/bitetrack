@@ -9,7 +9,7 @@
         <%-- ── Page Header ───────────────────────────────────────────── --%>
         <div class="flex justify-between items-start mb-6">
             <div>
-                <h1 class="text-4xl text-[#0b2a7a] font-hBruns tracking-widest">Case Surveillance</h1>
+                <h1 class="text-4xl text-[#0b2a7a] font-heading2 tracking-widest">Case Surveillance</h1>
                 <p class="text-slate-500 text-sm mt-1">Monitor patient cases, manage protocols, track daily administration, and record animal follow-ups.</p>
             </div>
         </div>

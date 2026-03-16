@@ -350,6 +350,8 @@
     <Content Include="Fonts\Brunson.ttf" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\SBI20260304231953 - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\SBI20260316113323 - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\SBI20260316113323 - Web Deploy1.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

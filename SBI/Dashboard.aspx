@@ -22,11 +22,9 @@
         <!-- Header -->
         <div class="flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-head1 font-bold text-slate-800">Dashboard</h1>
-                <p class="text-gray-500 text-sm">
-                    SBI Medical - Morong Branch Today:
-                    <span id="today-date" class="font-medium"></span>
-                </p>
+                <h1 class="text-4xl text-[#0b2a7a] font-heading2 tracking-widest">Dashboard</h1>
+<p class="text-slate-500 text-sm mt-1">SBI Medical - Morong Branch Today:</p>
+
             </div>
 
         </div>

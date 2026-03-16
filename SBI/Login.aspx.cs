@@ -41,7 +41,7 @@ namespace SBI
 
                         // A = Admin, B = Admin Assistant, C = Vaccinator
                         if (role == "A")
-                            Response.Redirect("UserManagement.aspx");
+                            Response.Redirect("Dashboard.aspx");
                         else if (role == "B" || role == "C")
                             Response.Redirect("Dashboard.aspx");
                         else

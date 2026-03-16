@@ -70,7 +70,7 @@
 
         <div class="flex justify-between items-start mb-6">
             <div>
-                <h1 class="text-4xl text-[#0b2a7a] font-hBruns tracking-widest">Patient Registration</h1>
+                <h1 class="text-4xl text-[#0b2a7a] font-heading2 tracking-widest">Patient Registration</h1>
                 <p class="text-slate-500 text-sm mt-1">Register patients, manage bite cases, and update records.</p>
             </div>
         </div>
@@ -82,7 +82,7 @@
                 onclick="showPanel('viewPatientPanel')">
                 View Patient / Case Details
             </button>
-            <button type="button" id="btnAddPanel"
+            <button type="button" id="btnAddPanel" runat ="server"
                 class="panel-tab h-11 rounded-lg px-6 font-bold text-sm transition cursor-pointer border"
                 onclick="showPanel('addPatientPanel')">
                 Add New Patient / Case

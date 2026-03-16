@@ -12,6 +12,17 @@ namespace SBI
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (Session["userRole"] == null)
+            { Response.Redirect("Login.aspx"); return; }
+
+            string role = Session["userRole"].ToString().ToUpper();
+            if (role != "A" && role != "B" && role != "C")
+            { Response.Redirect("Login.aspx"); return; }
+
+
+            // Always runs on every request including postbacks
+            btnAddPanel.Visible = (role != "C");
+
             if (!IsPostBack)
             {
                 FBindGrid();
@@ -116,6 +127,13 @@ namespace SBI
         {
             if (e.CommandName == "EditPatient")
             {
+                string role = Session["userRole"]?.ToString().ToUpper() ?? "";
+                if (role == "C")
+                {
+                    ShowAlert("You do not have permission to edit patient records.", "error");
+                    return;
+                }
+
                 string patientId = e.CommandArgument.ToString();
                 hfSelectedPatientId.Value = patientId;
                 hfSelectedCaseId.Value = "";
@@ -130,6 +148,13 @@ namespace SBI
         {
             if (e.CommandName == "EditCase")
             {
+                string role = Session["userRole"]?.ToString().ToUpper() ?? "";
+                if (role == "C")
+                {
+                    ShowAlert("You do not have permission to edit case records.", "error");
+                    return;
+                }
+
                 int caseId = Convert.ToInt32(e.CommandArgument);
                 hfSelectedCaseId.Value = caseId.ToString();
                 hfSelectedPatientId.Value = "";
@@ -203,6 +228,9 @@ namespace SBI
                     txtPreviewWeight.Text = dr["wt"] == DBNull.Value ? "" : dr["wt"].ToString();
                     txtPreviewCapillaryRefill.Text = "";
                     txtPreviewDateAdded.Text = dr["date_recorded"] == DBNull.Value ? "" : Convert.ToDateTime(dr["date_recorded"]).ToString("MMM dd, yyyy");
+
+                    string role = Session["userRole"]?.ToString().ToUpper() ?? "";
+                    btnPreviewUpdatePatient.Visible = (role != "C");
                 }
             }
         }
@@ -270,12 +298,17 @@ namespace SBI
                     txtPreviewCaseSiteOfBite.Text = dr["site_of_bite"] == DBNull.Value ? "" : dr["site_of_bite"].ToString();
                     ddlPreviewCaseCategory.SelectedValue = SafeDropdownValue(ddlPreviewCaseCategory, dr["category"].ToString());
                     ddlPreviewCaseWashed.SelectedValue = SafeDropdownValue(ddlPreviewCaseWashed, dr["washed"].ToString());
+
+                    string role = Session["userRole"]?.ToString().ToUpper() ?? "";
+                    btnPreviewUpdateCase.Visible = (role != "C");
                 }
             }
         }
 
         protected void btnPreviewUpdatePatient_Click(object sender, EventArgs e)
         {
+            string role = Session["userRole"]?.ToString().ToUpper() ?? "";
+            if (role == "C") { ShowAlert("You do not have permission to update patient records.", "error"); return; }
             if (string.IsNullOrWhiteSpace(txtPreviewPatientId.Text)) { ShowAlert("No patient selected."); return; }
 
             DateTime dob;
@@ -338,6 +371,8 @@ namespace SBI
 
         protected void btnPreviewUpdateCase_Click(object sender, EventArgs e)
         {
+            string role = Session["userRole"]?.ToString().ToUpper() ?? "";
+            if (role == "C") { ShowAlert("You do not have permission to update case records.", "error"); return; }
             if (string.IsNullOrWhiteSpace(txtPreviewCaseId.Text)) { ShowAlert("No case selected."); return; }
 
             DateTime biteDate;
@@ -427,6 +462,9 @@ namespace SBI
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
+            string role = Session["userRole"]?.ToString().ToUpper() ?? "";
+            if (role == "C") { ShowAlert("You do not have permission to register patients.", "error"); return; }
+
             DateTime dob, biteDateTime;
             if (!DateTime.TryParse(txtDOB.Text, out dob)) { ShowAlert("Invalid Date of Birth", "warning"); return; }
             if (dob > DateTime.Today) { ShowAlert("Date of Birth cannot be a future date.", "warning"); return; }
@@ -439,7 +477,6 @@ namespace SBI
                 SqlTransaction trans = conn.BeginTransaction();
                 try
                 {
-                    // ── INSERT Patient ──────────────────────────────────────
                     new SqlCommand(@"
                         INSERT INTO dbo.Patient (fname,lname,date_of_birth,gender,civil_status,contact_no,occupation,date_recorded)
                         VALUES (@fn,@ln,@dob,@g,@cs,@cn,@oc,GETDATE())", conn, trans)
@@ -459,7 +496,6 @@ namespace SBI
                         "SELECT TOP 1 patient_id FROM dbo.Patient ORDER BY date_recorded DESC",
                         conn, trans).ExecuteScalar().ToString();
 
-                    // ── INSERT Address ──────────────────────────────────────
                     new SqlCommand(@"
                         INSERT INTO dbo.Address (patient_id,house_no,street,barangay,city_province)
                         VALUES (@pid,@h,@s,@b,@c)", conn, trans)
@@ -473,7 +509,6 @@ namespace SBI
                         }
                     }.ExecuteNonQuery();
 
-                    // ── INSERT EmergencyContact ─────────────────────────────
                     new SqlCommand(@"
                         INSERT INTO dbo.EmergencyContact (patient_id,emergency_contact_person,emergency_contact_number)
                         VALUES (@pid,@p,@n)", conn, trans)
@@ -485,7 +520,6 @@ namespace SBI
                         }
                     }.ExecuteNonQuery();
 
-                    // ── INSERT VitalSigns (optional) ────────────────────────
                     if (!string.IsNullOrWhiteSpace(txtBloodPressure.Text) ||
                         !string.IsNullOrWhiteSpace(txtTemperature.Text) ||
                         !string.IsNullOrWhiteSpace(txtWeight.Text))
@@ -496,12 +530,10 @@ namespace SBI
                             txtWeight.Text.Trim());
                     }
 
-                    // ── Generate case_no using SEQUENCE ────────────────────
                     string newCaseNo = new SqlCommand(
                         "SELECT 'C' + CAST(YEAR(GETDATE()) AS VARCHAR) + '-' + RIGHT('0000' + CAST(NEXT VALUE FOR dbo.SeqCase AS VARCHAR), 4)",
                         conn, trans).ExecuteScalar().ToString();
 
-                    // ── INSERT Case ─────────────────────────────────────────
                     SqlCommand cmdCase = new SqlCommand(@"
                         INSERT INTO dbo.[Case]
                         (patient_id,case_no,date_of_bite,time_of_bite,type_of_exposure,wound_type,bleeding,site_of_bite,category,washed)
@@ -519,12 +551,10 @@ namespace SBI
                     cmdCase.Parameters.AddWithValue("@w", GetWashed());
                     int newCaseId = Convert.ToInt32(cmdCase.ExecuteScalar());
 
-                    // ── INSERT PlaceOfBite ──────────────────────────────────
                     UpsertPlaceOfBite(conn, trans, newCaseId,
                         txtPlaceHouseNo.Text.Trim(), txtPlaceStreet.Text.Trim(),
                         txtPlaceBarangay.Text.Trim(), txtPlaceCity.Text.Trim());
 
-                    // ── INSERT Animal ───────────────────────────────────────
                     new SqlCommand(@"
                         INSERT INTO dbo.Animal (case_id,animal_type,ownership,animal_status,circumstances)
                         VALUES (@cid,@at,@ow,@as,@ci)", conn, trans)
@@ -538,7 +568,6 @@ namespace SBI
                         }
                     }.ExecuteNonQuery();
 
-                    // ── INSERT Manifestation ────────────────────────────────
                     string symptom = GetManifestation();
                     if (!string.IsNullOrEmpty(symptom) && symptom != "None")
                     {
@@ -553,10 +582,6 @@ namespace SBI
                         }.ExecuteNonQuery();
                     }
 
-                    // ── AUTO-GENERATE Initial Visit ─────────────────────────
-                    // Derive a basic initial diagnosis from the category selected.
-                    // dose_day is set to 1 (first dose / Day 0 of PEP).
-                    // status defaults to 'Completed' for the initial consultation visit.
                     string initialDiagnosis = BuildInitialDiagnosis(GetSelectedCategory(), GetBitingAnimal());
 
                     new SqlCommand(@"
@@ -575,7 +600,6 @@ namespace SBI
                                                             : (object)symptom)
                         }
                     }.ExecuteNonQuery();
-                    // ───────────────────────────────────────────────────────
 
                     trans.Commit();
                     FBindGrid();
@@ -588,10 +612,6 @@ namespace SBI
             }
         }
 
-        /// <summary>
-        /// Builds a plain-text initial diagnosis string based on the WHO exposure
-        /// category and biting animal — used to pre-fill Visit.diagnosis on save.
-        /// </summary>
         private string BuildInitialDiagnosis(string category, string animalType)
         {
             string cat = string.IsNullOrWhiteSpace(category) ? "" : category.Trim().ToUpper();
@@ -599,14 +619,10 @@ namespace SBI
 
             switch (cat)
             {
-                case "I":
-                    return $"WHO Category I exposure — {animal} contact, no skin break. No PEP indicated.";
-                case "II":
-                    return $"WHO Category II exposure — {animal} bite/scratch with minor skin break. PEP initiated.";
-                case "III":
-                    return $"WHO Category III exposure — {animal} bite/scratch penetrating skin or mucous membrane contact. Urgent PEP initiated.";
-                default:
-                    return $"Animal bite exposure — {animal}. Category pending assessment.";
+                case "I": return $"WHO Category I exposure — {animal} contact, no skin break. No PEP indicated.";
+                case "II": return $"WHO Category II exposure — {animal} bite/scratch with minor skin break. PEP initiated.";
+                case "III": return $"WHO Category III exposure — {animal} bite/scratch penetrating skin or mucous membrane contact. Urgent PEP initiated.";
+                default: return $"Animal bite exposure — {animal}. Category pending assessment.";
             }
         }
 
@@ -633,7 +649,7 @@ namespace SBI
             ddlManifestation.SelectedIndex = 0;
         }
 
-        // ── Upsert helpers ──────────────────────────────────────────────────
+        // ── Upsert helpers ───────────────────────────────────────────────────
 
         private void UpsertRecord(SqlConnection conn, SqlTransaction trans,
             string checkSql, string updateSql, string insertSql,
@@ -654,8 +670,9 @@ namespace SBI
 
         private void UpsertEC(SqlConnection conn, SqlTransaction trans, string pid, string person, string number)
         {
-            string chk = "SELECT COUNT(*) FROM dbo.EmergencyContact WHERE patient_id=@pid";
-            bool exists = Convert.ToInt32(new SqlCommand(chk, conn, trans) { Parameters = { new SqlParameter("@pid", pid) } }.ExecuteScalar()) > 0;
+            bool exists = Convert.ToInt32(new SqlCommand(
+                "SELECT COUNT(*) FROM dbo.EmergencyContact WHERE patient_id=@pid", conn, trans)
+            { Parameters = { new SqlParameter("@pid", pid) } }.ExecuteScalar()) > 0;
 
             string sql = exists
                 ? "UPDATE dbo.EmergencyContact SET emergency_contact_person=@p, emergency_contact_number=@n WHERE patient_id=@pid"
@@ -670,8 +687,9 @@ namespace SBI
 
         private void UpsertVitals(SqlConnection conn, SqlTransaction trans, string pid, string bp, string temp, string wt)
         {
-            string chk = "SELECT COUNT(*) FROM dbo.VitalSigns WHERE patient_id=@pid";
-            bool exists = Convert.ToInt32(new SqlCommand(chk, conn, trans) { Parameters = { new SqlParameter("@pid", pid) } }.ExecuteScalar()) > 0;
+            bool exists = Convert.ToInt32(new SqlCommand(
+                "SELECT COUNT(*) FROM dbo.VitalSigns WHERE patient_id=@pid", conn, trans)
+            { Parameters = { new SqlParameter("@pid", pid) } }.ExecuteScalar()) > 0;
 
             string sql = exists
                 ? "UPDATE dbo.VitalSigns SET blood_pressure=@bp,temperature=@t,wt=@w WHERE patient_id=@pid"
@@ -687,8 +705,9 @@ namespace SBI
 
         private void UpsertPlaceOfBite(SqlConnection conn, SqlTransaction trans, int caseId, string h, string s, string b, string c)
         {
-            string chk = "SELECT COUNT(*) FROM dbo.PlaceOfBite WHERE case_id=@cid";
-            bool exists = Convert.ToInt32(new SqlCommand(chk, conn, trans) { Parameters = { new SqlParameter("@cid", caseId) } }.ExecuteScalar()) > 0;
+            bool exists = Convert.ToInt32(new SqlCommand(
+                "SELECT COUNT(*) FROM dbo.PlaceOfBite WHERE case_id=@cid", conn, trans)
+            { Parameters = { new SqlParameter("@cid", caseId) } }.ExecuteScalar()) > 0;
 
             string sql = exists
                 ? "UPDATE dbo.PlaceOfBite SET house_no=@h,street=@s,barangay=@b,city_province=@c WHERE case_id=@cid"
@@ -703,7 +722,7 @@ namespace SBI
             cmd.ExecuteNonQuery();
         }
 
-        // ── Helpers ─────────────────────────────────────────────────────────
+        // ── UI helpers ───────────────────────────────────────────────────────
 
         private void ShowRecordPreview() { pnlRecordPreviewContainer.Visible = true; }
 

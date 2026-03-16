@@ -51,6 +51,15 @@ namespace SBI
         protected global::System.Web.UI.WebControls.HiddenField hfEditMode;
 
         /// <summary>
+        /// btnAddPanel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlButton btnAddPanel;
+
+        /// <summary>
         /// txtFirstName control.
         /// </summary>
         /// <remarks>
