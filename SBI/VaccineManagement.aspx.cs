@@ -30,6 +30,7 @@ namespace SBI
             }
         }
 
+
         private void ShowDashboard()
         {
             panelOverview.Visible = true;
@@ -303,10 +304,12 @@ namespace SBI
             return $"<span class=\"{css}\">{System.Web.HttpUtility.HtmlEncode(status)}</span>";
         }
 
-        private void ShowAlert(string message)
+        private void ShowAlert(string message, string type = "info")
         {
-            ClientScript.RegisterStartupScript(GetType(), "alert",
-                $"alert('{message.Replace("'", "\\'")}');", true);
+            string safe = message.Replace("\\", "\\\\").Replace("'", "\\'")
+                                 .Replace(Environment.NewLine, " ").Replace("\r", "").Replace("\n", " ");
+            ClientScript.RegisterStartupScript(this.GetType(), Guid.NewGuid().ToString(),
+                "showNotifyModal('" + safe + "','" + type + "');", true);
         }
     }
 }

@@ -471,7 +471,11 @@ namespace SBI
             if (!DateTime.TryParse(txtDOB.Text, out dob)) { ShowAlert("Invalid Date of Birth", "warning"); return; }
             if (dob > DateTime.Today) { ShowAlert("Date of Birth cannot be a future date.", "warning"); return; }
             if (!DateTime.TryParse(txtBiteDateTime.Text, out biteDateTime)) { ShowAlert("Invalid Bite Date and Time", "warning"); return; }
-            if (biteDateTime > DateTime.Now) { ShowAlert("Date and Time of Bite cannot be in the future.", "warning"); return; }
+            if (biteDateTime > DateTime.Now.AddMinutes(1))
+            {
+                ShowAlert("Date and Time of Bite cannot be in the future.", "warning");
+                return;
+            }
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {

@@ -28,6 +28,12 @@
     .badge-warn { background:#fef9c3; color:#a16207; }
     .badge-exp  { background:#fee2e2; color:#b91c1c; }
     .badge-in   { background:#dbeafe; color:#1d4ed8; }
+
+    /* ── Modal animation ────────────────────────────────────────── */
+    @keyframes fadeIn {
+        from { opacity:0; transform:translateY(8px) scale(.98); }
+        to   { opacity:1; transform:translateY(0) scale(1); }
+    }
 </style>
 
 <div class="p-6 font-heading2 text-slate-900">
@@ -210,7 +216,7 @@
             <div class="xl:col-span-3 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
                     <h3 class="font-extrabold text-slate-800">Recent Stock Receipts</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Last 10 stock-in transactions</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Last 50 stock-in transactions</p>
                 </div>
 
                 <asp:GridView ID="gvStockHistory" runat="server" AutoGenerateColumns="False"
@@ -233,9 +239,7 @@
                         <asp:BoundField DataField="batch_number" HeaderText="Batch #"
                             ItemStyle-CssClass="p-4 font-mono text-slate-500 text-xs"
                             HeaderStyle-CssClass="p-4" />
-                        <asp:BoundField DataField="quantity" HeaderText="Qty"
-                            ItemStyle-CssClass="p-4"
-                            HeaderStyle-CssClass="p-4" />
+                        <%-- Single Qty column as badge only — removed the plain BoundField duplicate --%>
                         <asp:TemplateField HeaderText="Qty" HeaderStyle-CssClass="p-4" ItemStyle-CssClass="p-4">
                             <ItemTemplate>
                                 <span class="badge badge-in">+<%# Eval("quantity") %></span>
@@ -255,4 +259,91 @@
     </asp:Panel>
 
 </div>
+
+<%-- ── Notify Modal ──────────────────────────────────────────── --%>
+<div id="notifyModal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-slate-900/50 px-4">
+    <div class="w-full max-w-sm rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden" style="animation:fadeIn .2s ease-out;">
+        <div id="notifyModalHeader" class="px-6 py-4 border-b flex items-start gap-4">
+            <div id="notifyModalIconWrap" class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <img id="notifyModalIcon" src="<%= ResolveUrl("~/Icons/warning.svg") %>" alt="icon" class="w-5 h-5" />
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 id="notifyModalTitle" class="font-extrabold text-slate-900 text-base"></h3>
+                <p id="notifyModalMessage" class="text-sm text-slate-600 mt-1 leading-relaxed whitespace-pre-line"></p>
+            </div>
+        </div>
+        <div class="px-6 py-4 flex justify-end">
+            <button type="button" onclick="hideNotifyModal()" id="notifyModalBtn"
+                class="px-6 py-2 rounded-lg text-sm font-bold cursor-pointer transition text-white">
+                OK
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var _iconSrc = '<%= ResolveUrl("~/Icons/warning.svg") %>';
+
+    function showNotifyModal(message, type) {
+        type = type || 'info';
+        var hdr = document.getElementById('notifyModalHeader');
+        var wrap = document.getElementById('notifyModalIconWrap');
+        var icon = document.getElementById('notifyModalIcon');
+        var ttl = document.getElementById('notifyModalTitle');
+        var msg = document.getElementById('notifyModalMessage');
+        var btn = document.getElementById('notifyModalBtn');
+
+        icon.src = _iconSrc;
+        hdr.className = 'px-6 py-4 border-b flex items-start gap-4';
+        wrap.className = 'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5';
+        icon.className = 'w-5 h-5';
+        btn.className = 'px-6 py-2 rounded-lg text-sm font-bold cursor-pointer transition text-white';
+        btn.onclick = hideNotifyModal;
+
+        if (type === 'success') {
+            hdr.className += ' bg-emerald-50 border-emerald-100';
+            wrap.className += ' bg-emerald-100';
+            icon.style.filter = 'invert(39%) sepia(98%) saturate(400%) hue-rotate(100deg) brightness(90%)';
+            ttl.textContent = 'Success'; ttl.className = 'font-extrabold text-emerald-800 text-base';
+            btn.className += ' bg-emerald-600 hover:bg-emerald-700';
+        } else if (type === 'error') {
+            hdr.className += ' bg-red-50 border-red-100';
+            wrap.className += ' bg-red-100';
+            icon.style.filter = 'invert(20%) sepia(90%) saturate(700%) hue-rotate(340deg) brightness(90%)';
+            ttl.textContent = 'Error'; ttl.className = 'font-extrabold text-red-800 text-base';
+            btn.className += ' bg-red-600 hover:bg-red-700';
+        } else if (type === 'warning') {
+            hdr.className += ' bg-amber-50 border-amber-100';
+            wrap.className += ' bg-amber-100';
+            icon.style.filter = 'invert(55%) sepia(90%) saturate(500%) hue-rotate(10deg) brightness(95%)';
+            ttl.textContent = 'Warning'; ttl.className = 'font-extrabold text-amber-800 text-base';
+            btn.className += ' bg-amber-500 hover:bg-amber-600';
+        } else {
+            hdr.className += ' bg-blue-50 border-blue-100';
+            wrap.className += ' bg-blue-100';
+            icon.style.filter = 'invert(28%) sepia(80%) saturate(600%) hue-rotate(195deg) brightness(95%)';
+            ttl.textContent = 'Notice'; ttl.className = 'font-extrabold text-blue-800 text-base';
+            btn.className += ' bg-blue-600 hover:bg-blue-700';
+        }
+
+        msg.textContent = message;
+        var modal = document.getElementById('notifyModal');
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function hideNotifyModal() {
+        var modal = document.getElementById('notifyModal');
+        modal.classList.add('hidden'); modal.classList.remove('flex');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') hideNotifyModal();
+    });
+    document.addEventListener('click', function (e) {
+        var nm = document.getElementById('notifyModal');
+        if (nm && !nm.classList.contains('hidden') && e.target === nm) hideNotifyModal();
+    });
+</script>
 </asp:Content>
