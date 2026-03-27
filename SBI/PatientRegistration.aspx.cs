@@ -468,15 +468,39 @@ namespace SBI
             if (role == "C") { ShowAlert("You do not have permission to register patients.", "error"); return; }
 
             DateTime dob, biteDateTime;
-            if (!DateTime.TryParse(txtDOB.Text, out dob)) { ShowAlert("Invalid Date of Birth", "warning"); return; }
-            if (dob > DateTime.Today) { ShowAlert("Date of Birth cannot be a future date.", "warning"); return; }
-            if (!DateTime.TryParse(txtBiteDateTime.Text, out biteDateTime)) { ShowAlert("Invalid Bite Date and Time", "warning"); return; }
-            if (biteDateTime > DateTime.Now.AddMinutes(1))
+
+            if (!DateTime.TryParse(txtDOB.Text, out dob))
+            {
+                ShowAlert("Invalid Date of Birth", "warning");
+                return;
+            }
+
+            if (dob > DateTime.Today)
+            {
+                ShowAlert("Date of Birth cannot be a future date.", "warning");
+                return;
+            }
+
+            if (!DateTime.TryParse(txtBiteDateTime.Text, out biteDateTime))
+            {
+                ShowAlert("Invalid Bite Date and Time", "warning");
+                return;
+            }
+
+            // Force biteDateTime to be treated as Philippine time
+            TimeZoneInfo phTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Singapore Standard Time");
+
+            // Assume input is already PH time (important!)
+            DateTime bitePH = DateTime.SpecifyKind(biteDateTime, DateTimeKind.Unspecified);
+
+            // Get current PH time
+            DateTime nowPH = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, phTimeZone);
+
+            if (bitePH > nowPH.AddMinutes(1))
             {
                 ShowAlert("Date and Time of Bite cannot be in the future.", "warning");
                 return;
             }
-
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();

@@ -21,7 +21,7 @@
     },
     "resourceName": {
       "type": "string",
-      "defaultValue": "BiteTrackSBI20260327160823",
+      "defaultValue": "SBI20260327222024",
       "metadata": {
         "description": "Name of the main resource to be created by this template."
       }
