@@ -13,6 +13,13 @@ namespace SBI
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (Session["userRole"] == null)
+            { Response.Redirect("Login.aspx"); return; }
+
+            string role = Session["userRole"].ToString().ToUpper();
+            if (role != "A" && role != "B" && role != "C")
+            { Response.Redirect("Login.aspx"); return; }
+
             if (!IsPostBack)
             {
             }

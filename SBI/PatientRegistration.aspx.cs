@@ -19,6 +19,8 @@ namespace SBI
             if (role != "A" && role != "B" && role != "C")
             { Response.Redirect("Login.aspx"); return; }
 
+            btnAddPanel.Text = "Add New Patient / Case";
+            btnAddPanel.Visible = (role != "C");
 
             // Always runs on every request including postbacks
             btnAddPanel.Visible = (role != "C");

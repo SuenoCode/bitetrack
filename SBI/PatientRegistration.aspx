@@ -9,60 +9,248 @@
 
     <style>
         /* ── Step progress bar ───────────────────────────────── */
-        .step-bar { display:flex; align-items:center; margin-bottom:2rem; }
-        .step-item { display:flex; flex-direction:column; align-items:center; position:relative; flex:1; }
-        .step-item:not(:last-child)::after {
-            content:''; position:absolute; top:18px; left:calc(50% + 22px);
-            right:calc(-50% + 22px); height:2px;
-            background:#e2e8f0; z-index:0; transition:background .4s;
+        .step-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
         }
-        .step-item.done:not(:last-child)::after { background:#2563eb; }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 1;
+        }
+
+            .step-item:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 18px;
+                left: calc(50% + 22px);
+                right: calc(-50% + 22px);
+                height: 2px;
+                background: #e2e8f0;
+                z-index: 0;
+                transition: background .4s;
+            }
+
+            .step-item.done:not(:last-child)::after {
+                background: #2563eb;
+            }
+
         .step-circle {
-            width:36px; height:36px; border-radius:50%;
-            display:flex; align-items:center; justify-content:center;
-            font-size:13px; font-weight:800; border:2px solid #e2e8f0;
-            background:#fff; color:#94a3b8; position:relative; z-index:1; transition:all .3s;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+            border: 2px solid #e2e8f0;
+            background: #fff;
+            color: #94a3b8;
+            position: relative;
+            z-index: 1;
+            transition: all .3s;
         }
-        .step-item.done   .step-circle { background:#2563eb; border-color:#2563eb; color:#fff; }
-        .step-item.active .step-circle { background:#fff; border-color:#2563eb; color:#2563eb; box-shadow:0 0 0 4px #dbeafe; }
-        .step-label { font-size:11px; font-weight:700; color:#94a3b8; margin-top:6px; text-transform:uppercase; letter-spacing:.5px; text-align:center; }
-        .step-item.done   .step-label { color:#2563eb; }
-        .step-item.active .step-label { color:#1e40af; }
+
+        .step-item.done .step-circle {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #fff;
+        }
+
+        .step-item.active .step-circle {
+            background: #fff;
+            border-color: #2563eb;
+            color: #2563eb;
+            box-shadow: 0 0 0 4px #dbeafe;
+        }
+
+        .step-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            text-align: center;
+        }
+
+        .step-item.done .step-label {
+            color: #2563eb;
+        }
+
+        .step-item.active .step-label {
+            color: #1e40af;
+        }
         /* ── Wizard steps ─────────────────────────────────── */
-        .wizard-step { display:none; animation:stepIn .25s ease-out; }
-        .wizard-step.active { display:block; }
-        @keyframes stepIn  { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes fadeIn  { from { opacity:0; transform:translateY(8px) scale(.98); } to { opacity:1; transform:translateY(0) scale(1); } }
-        .wizard-nav { display:flex; justify-content:space-between; align-items:center;
-            padding:16px 24px; border-top:1px solid #e2e8f0; background:#f8fafc;
-            border-radius:0 0 12px 12px; margin-top:24px; }
+        .wizard-step {
+            display: none;
+            animation: stepIn .25s ease-out;
+        }
+
+            .wizard-step.active {
+                display: block;
+            }
+
+        @keyframes stepIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px) scale(.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .wizard-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 0 0 12px 12px;
+            margin-top: 24px;
+        }
         /* ── Field styling ────────────────────────────────── */
-        .field-group { display:flex; flex-direction:column; gap:6px; }
-        .field-label { font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
-        .field-required { color:#ef4444; margin-left:2px; }
-        .field-input { width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:10px 14px;
-            font-size:14px; outline:none; transition:all .2s; background:#fff; }
-        .field-input:focus { border-color:#2563eb; box-shadow:0 0 0 3px #dbeafe; }
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .field-required {
+            color: #ef4444;
+            margin-left: 2px;
+        }
+
+        .field-input {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+            outline: none;
+            transition: all .2s;
+            background: #fff;
+        }
+
+            .field-input:focus {
+                border-color: #2563eb;
+                box-shadow: 0 0 0 3px #dbeafe;
+            }
         /* ── Section / sub cards ──────────────────────────── */
-        .section-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; margin-bottom:20px; }
-        .section-header { padding:16px 20px; background:#f8fafc; border-bottom:1px solid #e2e8f0; }
-        .section-title { font-size:14px; font-weight:800; color:#1e293b; }
-        .section-desc  { font-size:12px; color:#94a3b8; margin-top:2px; }
-        .section-body  { padding:20px; }
-        .sub-card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-top:4px; }
-        .sub-card-title { font-size:11px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:.5px; margin-bottom:12px; }
+        .section-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            padding: 16px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .section-desc {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .section-body {
+            padding: 20px;
+        }
+
+        .sub-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 4px;
+        }
+
+        .sub-card-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 12px;
+        }
         /* ── Review rows ──────────────────────────────────── */
-        .review-row { display:flex; gap:8px; padding:8px 0; border-bottom:1px solid #f1f5f9; font-size:13px; }
-        .review-row:last-child { border-bottom:none; }
-        .review-key { font-weight:700; color:#64748b; min-width:160px; flex-shrink:0; }
-        .review-val { color:#1e293b; }
+        .review-row {
+            display: flex;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13px;
+        }
+
+            .review-row:last-child {
+                border-bottom: none;
+            }
+
+        .review-key {
+            font-weight: 700;
+            color: #64748b;
+            min-width: 160px;
+            flex-shrink: 0;
+        }
+
+        .review-val {
+            color: #1e293b;
+        }
         /* ── View panel layout ────────────────────────────── */
         @media (min-width: 1280px) {
-            #viewLayout.with-preview { grid-template-columns: minmax(0,1.8fr) minmax(360px,440px); align-items:start; }
-            #viewLayout.no-preview   { grid-template-columns: minmax(0,1fr); }
+            #viewLayout.with-preview {
+                grid-template-columns: minmax(0,1.8fr) minmax(360px,440px);
+                align-items: start;
+            }
+
+            #viewLayout.no-preview {
+                grid-template-columns: minmax(0,1fr);
+            }
         }
+
         @media (max-width:1279px) {
-            #viewLayout.with-preview, #viewLayout.no-preview { grid-template-columns:1fr; }
+            #viewLayout.with-preview, #viewLayout.no-preview {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 
@@ -82,11 +270,10 @@
                 onclick="showPanel('viewPatientPanel')">
                 View Patient / Case Details
             </button>
-            <button type="button" id="btnAddPanel" runat ="server"
-                class="panel-tab h-11 rounded-lg px-6 font-bold text-sm transition cursor-pointer border"
-                onclick="showPanel('addPatientPanel')">
-                Add New Patient / Case
-            </button>
+          <asp:Button type="button" ID="btnAddPanel" runat="server"
+    CssClass="panel-tab h-11 rounded-lg px-6 font-bold text-sm transition cursor-pointer border"
+    Text="Add New Patient / Case"
+    OnClientClick="showPanel('addPatientPanel'); return false;" />
         </div>
 
         <%-- ══════════════════════════════════════════════════
@@ -452,34 +639,34 @@
                     </div>
                     <div class="section-body space-y-4">
                         <div class="section-card">
-                            <div class="section-header" style="padding:12px 16px;">
-                                <div class="section-title" style="font-size:12px;">👤 Patient Information</div>
+                            <div class="section-header" style="padding: 12px 16px;">
+                                <div class="section-title" style="font-size: 12px;">👤 Patient Information</div>
                             </div>
-                            <div class="section-body" style="padding:12px 16px;">
+                            <div class="section-body" style="padding: 12px 16px;">
                                 <div id="reviewPersonal"></div>
                             </div>
                         </div>
                         <div class="section-card">
-                            <div class="section-header" style="padding:12px 16px;">
-                                <div class="section-title" style="font-size:12px;">🏠 Address &amp; Emergency Contact</div>
+                            <div class="section-header" style="padding: 12px 16px;">
+                                <div class="section-title" style="font-size: 12px;">🏠 Address &amp; Emergency Contact</div>
                             </div>
-                            <div class="section-body" style="padding:12px 16px;">
+                            <div class="section-body" style="padding: 12px 16px;">
                                 <div id="reviewAddress"></div>
                             </div>
                         </div>
                         <div class="section-card">
-                            <div class="section-header" style="padding:12px 16px;">
-                                <div class="section-title" style="font-size:12px;">🦷 Bite Incident</div>
+                            <div class="section-header" style="padding: 12px 16px;">
+                                <div class="section-title" style="font-size: 12px;">🦷 Bite Incident</div>
                             </div>
-                            <div class="section-body" style="padding:12px 16px;">
+                            <div class="section-body" style="padding: 12px 16px;">
                                 <div id="reviewBite"></div>
                             </div>
                         </div>
                         <div class="section-card">
-                            <div class="section-header" style="padding:12px 16px;">
-                                <div class="section-title" style="font-size:12px;">🐾 Animal &amp; Wound</div>
+                            <div class="section-header" style="padding: 12px 16px;">
+                                <div class="section-title" style="font-size: 12px;">🐾 Animal &amp; Wound</div>
                             </div>
-                            <div class="section-body" style="padding:12px 16px;">
+                            <div class="section-body" style="padding: 12px 16px;">
                                 <div id="reviewAnimal"></div>
                             </div>
                         </div>
@@ -508,9 +695,9 @@
             </div>
 
             <%-- Hidden for code-behind compatibility --%>
-            <asp:Button ID="btnUpdateRecord"   runat="server" Visible="false" OnClick="btnUpdateRecord_Click" />
+            <asp:Button ID="btnUpdateRecord" runat="server" Visible="false" OnClick="btnUpdateRecord_Click" />
             <asp:Button ID="btnCancelEditForm" runat="server" Visible="false" OnClick="btnCancelEditForm_Click" />
-            <asp:Button ID="btnClear"          runat="server" Visible="false" OnClick="btnClear_Click" />
+            <asp:Button ID="btnClear" runat="server" Visible="false" OnClick="btnClear_Click" />
 
         </div>
 
@@ -555,7 +742,9 @@
                                 <asp:BoundField DataField="address" HeaderText="Address" ItemStyle-CssClass="p-4 text-slate-600" HeaderStyle-CssClass="p-4" />
                                 <asp:BoundField DataField="date_added" HeaderText="Date Added" DataFormatString="{0:MMM dd, yyyy}" ItemStyle-CssClass="p-4 text-slate-500 text-xs whitespace-nowrap" HeaderStyle-CssClass="p-4" />
                             </Columns>
-                            <EmptyDataTemplate><div class="p-10 text-center text-slate-400 text-sm">No patient records found.</div></EmptyDataTemplate>
+                            <EmptyDataTemplate>
+                                <div class="p-10 text-center text-slate-400 text-sm">No patient records found.</div>
+                            </EmptyDataTemplate>
                         </asp:GridView>
                     </asp:Panel>
 
@@ -593,7 +782,9 @@
                                 <asp:BoundField DataField="site_of_bite" HeaderText="Site of Bite" ItemStyle-CssClass="p-4 text-slate-600" HeaderStyle-CssClass="p-4" />
                                 <asp:BoundField DataField="category" HeaderText="Category" ItemStyle-CssClass="p-4 text-slate-600" HeaderStyle-CssClass="p-4" />
                             </Columns>
-                            <EmptyDataTemplate><div class="p-10 text-center text-slate-400 text-sm">No case records found.</div></EmptyDataTemplate>
+                            <EmptyDataTemplate>
+                                <div class="p-10 text-center text-slate-400 text-sm">No case records found.</div>
+                            </EmptyDataTemplate>
                         </asp:GridView>
                     </asp:Panel>
 
@@ -857,7 +1048,7 @@
 
     <%-- ── Confirm Modal ─────────────────────────────────────────── --%>
     <div id="confirmModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/50 px-4">
-        <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden" style="animation:fadeIn .2s ease-out;">
+        <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden" style="animation: fadeIn .2s ease-out;">
             <div class="px-6 py-4 border-b border-amber-100 bg-amber-50 flex items-center gap-3">
                 <img src="<%= ResolveUrl("~/Icons/warning.svg") %>" alt="warning" class="w-6 h-6 flex-shrink-0" />
                 <div>
@@ -880,12 +1071,12 @@
 
     <%-- ── Notify Modal ──────────────────────────────────────────── --%>
     <div id="notifyModal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-slate-900/50 px-4">
-        <div class="w-full max-w-sm rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden" style="animation:fadeIn .2s ease-out;">
+        <div class="w-full max-w-sm rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden" style="animation: fadeIn .2s ease-out;">
             <div id="notifyModalHeader" class="px-6 py-4 border-b flex items-start gap-4">
                 <div id="notifyModalIconWrap" class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <img id="notifyModalIcon"
-                         src="<%= ResolveUrl("~/Icons/warning.svg") %>"
-                         alt="icon" class="w-5 h-5" />
+                        src="<%= ResolveUrl("~/Icons/warning.svg") %>"
+                        alt="icon" class="w-5 h-5" />
                 </div>
                 <div class="flex-1 min-w-0">
                     <h3 id="notifyModalTitle" class="font-extrabold text-slate-900 text-base"></h3>
@@ -909,45 +1100,45 @@
         // ── Notify Modal ─────────────────────────────────────────────
         function showNotifyModal(message, type) {
             type = type || 'info';
-            var hdr  = document.getElementById('notifyModalHeader');
+            var hdr = document.getElementById('notifyModalHeader');
             var wrap = document.getElementById('notifyModalIconWrap');
             var icon = document.getElementById('notifyModalIcon');
-            var ttl  = document.getElementById('notifyModalTitle');
-            var msg  = document.getElementById('notifyModalMessage');
-            var btn  = document.getElementById('notifyModalBtn');
+            var ttl = document.getElementById('notifyModalTitle');
+            var msg = document.getElementById('notifyModalMessage');
+            var btn = document.getElementById('notifyModalBtn');
 
             icon.src = _iconSrc;
-            hdr.className  = 'px-6 py-4 border-b flex items-start gap-4';
+            hdr.className = 'px-6 py-4 border-b flex items-start gap-4';
             wrap.className = 'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5';
             icon.className = 'w-5 h-5';
-            btn.className  = 'px-6 py-2 rounded-lg text-sm font-bold cursor-pointer transition text-white';
+            btn.className = 'px-6 py-2 rounded-lg text-sm font-bold cursor-pointer transition text-white';
             // restore default onclick
             btn.onclick = hideNotifyModal;
 
             if (type === 'success') {
-                hdr.className  += ' bg-emerald-50 border-emerald-100';
+                hdr.className += ' bg-emerald-50 border-emerald-100';
                 wrap.className += ' bg-emerald-100';
                 icon.style.filter = 'invert(39%) sepia(98%) saturate(400%) hue-rotate(100deg) brightness(90%)';
                 ttl.textContent = 'Success'; ttl.className = 'font-extrabold text-emerald-800 text-base';
-                btn.className  += ' bg-emerald-600 hover:bg-emerald-700';
+                btn.className += ' bg-emerald-600 hover:bg-emerald-700';
             } else if (type === 'error') {
-                hdr.className  += ' bg-red-50 border-red-100';
+                hdr.className += ' bg-red-50 border-red-100';
                 wrap.className += ' bg-red-100';
                 icon.style.filter = 'invert(20%) sepia(90%) saturate(700%) hue-rotate(340deg) brightness(90%)';
                 ttl.textContent = 'Error'; ttl.className = 'font-extrabold text-red-800 text-base';
-                btn.className  += ' bg-red-600 hover:bg-red-700';
+                btn.className += ' bg-red-600 hover:bg-red-700';
             } else if (type === 'warning') {
-                hdr.className  += ' bg-amber-50 border-amber-100';
+                hdr.className += ' bg-amber-50 border-amber-100';
                 wrap.className += ' bg-amber-100';
                 icon.style.filter = 'invert(55%) sepia(90%) saturate(500%) hue-rotate(10deg) brightness(95%)';
                 ttl.textContent = 'Warning'; ttl.className = 'font-extrabold text-amber-800 text-base';
-                btn.className  += ' bg-amber-500 hover:bg-amber-600';
+                btn.className += ' bg-amber-500 hover:bg-amber-600';
             } else {
-                hdr.className  += ' bg-blue-50 border-blue-100';
+                hdr.className += ' bg-blue-50 border-blue-100';
                 wrap.className += ' bg-blue-100';
                 icon.style.filter = 'invert(28%) sepia(80%) saturate(600%) hue-rotate(195deg) brightness(95%)';
                 ttl.textContent = 'Notice'; ttl.className = 'font-extrabold text-blue-800 text-base';
-                btn.className  += ' bg-blue-600 hover:bg-blue-700';
+                btn.className += ' bg-blue-600 hover:bg-blue-700';
             }
 
             msg.textContent = message;
@@ -992,7 +1183,7 @@
 
         // ── Wizard ───────────────────────────────────────────────────
         var currentStep = 1;
-        var totalSteps  = 5;
+        var totalSteps = 5;
 
         function goStep(n) {
             if (n < 1 || n > totalSteps) return;
@@ -1002,7 +1193,7 @@
             for (var i = 1; i <= totalSteps; i++) {
                 var item = document.getElementById('stepItem' + i);
                 item.classList.remove('active', 'done');
-                if (i < n)        item.classList.add('done');
+                if (i < n) item.classList.add('done');
                 else if (i === n) item.classList.add('active');
             }
             currentStep = n;
@@ -1014,24 +1205,24 @@
         function validateStep(step) {
             var errors = [];
             if (step === 1) {
-                if (!getVal('<%=txtFirstName.ClientID%>'))  errors.push('First Name is required.');
-                if (!getVal('<%=txtLastName.ClientID%>'))   errors.push('Last Name is required.');
-                if (!getVal('<%=txtDOB.ClientID%>'))        errors.push('Date of Birth is required.');
-                if (!getVal('<%=ddlGender.ClientID%>'))     errors.push('Gender is required.');
-                if (!getVal('<%=txtContactNo.ClientID%>'))  errors.push('Contact No is required.');
+                if (!getVal('<%=txtFirstName.ClientID%>')) errors.push('First Name is required.');
+                if (!getVal('<%=txtLastName.ClientID%>')) errors.push('Last Name is required.');
+                if (!getVal('<%=txtDOB.ClientID%>')) errors.push('Date of Birth is required.');
+                if (!getVal('<%=ddlGender.ClientID%>')) errors.push('Gender is required.');
+                if (!getVal('<%=txtContactNo.ClientID%>')) errors.push('Contact No is required.');
                 if (!getVal('<%=ddlOccupation.ClientID%>')) errors.push('Occupation is required.');
             }
             if (step === 2) {
-                if (!getVal('<%=txtBarangay.ClientID%>'))               errors.push('Barangay (home address) is required.');
-                if (!getVal('<%=txtProvinceCity.ClientID%>'))           errors.push('City / Province is required.');
+                if (!getVal('<%=txtBarangay.ClientID%>')) errors.push('Barangay (home address) is required.');
+                if (!getVal('<%=txtProvinceCity.ClientID%>')) errors.push('City / Province is required.');
                 if (!getVal('<%=txtEmergencyContactPerson.ClientID%>')) errors.push('Emergency contact person is required.');
-                if (!getVal('<%=txtEmergencyContactNo.ClientID%>'))     errors.push('Emergency contact number is required.');
+                if (!getVal('<%=txtEmergencyContactNo.ClientID%>')) errors.push('Emergency contact number is required.');
             }
             if (step === 3) {
-                if (!getVal('<%=txtBiteDateTime.ClientID%>'))  errors.push('Date and Time of Bite is required.');
+                if (!getVal('<%=txtBiteDateTime.ClientID%>')) errors.push('Date and Time of Bite is required.');
                 if (!getVal('<%=txtPlaceBarangay.ClientID%>')) errors.push('Barangay (place of bite) is required.');
-                if (!getVal('<%=txtPlaceCity.ClientID%>'))     errors.push('City / Province (place of bite) is required.');
-                if (!getVal('<%=ddlCategory.ClientID%>'))      errors.push('Category is required.');
+                if (!getVal('<%=txtPlaceCity.ClientID%>')) errors.push('City / Province (place of bite) is required.');
+                if (!getVal('<%=ddlCategory.ClientID%>')) errors.push('Category is required.');
             }
             if (step === 4) {
                 if (!getVal('<%=ddlBitingAnimal.ClientID%>')) errors.push('Animal Type is required.');
@@ -1061,43 +1252,43 @@
 
         function buildReview() {
             document.getElementById('reviewPersonal').innerHTML =
-                row('First Name',       getVal('<%=txtFirstName.ClientID%>')) +
-                row('Last Name',        getVal('<%=txtLastName.ClientID%>')) +
-                row('Date of Birth',    getVal('<%=txtDOB.ClientID%>')) +
-                row('Gender',           getLbl('<%=ddlGender.ClientID%>')) +
-                row('Civil Status',     getLbl('<%=ddlCivilStatus.ClientID%>')) +
-                row('Contact No',       getVal('<%=txtContactNo.ClientID%>')) +
-                row('Occupation',       getLbl('<%=ddlOccupation.ClientID%>')) +
-                row('Blood Pressure',   getVal('<%=txtBloodPressure.ClientID%>')) +
-                row('Temperature',      getVal('<%=txtTemperature.ClientID%>')) +
-                row('Weight',           getVal('<%=txtWeight.ClientID%>')) +
-                row('Capillary Refill', getVal('<%=txtCapillaryRefill.ClientID%>'));
+                row('First Name', getVal('<%=txtFirstName.ClientID%>')) +
+                row('Last Name', getVal('<%=txtLastName.ClientID%>')) +
+            row('Date of Birth', getVal('<%=txtDOB.ClientID%>')) +
+            row('Gender', getLbl('<%=ddlGender.ClientID%>')) +
+            row('Civil Status', getLbl('<%=ddlCivilStatus.ClientID%>')) +
+            row('Contact No', getVal('<%=txtContactNo.ClientID%>')) +
+            row('Occupation', getLbl('<%=ddlOccupation.ClientID%>')) +
+            row('Blood Pressure', getVal('<%=txtBloodPressure.ClientID%>')) +
+            row('Temperature', getVal('<%=txtTemperature.ClientID%>')) +
+            row('Weight', getVal('<%=txtWeight.ClientID%>')) +
+            row('Capillary Refill', getVal('<%=txtCapillaryRefill.ClientID%>'));
 
             document.getElementById('reviewAddress').innerHTML =
-                row('House No.',        getVal('<%=txtHouseNo.ClientID%>')) +
-                row('Street',           getVal('<%=txtSubdivision.ClientID%>')) +
-                row('Barangay',         getVal('<%=txtBarangay.ClientID%>')) +
-                row('City / Province',  getVal('<%=txtProvinceCity.ClientID%>')) +
-                row('Emergency Person', getVal('<%=txtEmergencyContactPerson.ClientID%>')) +
-                row('Emergency No.',    getVal('<%=txtEmergencyContactNo.ClientID%>'));
+                row('House No.', getVal('<%=txtHouseNo.ClientID%>')) +
+                row('Street', getVal('<%=txtSubdivision.ClientID%>')) +
+            row('Barangay', getVal('<%=txtBarangay.ClientID%>')) +
+            row('City / Province', getVal('<%=txtProvinceCity.ClientID%>')) +
+            row('Emergency Person', getVal('<%=txtEmergencyContactPerson.ClientID%>')) +
+            row('Emergency No.', getVal('<%=txtEmergencyContactNo.ClientID%>'));
 
             document.getElementById('reviewBite').innerHTML =
-                row('Date & Time',      getVal('<%=txtBiteDateTime.ClientID%>')) +
-                row('Place Barangay',   getVal('<%=txtPlaceBarangay.ClientID%>')) +
-                row('Place City',       getVal('<%=txtPlaceCity.ClientID%>')) +
-                row('Category',         getLbl('<%=ddlCategory.ClientID%>')) +
-                row('Type of Exposure', getLbl('<%=ddlExposureType.ClientID%>')) +
-                row('Manifestation',    getLbl('<%=ddlManifestation.ClientID%>'));
+                row('Date & Time', getVal('<%=txtBiteDateTime.ClientID%>')) +
+                row('Place Barangay', getVal('<%=txtPlaceBarangay.ClientID%>')) +
+            row('Place City', getVal('<%=txtPlaceCity.ClientID%>')) +
+            row('Category', getLbl('<%=ddlCategory.ClientID%>')) +
+            row('Type of Exposure', getLbl('<%=ddlExposureType.ClientID%>')) +
+            row('Manifestation', getLbl('<%=ddlManifestation.ClientID%>'));
 
             document.getElementById('reviewAnimal').innerHTML =
-                row('Animal Type',    getLbl('<%=ddlBitingAnimal.ClientID%>')) +
-                row('Ownership',      getLbl('<%=ddlOwnership.ClientID%>')) +
-                row('Animal Status',  getLbl('<%=ddlAnimalStatus.ClientID%>')) +
-                row('Circumstance',   getLbl('<%=ddlCircumstance.ClientID%>')) +
-                row('Wound Location', getVal('<%=txtWoundLocation.ClientID%>')) +
-                row('Wound Type',     getLbl('<%=ddlWoundType.ClientID%>')) +
-                row('Bleeding',       getLbl('<%=ddlBleeding.ClientID%>')) +
-                row('Wound Washed',   getLbl('<%=ddlWoundWashed.ClientID%>'));
+                row('Animal Type', getLbl('<%=ddlBitingAnimal.ClientID%>')) +
+                row('Ownership', getLbl('<%=ddlOwnership.ClientID%>')) +
+            row('Animal Status', getLbl('<%=ddlAnimalStatus.ClientID%>')) +
+            row('Circumstance', getLbl('<%=ddlCircumstance.ClientID%>')) +
+            row('Wound Location', getVal('<%=txtWoundLocation.ClientID%>')) +
+            row('Wound Type', getLbl('<%=ddlWoundType.ClientID%>')) +
+            row('Bleeding', getLbl('<%=ddlBleeding.ClientID%>')) +
+            row('Wound Washed', getLbl('<%=ddlWoundWashed.ClientID%>'));
         }
 
         function resetWizard() {
@@ -1115,7 +1306,7 @@
                  '<%=txtBiteDateTime.ClientID%>','<%=txtPlaceHouseNo.ClientID%>',
                  '<%=txtPlaceStreet.ClientID%>','<%=txtPlaceBarangay.ClientID%>',
                  '<%=txtPlaceCity.ClientID%>','<%=txtWoundLocation.ClientID%>'
-                ].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+                ].forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
                 ['<%=ddlGender.ClientID%>','<%=ddlCivilStatus.ClientID%>',
                  '<%=ddlOccupation.ClientID%>','<%=ddlCategory.ClientID%>',
                  '<%=ddlExposureType.ClientID%>','<%=ddlManifestation.ClientID%>',
@@ -1123,7 +1314,7 @@
                  '<%=ddlAnimalStatus.ClientID%>','<%=ddlCircumstance.ClientID%>',
                  '<%=ddlWoundType.ClientID%>','<%=ddlBleeding.ClientID%>',
                  '<%=ddlWoundWashed.ClientID%>'
-                ].forEach(function(id){ var el=document.getElementById(id); if(el) el.selectedIndex=0; });
+                ].forEach(function (id) { var el = document.getElementById(id); if (el) el.selectedIndex = 0; });
                 goStep(1);
             };
         }
@@ -1136,15 +1327,17 @@
 
         // ── Panel switching ──────────────────────────────────────────
         function setActivePanelButton(panelId) {
-            ['btnViewPanel','btnAddPanel'].forEach(function(id) {
+            ['btnViewPanel', '<%= btnAddPanel.ClientID %>'].forEach(function (id) {
                 var b = document.getElementById(id); if (!b) return;
-                b.classList.remove('bg-blue-600','text-white','border-blue-600','shadow');
-                b.classList.add('bg-white','text-slate-700','border-slate-300');
+                b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow');
+                b.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
             });
-            var a = document.getElementById(panelId === 'viewPatientPanel' ? 'btnViewPanel' : 'btnAddPanel');
+            var a = document.getElementById(
+                panelId === 'viewPatientPanel' ? 'btnViewPanel' : '<%= btnAddPanel.ClientID %>'
+            );
             if (a) {
-                a.classList.remove('bg-white','text-slate-700','border-slate-300');
-                a.classList.add('bg-blue-600','text-white','border-blue-600','shadow');
+                a.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
+                a.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow');
             }
         }
 
@@ -1153,12 +1346,12 @@
             var pr = document.getElementById('<%=pnlRecordPreviewContainer.ClientID%>');
             if (!vl || !pr) return;
             var vis = pr.style.display !== 'none' && !pr.hasAttribute('hidden') && pr.offsetParent !== null;
-            vl.classList.remove('with-preview','no-preview');
+            vl.classList.remove('with-preview', 'no-preview');
             vl.classList.add(vis ? 'with-preview' : 'no-preview');
         }
 
         function showPanel(panelId) {
-            document.querySelectorAll('.panel').forEach(function(p) { p.classList.add('hidden'); });
+            document.querySelectorAll('.panel').forEach(function (p) { p.classList.add('hidden'); });
             var t = document.getElementById(panelId); if (t) t.classList.remove('hidden');
             setActivePanelButton(panelId);
             var hf = document.getElementById('<%=hfActivePanel.ClientID%>'); if (hf) hf.value = panelId;
