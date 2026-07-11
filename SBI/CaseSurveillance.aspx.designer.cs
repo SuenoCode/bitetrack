@@ -69,6 +69,42 @@ namespace SBI
         protected global::System.Web.UI.WebControls.HiddenField hfVisitEditMode;
 
         /// <summary>
+        /// hfAnimalId control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfAnimalId;
+
+        /// <summary>
+        /// hfFollowUpId control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfFollowUpId;
+
+        /// <summary>
+        /// hfConfirmVaccineId control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfConfirmVaccineId;
+
+        /// <summary>
+        /// hfConfirmBatchId control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfConfirmBatchId;
+
+        /// <summary>
         /// btnTabToday control.
         /// </summary>
         /// <remarks>
@@ -177,67 +213,49 @@ namespace SBI
         protected global::System.Web.UI.WebControls.LinkButton btnBackToCases;
 
         /// <summary>
-        /// panelAnimalFollowUp control.
+        /// panelScheduleInfo control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel panelAnimalFollowUp;
+        protected global::System.Web.UI.WebControls.Panel panelScheduleInfo;
 
         /// <summary>
-        /// hfAnimalId control.
+        /// litTotalDoses control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hfAnimalId;
+        protected global::System.Web.UI.WebControls.Literal litTotalDoses;
 
         /// <summary>
-        /// hfFollowUpId control.
+        /// litCompletedDoses control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hfFollowUpId;
+        protected global::System.Web.UI.WebControls.Literal litCompletedDoses;
 
         /// <summary>
-        /// ddlDay14Status control.
+        /// litPendingDoses control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlDay14Status;
+        protected global::System.Web.UI.WebControls.Literal litPendingDoses;
 
         /// <summary>
-        /// txtFollowUpDate control.
+        /// litProtocolDisplay control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtFollowUpDate;
-
-        /// <summary>
-        /// txtFollowUpNotes control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtFollowUpNotes;
-
-        /// <summary>
-        /// btnSaveFollowUp control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSaveFollowUp;
+        protected global::System.Web.UI.WebControls.Literal litProtocolDisplay;
 
         /// <summary>
         /// litCaseNoDisplay control.
@@ -276,6 +294,33 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Literal litBiteDateDisplay;
 
         /// <summary>
+        /// litAnimalType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litAnimalType;
+
+        /// <summary>
+        /// litSiteOfBite control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litSiteOfBite;
+
+        /// <summary>
+        /// litWoundType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litWoundType;
+
+        /// <summary>
         /// litInitialDiagnosis control.
         /// </summary>
         /// <remarks>
@@ -283,6 +328,51 @@ namespace SBI
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litInitialDiagnosis;
+
+        /// <summary>
+        /// panelAnimalFollowUp control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel panelAnimalFollowUp;
+
+        /// <summary>
+        /// ddlDay14Status control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlDay14Status;
+
+        /// <summary>
+        /// txtFollowUpDate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtFollowUpDate;
+
+        /// <summary>
+        /// txtFollowUpNotes control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtFollowUpNotes;
+
+        /// <summary>
+        /// btnSaveFollowUp control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSaveFollowUp;
 
         /// <summary>
         /// panelVisitForm control.
@@ -402,51 +492,6 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Button btnCancelVisitEdit;
 
         /// <summary>
-        /// panelGenerate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel panelGenerate;
-
-        /// <summary>
-        /// panelNoVisitWarning control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel panelNoVisitWarning;
-
-        /// <summary>
-        /// ddlProtocol control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlProtocol;
-
-        /// <summary>
-        /// txtDay0 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtDay0;
-
-        /// <summary>
-        /// btnGenerateSchedule control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnGenerateSchedule;
-
-        /// <summary>
         /// gvVisits control.
         /// </summary>
         /// <remarks>
@@ -465,58 +510,76 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Panel panelAdministration;
 
         /// <summary>
-        /// ddlDoseVaccine control.
+        /// litConfirmVaccine control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlDoseVaccine;
+        protected global::System.Web.UI.WebControls.Literal litConfirmVaccine;
 
         /// <summary>
-        /// txtVaccinatedBy control.
+        /// litConfirmBatch control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtVaccinatedBy;
+        protected global::System.Web.UI.WebControls.Literal litConfirmBatch;
 
         /// <summary>
-        /// txtDosage control.
+        /// litConfirmPractitioner control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtDosage;
+        protected global::System.Web.UI.WebControls.Literal litConfirmPractitioner;
 
         /// <summary>
-        /// txtRoute control.
+        /// litConfirmDoseNumber control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtRoute;
+        protected global::System.Web.UI.WebControls.Literal litConfirmDoseNumber;
 
         /// <summary>
-        /// btnSaveDose control.
+        /// txtConfirmDosage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSaveDose;
+        protected global::System.Web.UI.WebControls.TextBox txtConfirmDosage;
 
         /// <summary>
-        /// btnCancelDose control.
+        /// ddlConfirmRoute control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnCancelDose;
+        protected global::System.Web.UI.WebControls.DropDownList ddlConfirmRoute;
+
+        /// <summary>
+        /// btnConfirmDose control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnConfirmDose;
+
+        /// <summary>
+        /// btnCancelConfirmDose control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnCancelConfirmDose;
 
         /// <summary>
         /// btnRefreshSchedule control.

@@ -42,6 +42,15 @@ namespace SBI
         protected global::System.Web.UI.WebControls.LinkButton btnAddStockTab;
 
         /// <summary>
+        /// btnAuditTab control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnAuditTab;
+
+        /// <summary>
         /// panelOverview control.
         /// </summary>
         /// <remarks>
@@ -58,6 +67,15 @@ namespace SBI
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblTotalDoses;
+
+        /// <summary>
+        /// lblTotalVials control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblTotalVials;
 
         /// <summary>
         /// lblExpiring30 control.
@@ -78,13 +96,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Label lblExpired;
 
         /// <summary>
-        /// lblAdministeredMTD control.
+        /// lblOpenVials control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblAdministeredMTD;
+        protected global::System.Web.UI.WebControls.Label lblOpenVials;
 
         /// <summary>
         /// panelInventory control.
@@ -168,6 +186,42 @@ namespace SBI
         protected global::System.Web.UI.WebControls.GridView gvBatchDetails;
 
         /// <summary>
+        /// panelVials control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel panelVials;
+
+        /// <summary>
+        /// lblSelectedBatch control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblSelectedBatch;
+
+        /// <summary>
+        /// btnCloseVials control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnCloseVials;
+
+        /// <summary>
+        /// rptVials control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptVials;
+
+        /// <summary>
         /// panelAddStock control.
         /// </summary>
         /// <remarks>
@@ -195,13 +249,22 @@ namespace SBI
         protected global::System.Web.UI.WebControls.TextBox txtExpiryDate;
 
         /// <summary>
-        /// txtQuantity control.
+        /// ddlDosesPerVial control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtQuantity;
+        protected global::System.Web.UI.WebControls.DropDownList ddlDosesPerVial;
+
+        /// <summary>
+        /// txtVialCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtVialCount;
 
         /// <summary>
         /// btnSaveStock control.
@@ -229,5 +292,50 @@ namespace SBI
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView gvStockHistory;
+
+        /// <summary>
+        /// panelAudit control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel panelAudit;
+
+        /// <summary>
+        /// txtAuditSearch control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtAuditSearch;
+
+        /// <summary>
+        /// btnAuditSearch control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnAuditSearch;
+
+        /// <summary>
+        /// btnAuditClear control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnAuditClear;
+
+        /// <summary>
+        /// gvAuditLog control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.GridView gvAuditLog;
     }
 }

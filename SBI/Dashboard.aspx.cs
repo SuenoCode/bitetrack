@@ -25,8 +25,6 @@ namespace SBI
             }
         }
 
-       
-
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object GetBarangayCases()
@@ -37,35 +35,38 @@ namespace SBI
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    // Use dbo.PlaceOfBite.barangay directly — no more LIKE hacks
+                    // Using bite_barangay from the Case table (since PlaceOfBite doesn't exist)
                     string query = @"
                         SELECT
                             CASE
-                                WHEN pb.barangay LIKE '%San Pedro%'    THEN 'San Pedro'
-                                WHEN pb.barangay LIKE '%San Juan%'     THEN 'San Juan'
-                                WHEN pb.barangay LIKE '%San Guillermo%'THEN 'San Guillermo'
-                                WHEN pb.barangay LIKE '%CCL%'          THEN 'CCL'
-                                WHEN pb.barangay LIKE '%San Jose%'     THEN 'San Jose'
-                                WHEN pb.barangay LIKE '%Bombongan%'    THEN 'Bombongan'
-                                WHEN pb.barangay LIKE '%Lagundi%'      THEN 'Lagundi'
-                                WHEN pb.barangay LIKE '%Maybancal%'    THEN 'Maybancal'
+                                WHEN c.bite_barangay LIKE '%San Pedro%'    THEN 'San Pedro'
+                                WHEN c.bite_barangay LIKE '%San Juan%'     THEN 'San Juan'
+                                WHEN c.bite_barangay LIKE '%San Guillermo%'THEN 'San Guillermo'
+                                WHEN c.bite_barangay LIKE '%CCL%'          THEN 'CCL'
+                                WHEN c.bite_barangay LIKE '%San Jose%'     THEN 'San Jose'
+                                WHEN c.bite_barangay LIKE '%Bombongan%'    THEN 'Bombongan'
+                                WHEN c.bite_barangay LIKE '%Lagundi%'      THEN 'Lagundi'
+                                WHEN c.bite_barangay LIKE '%Maybancal%'    THEN 'Maybancal'
+                                WHEN c.bite_barangay LIKE '%San Francisco%'THEN 'San Francisco'
+                                WHEN c.bite_barangay LIKE '%San Vicente%'  THEN 'San Vicente'
                                 ELSE 'Other'
                             END AS Barangay,
                             COUNT(*) AS CaseCount
                         FROM dbo.[Case] c
-                        INNER JOIN dbo.PlaceOfBite pb ON pb.case_id = c.case_id
-                        WHERE pb.barangay IS NOT NULL
-                          AND pb.barangay <> ''
+                        WHERE c.bite_barangay IS NOT NULL
+                          AND c.bite_barangay <> ''
                         GROUP BY
                             CASE
-                                WHEN pb.barangay LIKE '%San Pedro%'    THEN 'San Pedro'
-                                WHEN pb.barangay LIKE '%San Juan%'     THEN 'San Juan'
-                                WHEN pb.barangay LIKE '%San Guillermo%'THEN 'San Guillermo'
-                                WHEN pb.barangay LIKE '%CCL%'          THEN 'CCL'
-                                WHEN pb.barangay LIKE '%San Jose%'     THEN 'San Jose'
-                                WHEN pb.barangay LIKE '%Bombongan%'    THEN 'Bombongan'
-                                WHEN pb.barangay LIKE '%Lagundi%'      THEN 'Lagundi'
-                                WHEN pb.barangay LIKE '%Maybancal%'    THEN 'Maybancal'
+                                WHEN c.bite_barangay LIKE '%San Pedro%'    THEN 'San Pedro'
+                                WHEN c.bite_barangay LIKE '%San Juan%'     THEN 'San Juan'
+                                WHEN c.bite_barangay LIKE '%San Guillermo%'THEN 'San Guillermo'
+                                WHEN c.bite_barangay LIKE '%CCL%'          THEN 'CCL'
+                                WHEN c.bite_barangay LIKE '%San Jose%'     THEN 'San Jose'
+                                WHEN c.bite_barangay LIKE '%Bombongan%'    THEN 'Bombongan'
+                                WHEN c.bite_barangay LIKE '%Lagundi%'      THEN 'Lagundi'
+                                WHEN c.bite_barangay LIKE '%Maybancal%'    THEN 'Maybancal'
+                                WHEN c.bite_barangay LIKE '%San Francisco%'THEN 'San Francisco'
+                                WHEN c.bite_barangay LIKE '%San Vicente%'  THEN 'San Vicente'
                                 ELSE 'Other'
                             END
                         ORDER BY CaseCount DESC";
@@ -105,12 +106,18 @@ namespace SBI
                 {
                     conn.Open();
 
-                    string query = @"
+                    // Fixed: Using proper table names from your schema
+                    string query = (@"
                         SELECT
-                            COUNT(*)                                           AS TotalCases,
-                            COUNT(DISTINCT ISNULL(pb.barangay, ''))           AS TotalBarangays
-                        FROM dbo.[Case] c
-                        LEFT JOIN dbo.PlaceOfBite pb ON pb.case_id = c.case_id";
+                            (SELECT COUNT(*) FROM dbo.[Case]) AS TotalCases,
+                            (SELECT COUNT(DISTINCT ISNULL(bite_barangay, '')) FROM dbo.[Case] WHERE bite_barangay IS NOT NULL AND bite_barangay <> '') AS TotalBarangays,
+                            (SELECT COUNT(*) FROM dbo.[Case] WHERE category = 'III') AS HighRiskCases,
+                            (SELECT COUNT(*) FROM dbo.[Case] WHERE category IS NOT NULL AND category <> '') AS TotalCategories,
+                            (SELECT COUNT(*) FROM ScheduledDose WHERE status = 'Pending') AS OngoingTreatments,
+                            (SELECT COUNT(*) FROM ScheduledDose WHERE status = 'Completed') AS CompletedCases,
+                            (SELECT ISNULL(SUM(current_stock), 0) FROM VaccineBatch WHERE expiration_date < CAST(GETDATE() AS DATE)) AS StockAlerts,
+                            (SELECT COUNT(*) FROM dbo.[Case] WHERE MONTH(date_of_bite) = MONTH(GETDATE()) AND YEAR(date_of_bite) = YEAR(GETDATE())) AS MonthlyCases
+                    ");
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     using (SqlDataReader reader = cmd.ExecuteReader())
@@ -120,17 +127,22 @@ namespace SBI
                             return new
                             {
                                 TotalCases = reader["TotalCases"] != DBNull.Value ? Convert.ToInt32(reader["TotalCases"]) : 0,
-                                TotalBarangays = reader["TotalBarangays"] != DBNull.Value ? Convert.ToInt32(reader["TotalBarangays"]) : 0
+                                TotalBarangays = reader["TotalBarangays"] != DBNull.Value ? Convert.ToInt32(reader["TotalBarangays"]) : 0,
+                                HighRiskCases = reader["HighRiskCases"] != DBNull.Value ? Convert.ToInt32(reader["HighRiskCases"]) : 0,
+                                OngoingTreatments = reader["OngoingTreatments"] != DBNull.Value ? Convert.ToInt32(reader["OngoingTreatments"]) : 0,
+                                CompletedCases = reader["CompletedCases"] != DBNull.Value ? Convert.ToInt32(reader["CompletedCases"]) : 0,
+                                StockAlerts = reader["StockAlerts"] != DBNull.Value ? Convert.ToInt32(reader["StockAlerts"]) : 0,
+                                MonthlyCases = reader["MonthlyCases"] != DBNull.Value ? Convert.ToInt32(reader["MonthlyCases"]) : 0
                             };
                         }
                     }
                 }
 
-                return new { TotalCases = 0, TotalBarangays = 0 };
+                return new { TotalCases = 0, TotalBarangays = 0, HighRiskCases = 0, OngoingTreatments = 0, CompletedCases = 0, StockAlerts = 0, MonthlyCases = 0 };
             }
             catch (Exception ex)
             {
-                return new { Error = ex.Message, TotalCases = 0, TotalBarangays = 0 };
+                return new { Error = ex.Message, TotalCases = 0, TotalBarangays = 0, HighRiskCases = 0, OngoingTreatments = 0, CompletedCases = 0, StockAlerts = 0, MonthlyCases = 0 };
             }
         }
 
@@ -183,6 +195,7 @@ namespace SBI
                 return new { Error = ex.Message };
             }
         }
+
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public static object GetMonthlyCases()
@@ -199,6 +212,7 @@ namespace SBI
                         SELECT MONTH(date_of_bite) AS Month, COUNT(*) AS Total
                         FROM dbo.[Case]
                         WHERE YEAR(date_of_bite) = YEAR(GETDATE())
+                          AND date_of_bite IS NOT NULL
                         GROUP BY MONTH(date_of_bite)";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -226,13 +240,27 @@ namespace SBI
 
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
+                    // Using InventoryLog with 'Dispensed' type for vaccine usage
                     string query = @"
-                        SELECT CEILING(DAY(transaction_date) / 7.0) AS WeekNum, COUNT(*) AS Total
+                        SELECT 
+                            CASE 
+                                WHEN DAY(transaction_date) <= 7 THEN 1
+                                WHEN DAY(transaction_date) <= 14 THEN 2
+                                WHEN DAY(transaction_date) <= 21 THEN 3
+                                ELSE 4
+                            END AS WeekNum, 
+                            COUNT(*) AS Total
                         FROM dbo.InventoryLog
-                        WHERE transaction_type = 'Consumed'
+                        WHERE transaction_type = 'Dispensed'
                           AND MONTH(transaction_date) = MONTH(GETDATE())
-                          AND YEAR(transaction_date)  = YEAR(GETDATE())
-                        GROUP BY CEILING(DAY(transaction_date) / 7.0)";
+                          AND YEAR(transaction_date) = YEAR(GETDATE())
+                        GROUP BY 
+                            CASE 
+                                WHEN DAY(transaction_date) <= 7 THEN 1
+                                WHEN DAY(transaction_date) <= 14 THEN 2
+                                WHEN DAY(transaction_date) <= 21 THEN 3
+                                ELSE 4
+                            END";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
@@ -298,6 +326,7 @@ namespace SBI
                 string connectionString = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
+                    // Using animal_type from the Case table
                     string query = @"
                         SELECT
                             CASE
@@ -306,7 +335,7 @@ namespace SBI
                                 ELSE 'Others'
                             END AS Label,
                             COUNT(*) AS Total
-                        FROM dbo.Animal
+                        FROM dbo.[Case]
                         WHERE animal_type IS NOT NULL AND animal_type <> ''
                         GROUP BY
                             CASE
@@ -346,6 +375,7 @@ namespace SBI
                             ISNULL(NULLIF(type_of_exposure,''), 'Unknown') AS Label,
                             COUNT(*) AS Total
                         FROM dbo.[Case]
+                        WHERE type_of_exposure IS NOT NULL AND type_of_exposure <> ''
                         GROUP BY type_of_exposure
                         ORDER BY Total DESC";
 

@@ -330,13 +330,17 @@
                 }
             });
 
-            fetchChart('GetWeeklyVaccineUsage').then(d => {
-                if (d && d.Weeks && d.Counts) {
-                    vaccineChartInst.data.labels = d.Weeks;
-                    vaccineChartInst.data.datasets[0].data = d.Counts;
-                    vaccineChartInst.update();
+            // ─── Remaining stats ───
+            fetchChart('GetDashboardStats').then(d => {
+                if (d) {
+                    if (d.MonthlyCases !== undefined) document.getElementById('monthlyCaseValue').textContent = d.MonthlyCases;
+                    if (d.HighRiskCases !== undefined) document.getElementById('highRiskCaseValue').textContent = d.HighRiskCases;
+                    if (d.OngoingTreatments !== undefined) document.getElementById('treatmentCountValue').textContent = d.OngoingTreatments;
+                    if (d.CompletedCases !== undefined) document.getElementById('completedCaseValue').textContent = d.CompletedCases;
+                    if (d.StockAlerts !== undefined) document.getElementById('stockValue').textContent = d.StockAlerts;
+                    if (d.TotalCases !== undefined) document.getElementById('caseValue').textContent = d.TotalCases;
                 }
-            }).catch(() => {});
+            }).catch(() => { });
 
             // 3. Cases by Category Doughnut
             categoryChartInst = new Chart(document.getElementById('categoryChart'), {

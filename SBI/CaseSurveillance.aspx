@@ -4,6 +4,73 @@
 
     <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
 
+    <style>
+        /* ── Status badges ──────────────────────────────────────────── */
+        .badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; }
+        .badge-ok   { background:#dcfce7; color:#15803d; }
+        .badge-warn { background:#fef9c3; color:#a16207; }
+        .badge-exp  { background:#fee2e2; color:#b91c1c; }
+        .badge-in   { background:#dbeafe; color:#1d4ed8; }
+
+        /* ── Schedule summary ───────────────────────────────────────── */
+        .schedule-summary {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .schedule-summary .stat {
+            display: flex;
+            flex-direction: column;
+        }
+        .schedule-summary .stat .label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+        .schedule-summary .stat .value {
+            font-size: 20px;
+            font-weight: 800;
+        }
+        .schedule-summary .stat .value.total { color: #1e293b; }
+        .schedule-summary .stat .value.completed { color: #15803d; }
+        .schedule-summary .stat .value.pending { color: #b45309; }
+
+        /* ── Modal animation ────────────────────────────────────────── */
+        @keyframes fadeIn {
+            from { opacity:0; transform:translateY(8px) scale(.98); }
+            to   { opacity:1; transform:translateY(0) scale(1); }
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .info-box .icon {
+            color: #2563eb;
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .info-box .text {
+            font-size: 13px;
+            color: #1e40af;
+        }
+        .info-box .text strong {
+            font-weight: 700;
+        }
+
+        .admin-card {
+            border-left: 4px solid #f59e0b;
+        }
+    </style>
+
     <div class="p-6 font-heading2 text-slate-900">
 
         <%-- ── Page Header ───────────────────────────────────────────── --%>
@@ -19,6 +86,10 @@
         <asp:HiddenField ID="hfEditMode" runat="server" />
         <asp:HiddenField ID="hfSelectedVisitId" runat="server" />
         <asp:HiddenField ID="hfVisitEditMode" runat="server" />
+        <asp:HiddenField ID="hfAnimalId" runat="server" />
+        <asp:HiddenField ID="hfFollowUpId" runat="server" />
+        <asp:HiddenField ID="hfConfirmVaccineId" runat="server" />
+        <asp:HiddenField ID="hfConfirmBatchId" runat="server" />
 
         <%-- ── Tab Navigation ────────────────────────────────────────── --%>
         <div class="flex gap-2 border-b border-slate-200 pb-px mb-6">
@@ -61,17 +132,29 @@
                     <asp:BoundField DataField="dose_number" HeaderText="Dose"
                         ItemStyle-CssClass="p-4 text-slate-600 text-center"
                         HeaderStyle-CssClass="p-4 text-center" />
-                    <asp:BoundField DataField="vaccine_name" HeaderText="Vaccine" NullDisplayText="-"
-                        ItemStyle-CssClass="p-4 text-slate-500 italic text-center"
+                    <asp:BoundField DataField="vaccine_name" HeaderText="Vaccine" NullDisplayText="—"
+                        ItemStyle-CssClass="p-4 text-slate-600 text-center"
                         HeaderStyle-CssClass="p-4 text-center" />
+                    <asp:TemplateField HeaderText="Category" HeaderStyle-CssClass="p-4 text-center" ItemStyle-CssClass="p-4 text-center">
+                        <ItemTemplate>
+                            <span class='badge <%# Eval("category").ToString() == "III" ? "badge-exp" : Eval("category").ToString() == "II" ? "badge-warn" : "badge-ok" %>'>
+                                Cat <%# Eval("category") %>
+                            </span>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Status" HeaderStyle-CssClass="p-4 text-center" ItemStyle-CssClass="p-4 text-center">
+                        <ItemTemplate>
+                            <span class='badge badge-warn'>Pending</span>
+                        </ItemTemplate>
+                    </asp:TemplateField>
                     <asp:TemplateField HeaderStyle-CssClass="p-4 text-right" ItemStyle-CssClass="p-4 text-right">
                         <ItemTemplate>
                             <asp:Button ID="btnGoToCase" runat="server"
-    CommandName="ViewCase"
-    CommandArgument='<%# Container.DataItemIndex %>'
-    Text="Open Case"
-    Visible='<%# CanOpenCase %>'
-    CssClass="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded-lg text-xs transition cursor-pointer" />
+                                CommandName="ViewCase"
+                                CommandArgument='<%# Container.DataItemIndex %>'
+                                Text="Open Case"
+                                Visible='<%# CanOpenCase %>'
+                                CssClass="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-4 rounded-lg text-xs transition cursor-pointer" />
                         </ItemTemplate>
                     </asp:TemplateField>
                 </Columns>
@@ -88,7 +171,7 @@
             CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-6">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-3">
                 <h3 class="font-extrabold text-slate-800">Case Registry</h3>
-                <div class="flex gap-2">
+                <div class="flex gap-2 flex-wrap">
                     <asp:TextBox ID="txtSearchCase" runat="server"
                         CssClass="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         Placeholder="Search by patient name, case no…" />
@@ -115,26 +198,41 @@
                     <asp:BoundField DataField="patient_name" HeaderText="Patient Name"
                         ItemStyle-CssClass="p-4 font-bold text-slate-700"
                         HeaderStyle-CssClass="p-4" />
-                    <asp:BoundField DataField="category" HeaderText="Category"
-                        ItemStyle-CssClass="p-4 text-slate-600 text-center"
-                        HeaderStyle-CssClass="p-4 text-center" />
-                    <asp:BoundField DataField="regimen_type" HeaderText="Protocol" NullDisplayText="-"
-                        ItemStyle-CssClass="p-4 text-slate-600 text-center"
-                        HeaderStyle-CssClass="p-4 text-center" />
-                    <asp:BoundField DataField="total_doses" HeaderText="Total" NullDisplayText="-"
+                    <asp:TemplateField HeaderText="Category" HeaderStyle-CssClass="p-4 text-center" ItemStyle-CssClass="p-4 text-center">
+                        <ItemTemplate>
+                            <span class='badge <%# Eval("category").ToString() == "III" ? "badge-exp" : Eval("category").ToString() == "II" ? "badge-warn" : "badge-ok" %>'>
+                                Cat <%# Eval("category") %>
+                            </span>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:BoundField DataField="date_of_bite" HeaderText="Bite Date"
+                        DataFormatString="{0:MMM dd, yyyy}"
+                        ItemStyle-CssClass="p-4 text-slate-600"
+                        HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="regimen_type" HeaderText="Protocol" NullDisplayText="—"
+                        ItemStyle-CssClass="p-4 text-slate-600"
+                        HeaderStyle-CssClass="p-4" />
+                    <asp:BoundField DataField="total_doses" HeaderText="Total" NullDisplayText="—"
                         ItemStyle-CssClass="p-4 text-center text-slate-600"
                         HeaderStyle-CssClass="p-4 text-center" />
                     <asp:BoundField DataField="completed_doses" HeaderText="Completed"
                         ItemStyle-CssClass="p-4 text-center font-extrabold text-emerald-600"
                         HeaderStyle-CssClass="p-4 text-center" />
+                    <asp:TemplateField HeaderText="Status" HeaderStyle-CssClass="p-4 text-center" ItemStyle-CssClass="p-4 text-center">
+                        <ItemTemplate>
+                            <span class='badge <%# Eval("case_status").ToString() == "Complete" ? "badge-ok" : Eval("case_status").ToString() == "No Schedule" ? "badge-exp" : "badge-warn" %>'>
+                                <%# Eval("case_status") %>
+                            </span>
+                        </ItemTemplate>
+                    </asp:TemplateField>
                     <asp:TemplateField HeaderStyle-CssClass="p-4 text-right" ItemStyle-CssClass="p-4 text-right">
                         <ItemTemplate>
                             <asp:Button ID="btnOpenCase" runat="server"
-    CommandName="OpenCase"
-    CommandArgument='<%# Container.DataItemIndex %>'
-    Text="Manage Case"
-    Visible='<%# CanManageCase %>'
-    CssClass="inline-flex items-center gap-1 text-blue-600 font-semibold text-xs hover:text-blue-800 hover:underline transition" />
+                                CommandName="OpenCase"
+                                CommandArgument='<%# Container.DataItemIndex %>'
+                                Text="Manage Case"
+                                Visible='<%# CanManageCase %>'
+                                CssClass="inline-flex items-center gap-1 text-blue-600 font-semibold text-xs hover:text-blue-800 hover:underline transition" />
                         </ItemTemplate>
                     </asp:TemplateField>
                 </Columns>
@@ -158,10 +256,83 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <%-- LEFT: Treatment Details + Animal Follow-Up + Visit Form + Assign Protocol --%>
+                <%-- LEFT: Treatment Details + Animal Follow-Up + Visit Form --%>
                 <div class="lg:col-span-1 space-y-6">
 
-                    <%-- Animal Follow-Up --%>
+                    <%-- Schedule Info (Auto-generated summary) --%>
+                    <asp:Panel ID="panelScheduleInfo" runat="server" Visible="true"
+                        CssClass="bg-white border border-emerald-200 rounded-xl shadow-sm overflow-hidden">
+                        <div class="px-5 py-4 border-b border-emerald-200 bg-emerald-50">
+                            <h3 class="font-extrabold text-emerald-800 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Vaccination Schedule
+                            </h3>
+                            <p class="text-xs text-emerald-700 mt-0.5">Auto-generated based on bite category</p>
+                        </div>
+                        <div class="p-5">
+                            <div class="schedule-summary">
+                                <div class="stat">
+                                    <span class="label">Total Doses</span>
+                                    <span class="value total"><asp:Literal ID="litTotalDoses" runat="server" Text="0" /></span>
+                                </div>
+                                <div class="stat">
+                                    <span class="label">Completed</span>
+                                    <span class="value completed"><asp:Literal ID="litCompletedDoses" runat="server" Text="0" /></span>
+                                </div>
+                                <div class="stat">
+                                    <span class="label">Pending</span>
+                                    <span class="value pending"><asp:Literal ID="litPendingDoses" runat="server" Text="0" /></span>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-xs text-slate-500">
+                                <span class="font-semibold">Protocol:</span>
+                                <asp:Literal ID="litProtocolDisplay" runat="server" Text="—" />
+                            </div>
+                        </div>
+                    </asp:Panel>
+
+                    <%-- Case Info --%>
+                    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
+                        <h3 class="font-extrabold text-slate-800 border-b border-slate-100 pb-3 mb-4">Case Details</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Case Reference</label>
+                                <div class="text-slate-800 font-semibold"><asp:Literal ID="litCaseNoDisplay" runat="server" /></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Patient Name</label>
+                                <div class="text-slate-800 font-semibold"><asp:Literal ID="litPatientNameDisplay" runat="server" /></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Exposure Category</label>
+                                <div class="text-slate-800 font-semibold"><asp:Literal ID="litCategoryDisplay" runat="server" /></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Bite Date</label>
+                                <div class="text-slate-800 font-semibold"><asp:Literal ID="litBiteDateDisplay" runat="server" /></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Animal Type</label>
+                                <div class="text-slate-800 font-semibold"><asp:Literal ID="litAnimalType" runat="server" /></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Site of Bite</label>
+                                <div class="text-slate-800 font-semibold"><asp:Literal ID="litSiteOfBite" runat="server" /></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Wound Type</label>
+                                <div class="text-slate-800 font-semibold"><asp:Literal ID="litWoundType" runat="server" /></div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Initial Diagnosis</label>
+                                <div class="text-slate-700 text-sm"><asp:Literal ID="litInitialDiagnosis" runat="server" /></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <%-- ── Animal Follow-Up ────────────────────────────────────── --%>
                     <asp:Panel ID="panelAnimalFollowUp" runat="server" Visible="false"
                         CssClass="bg-white border border-amber-200 rounded-xl shadow-sm overflow-hidden">
                         <div class="px-5 py-4 border-b border-amber-200 bg-amber-50">
@@ -173,8 +344,6 @@
                             </h3>
                         </div>
                         <div class="p-5 space-y-4">
-                            <asp:HiddenField ID="hfAnimalId" runat="server" />
-                            <asp:HiddenField ID="hfFollowUpId" runat="server" />
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Animal Status</label>
                                 <asp:DropDownList ID="ddlDay14Status" runat="server"
@@ -201,38 +370,6 @@
                         </div>
                     </asp:Panel>
 
-                    <%-- Case Info --%>
-                    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
-                        <h3 class="font-extrabold text-slate-800 border-b border-slate-100 pb-3 mb-4">Treatment Details</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Case Reference</label>
-                                <div class="text-slate-800 font-semibold">
-                                    <asp:Literal ID="litCaseNoDisplay" runat="server" /></div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Patient Name</label>
-                                <div class="text-slate-800 font-semibold">
-                                    <asp:Literal ID="litPatientNameDisplay" runat="server" /></div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Exposure Category</label>
-                                <div class="text-slate-800 font-semibold">
-                                    <asp:Literal ID="litCategoryDisplay" runat="server" /></div>
-                            </div>
-                            <%-- ADD THESE TWO --%>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Bite Date</label>
-                                <div class="text-slate-800 font-semibold">
-                                    <asp:Literal ID="litBiteDateDisplay" runat="server" /></div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Initial Diagnosis</label>
-                                <div class="text-slate-700 text-sm">
-                                    <asp:Literal ID="litInitialDiagnosis" runat="server" /></div>
-                            </div>
-                        </div>
-                    </div>
                     <%-- ── Visit Form ──────────────────────────────────────────── --%>
                     <asp:Panel ID="panelVisitForm" runat="server"
                         CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
@@ -246,9 +383,8 @@
                         </div>
                         <div class="p-5 space-y-4">
 
-                            <%-- Visit Type --%>
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Visit Type</label>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Visit Type <span class="text-red-500">*</span></label>
                                 <asp:DropDownList ID="ddlVisitType" runat="server"
                                     CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                                     <asp:ListItem Text="-- Select Type --" Value="" />
@@ -259,7 +395,6 @@
                                 </asp:DropDownList>
                             </div>
 
-                            <%-- Dose Day — auto-generated, read-only display --%>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Dose Day</label>
                                 <asp:HiddenField ID="hfVisitDoseDay" runat="server" Value="" />
@@ -269,17 +404,15 @@
                                         <asp:Literal ID="litDoseDayDisplay" runat="server" Text="— select a visit type and date —" />
                                     </div>
                                 </div>
-                                <p class="text-[11px] text-slate-400 mt-1">Calculated automatically from the visit type and visit date relative to Day 0.</p>
+                                <p class="text-[11px] text-slate-400 mt-1">Calculated automatically from the visit date relative to the bite date.</p>
                             </div>
 
-                            <%-- Visit Date --%>
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Visit Date</label>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Visit Date <span class="text-red-500">*</span></label>
                                 <asp:TextBox ID="txtVisitDate" runat="server" TextMode="Date"
                                     CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
 
-                            <%-- Diagnosis --%>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Diagnosis</label>
                                 <asp:TextBox ID="txtVisitDiagnosis" runat="server"
@@ -287,7 +420,6 @@
                                     placeholder="e.g. Category III Bite" />
                             </div>
 
-                            <%-- Manifestation Notes --%>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Manifestation Notes</label>
                                 <asp:TextBox ID="txtManifestationNotes" runat="server" TextMode="MultiLine" Rows="3"
@@ -295,7 +427,6 @@
                                     placeholder="Describe wound, location, severity…" />
                             </div>
 
-                            <%-- Visit Status --%>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Status</label>
                                 <asp:DropDownList ID="ddlVisitStatus" runat="server"
@@ -306,7 +437,6 @@
                                 </asp:DropDownList>
                             </div>
 
-                            <%-- Validation message --%>
                             <asp:Label ID="lblVisitError" runat="server" Visible="false"
                                 CssClass="block text-xs text-red-600 font-semibold" />
 
@@ -318,42 +448,6 @@
                                     CssClass="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 py-2.5 rounded-lg font-bold cursor-pointer transition text-sm"
                                     OnClick="btnCancelVisitEdit_Click" Visible="false" />
                             </div>
-                        </div>
-                    </asp:Panel>
-
-                    <%-- Assign Protocol — locked until a visit exists --%>
-                    <asp:Panel ID="panelGenerate" runat="server"
-                        CssClass="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
-                        <h3 class="font-extrabold text-slate-800 mb-1">Assign Protocol</h3>
-
-                        <%-- Warning shown when no visit recorded yet --%>
-                        <asp:Panel ID="panelNoVisitWarning" runat="server" Visible="false"
-                            CssClass="mb-4 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-600 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <p class="text-xs text-amber-700 font-semibold">A visit must be recorded before a vaccination schedule can be generated.</p>
-                        </asp:Panel>
-
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Regimen Protocol</label>
-                                <asp:DropDownList ID="ddlProtocol" runat="server"
-                                    CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                                    <asp:ListItem Text="-- Select Protocol --" Value="" />
-                                    <asp:ListItem Text="PEP Essen (0, 3, 7, 14, 28)" Value="PEP_ESSEN" />
-                                    <asp:ListItem Text="PEP Zagreb (0, 7, 21)" Value="PEP_ZAGREB" />
-                                    <asp:ListItem Text="PrEP (0, 7, 21)" Value="PREP" />
-                                </asp:DropDownList>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Day 0 Date</label>
-                                <asp:TextBox ID="txtDay0" runat="server" TextMode="Date"
-                                    CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            </div>
-                            <asp:Button ID="btnGenerateSchedule" runat="server" Text="Generate Schedule"
-                                CssClass="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-bold cursor-pointer transition text-sm"
-                                OnClick="btnGenerateSchedule_Click" />
                         </div>
                     </asp:Panel>
 
@@ -387,20 +481,16 @@
                                     ItemStyle-CssClass="p-4 text-slate-600"
                                     HeaderStyle-CssClass="p-4" />
                                 <asp:BoundField DataField="dose_day" HeaderText="Day"
-                                    NullDisplayText="-"
+                                    NullDisplayText="—"
                                     ItemStyle-CssClass="p-4 text-slate-600 text-center"
                                     HeaderStyle-CssClass="p-4 text-center" />
                                 <asp:BoundField DataField="diagnosis" HeaderText="Diagnosis"
-                                    NullDisplayText="-"
-                                    ItemStyle-CssClass="p-4 text-slate-500 text-center"
-                                    HeaderStyle-CssClass="p-4 text-center" />
-                                <asp:TemplateField HeaderText="Status" HeaderStyle-CssClass="p-4" ItemStyle-CssClass="p-4">
+                                    NullDisplayText="—"
+                                    ItemStyle-CssClass="p-4 text-slate-600"
+                                    HeaderStyle-CssClass="p-4" />
+                                <asp:TemplateField HeaderText="Status" HeaderStyle-CssClass="p-4 text-center" ItemStyle-CssClass="p-4 text-center">
                                     <ItemTemplate>
-                                        <span class='<%# Eval("status").ToString() == "Completed"
-                                            ? "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700 uppercase tracking-wide"
-                                            : Eval("status").ToString() == "Cancelled"
-                                                ? "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-red-100 text-red-700 uppercase tracking-wide"
-                                                : "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wide" %>'>
+                                        <span class='badge <%# Eval("status").ToString() == "Completed" ? "badge-ok" : Eval("status").ToString() == "Cancelled" ? "badge-exp" : "badge-warn" %>'>
                                             <%# Eval("status") %>
                                         </span>
                                     </ItemTemplate>
@@ -423,51 +513,80 @@
                         </asp:GridView>
                     </asp:Panel>
 
-                    <%-- Record Dose Administration --%>
+                    <%-- ── Record Dose Administration (Simplified - Auto-filled) ── --%>
                     <asp:Panel ID="panelAdministration" runat="server" Visible="false"
-                        CssClass="bg-white border border-l-4 border-l-blue-600 border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                        <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
-                            <h3 class="font-extrabold text-slate-800">Record Dose Administration</h3>
+                        CssClass="bg-white border border-l-4 border-l-emerald-600 border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                        <div class="px-5 py-4 border-b border-slate-200 bg-emerald-50">
+                            <h3 class="font-extrabold text-emerald-800 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Confirm Dose Administration
+                            </h3>
+                            <p class="text-xs text-emerald-700 mt-0.5">Vial has been automatically reserved. Confirm to administer.</p>
                         </div>
                         <div class="p-5">
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div class="col-span-1 lg:col-span-2">
-                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Vaccine</label>
-                                    <asp:DropDownList ID="ddlDoseVaccine" runat="server"
-                                        CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Practitioner</label>
-                                    <asp:TextBox ID="txtVaccinatedBy" runat="server"
-                                        CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                </div>
-                                <div class="flex gap-2">
-                                    <div class="flex-1">
-                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Dosage</label>
-                                        <asp:TextBox ID="txtDosage" runat="server"
-                                            CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="e.g. 0.5" />
+                            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Vaccine</label>
+                                        <div class="text-sm font-bold text-slate-800">
+                                            <asp:Literal ID="litConfirmVaccine" runat="server" Text="—" />
+                                        </div>
                                     </div>
-                                    <div class="flex-1">
-                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Route</label>
-                                        <asp:TextBox ID="txtRoute" runat="server"
-                                            CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="e.g. IM" />
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Batch / Vial</label>
+                                        <div class="text-sm font-bold text-slate-800">
+                                            <asp:Literal ID="litConfirmBatch" runat="server" Text="—" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Practitioner</label>
+                                        <div class="text-sm font-bold text-slate-800">
+                                            <asp:Literal ID="litConfirmPractitioner" runat="server" Text="—" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Dose Number</label>
+                                        <div class="text-sm font-bold text-slate-800">
+                                            <asp:Literal ID="litConfirmDoseNumber" runat="server" Text="—" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Dosage (mL)</label>
+                                    <asp:TextBox ID="txtConfirmDosage" runat="server"
+                                        CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="e.g. 0.5" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Route</label>
+                                    <asp:DropDownList ID="ddlConfirmRoute" runat="server"
+                                        CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                        <asp:ListItem Text="-- Select Route --" Value="" />
+                                        <asp:ListItem Text="IM (Intramuscular)" Value="IM" />
+                                        <asp:ListItem Text="ID (Intradermal)" Value="ID" />
+                                        <asp:ListItem Text="SC (Subcutaneous)" Value="SC" />
+                                        <asp:ListItem Text="IV (Intravenous)" Value="IV" />
+                                    </asp:DropDownList>
+                                </div>
+                            </div>
+
                             <div class="mt-4 flex gap-3">
-                                <asp:Button ID="btnSaveDose" runat="server" Text="Confirm Administration"
-                                    CssClass="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-bold cursor-pointer transition text-sm"
-                                    OnClick="btnSaveDose_Click" />
-                                <asp:Button ID="btnCancelDose" runat="server" Text="Cancel"
+                                <asp:Button ID="btnConfirmDose" runat="server" Text="✓ Confirm Administration"
+                                    CssClass="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold cursor-pointer transition text-sm"
+                                    OnClick="btnConfirmDose_Click" />
+                                <asp:Button ID="btnCancelConfirmDose" runat="server" Text="Cancel"
                                     CssClass="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 py-2.5 rounded-lg font-bold cursor-pointer transition text-sm"
                                     OnClick="btnCancelDose_Click" />
                             </div>
                         </div>
                     </asp:Panel>
 
-                    <%-- Overall Schedule --%>
+                    <%-- ── Overall Schedule ─────────────────────────────────────── --%>
                     <asp:Panel runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex-1">
                         <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                             <h3 class="font-extrabold text-slate-800">Overall Schedule</h3>
@@ -485,33 +604,45 @@
                             <RowStyle CssClass="border-b border-slate-100 transition-colors hover:bg-slate-50" />
                             <Columns>
                                 <asp:BoundField DataField="dose_number" HeaderText="Dose"
-                                    ItemStyle-CssClass="p-4 font-bold text-slate-700"
-                                    HeaderStyle-CssClass="p-4" />
-                                <asp:BoundField DataField="schedule_date" HeaderText="Date"
+                                    ItemStyle-CssClass="p-4 font-bold text-slate-700 text-center"
+                                    HeaderStyle-CssClass="p-4 text-center" />
+                                <asp:BoundField DataField="schedule_date" HeaderText="Scheduled Date"
                                     DataFormatString="{0:MMM dd, yyyy}"
                                     ItemStyle-CssClass="p-4 text-slate-600"
                                     HeaderStyle-CssClass="p-4" />
+                                <asp:BoundField DataField="vaccine_name" HeaderText="Vaccine"
+                                    NullDisplayText="—"
+                                    ItemStyle-CssClass="p-4 text-slate-600"
+                                    HeaderStyle-CssClass="p-4" />
+                                <asp:TemplateField HeaderText="Status" HeaderStyle-CssClass="p-4 text-center" ItemStyle-CssClass="p-4 text-center">
+                                    <ItemTemplate>
+                                        <span class='badge <%# Eval("status").ToString() == "Completed" ? "badge-ok" : Eval("status").ToString() == "Cancelled" ? "badge-exp" : "badge-warn" %>'>
+                                            <%# Eval("status") %>
+                                        </span>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
                                 <asp:TemplateField HeaderStyle-CssClass="p-4 text-right" ItemStyle-CssClass="p-4 text-right">
                                     <ItemTemplate>
-                                        <%-- Administer — visible to A and C only, Pending doses only --%>
                                         <asp:Button ID="btnAdminister" runat="server"
-    CommandName="AdministerDose"
-    CommandArgument='<%# Container.DataItemIndex %>'
-    Text="Administer"
-    CssClass="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer"
-    Visible='<%# Eval("status").ToString() == "Pending" && CanAdminister %>' />
-                                        <%-- Edit — visible to A and C only, Completed doses only --%>
+                                            CommandName="AdministerDose"
+                                            CommandArgument='<%# Container.DataItemIndex %>'
+                                            Text="Administer"
+                                            CssClass="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer"
+                                            Visible='<%# Eval("status").ToString() == "Pending" && CanAdminister %>' />
                                         <asp:Button ID="btnEdit" runat="server"
-    CommandName="EditDose"
-    CommandArgument='<%# Container.DataItemIndex %>'
-    Text="Edit"
-    CssClass="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer"
-    Visible='<%# Eval("status").ToString() == "Completed" && CanAdminister %>' />
+                                            CommandName="EditDose"
+                                            CommandArgument='<%# Container.DataItemIndex %>'
+                                            Text="Edit"
+                                            CssClass="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer"
+                                            Visible='<%# Eval("status").ToString() == "Completed" && CanAdminister %>' />
                                     </ItemTemplate>
                                 </asp:TemplateField>
                             </Columns>
                             <EmptyDataTemplate>
-                                <div class="p-10 text-center text-slate-400 text-sm">No schedule generated for this case yet.</div>
+                                <div class="p-10 text-center text-slate-400 text-sm">
+                                    <p>No schedule generated for this case yet.</p>
+                                    <p class="text-xs mt-1">The schedule is automatically generated when the case is opened.</p>
+                                </div>
                             </EmptyDataTemplate>
                         </asp:GridView>
                     </asp:Panel>
@@ -521,5 +652,92 @@
         </asp:Panel>
 
     </div>
+
+    <%-- ── Notify Modal ──────────────────────────────────────────── --%>
+    <div id="notifyModal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-slate-900/50 px-4">
+        <div class="w-full max-w-sm rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden" style="animation:fadeIn .2s ease-out;">
+            <div id="notifyModalHeader" class="px-6 py-4 border-b flex items-start gap-4">
+                <div id="notifyModalIconWrap" class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <img id="notifyModalIcon" src="<%= ResolveUrl("~/Icons/warning.svg") %>" alt="icon" class="w-5 h-5" />
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 id="notifyModalTitle" class="font-extrabold text-slate-900 text-base"></h3>
+                    <p id="notifyModalMessage" class="text-sm text-slate-600 mt-1 leading-relaxed whitespace-pre-line"></p>
+                </div>
+            </div>
+            <div class="px-6 py-4 flex justify-end">
+                <button type="button" onclick="hideNotifyModal()" id="notifyModalBtn"
+                    class="px-6 py-2 rounded-lg text-sm font-bold cursor-pointer transition text-white">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var _iconSrc = '<%= ResolveUrl("~/Icons/warning.svg") %>';
+
+        function showNotifyModal(message, type) {
+            type = type || 'info';
+            var hdr = document.getElementById('notifyModalHeader');
+            var wrap = document.getElementById('notifyModalIconWrap');
+            var icon = document.getElementById('notifyModalIcon');
+            var ttl = document.getElementById('notifyModalTitle');
+            var msg = document.getElementById('notifyModalMessage');
+            var btn = document.getElementById('notifyModalBtn');
+
+            icon.src = _iconSrc;
+            hdr.className = 'px-6 py-4 border-b flex items-start gap-4';
+            wrap.className = 'w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5';
+            icon.className = 'w-5 h-5';
+            btn.className = 'px-6 py-2 rounded-lg text-sm font-bold cursor-pointer transition text-white';
+            btn.onclick = hideNotifyModal;
+
+            if (type === 'success') {
+                hdr.className += ' bg-emerald-50 border-emerald-100';
+                wrap.className += ' bg-emerald-100';
+                icon.style.filter = 'invert(39%) sepia(98%) saturate(400%) hue-rotate(100deg) brightness(90%)';
+                ttl.textContent = 'Success'; ttl.className = 'font-extrabold text-emerald-800 text-base';
+                btn.className += ' bg-emerald-600 hover:bg-emerald-700';
+            } else if (type === 'error') {
+                hdr.className += ' bg-red-50 border-red-100';
+                wrap.className += ' bg-red-100';
+                icon.style.filter = 'invert(20%) sepia(90%) saturate(700%) hue-rotate(340deg) brightness(90%)';
+                ttl.textContent = 'Error'; ttl.className = 'font-extrabold text-red-800 text-base';
+                btn.className += ' bg-red-600 hover:bg-red-700';
+            } else if (type === 'warning') {
+                hdr.className += ' bg-amber-50 border-amber-100';
+                wrap.className += ' bg-amber-100';
+                icon.style.filter = 'invert(55%) sepia(90%) saturate(500%) hue-rotate(10deg) brightness(95%)';
+                ttl.textContent = 'Warning'; ttl.className = 'font-extrabold text-amber-800 text-base';
+                btn.className += ' bg-amber-500 hover:bg-amber-600';
+            } else {
+                hdr.className += ' bg-blue-50 border-blue-100';
+                wrap.className += ' bg-blue-100';
+                icon.style.filter = 'invert(28%) sepia(80%) saturate(600%) hue-rotate(195deg) brightness(95%)';
+                ttl.textContent = 'Notice'; ttl.className = 'font-extrabold text-blue-800 text-base';
+                btn.className += ' bg-blue-600 hover:bg-blue-700';
+            }
+
+            msg.textContent = message;
+            var modal = document.getElementById('notifyModal');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function hideNotifyModal() {
+            var modal = document.getElementById('notifyModal');
+            modal.classList.add('hidden'); modal.classList.remove('flex');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') hideNotifyModal();
+        });
+        document.addEventListener('click', function (e) {
+            var nm = document.getElementById('notifyModal');
+            if (nm && !nm.classList.contains('hidden') && e.target === nm) hideNotifyModal();
+        });
+    </script>
 
 </asp:Content>
