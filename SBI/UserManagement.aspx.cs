@@ -24,22 +24,10 @@ namespace SBI
         {
             using (var conn = new SqlConnection(cs))
             {
-                string query = @"
-                    SELECT 
-                        user_id,
-                        fname + ' ' + lname AS full_name,
-                        username,
-                        password_hash AS password,
-                        email,
-                        contact_no,
-                        is_active,
-                        created_at,
-                        role_id
-                    FROM AppUser
-                    ORDER BY user_id DESC";
-
-                SqlDataAdapter da = new SqlDataAdapter(query, conn);
-                DataTable dt = new DataTable();
+                var da = new SqlDataAdapter(
+                    "SELECT user_id, fname + ' ' + lname AS full_name, username, password, role FROM Users ORDER BY user_id DESC",
+                    conn);
+                var dt = new DataTable();
                 da.Fill(dt);
                 gvUsers.DataSource = dt;
                 gvUsers.DataBind();
@@ -125,8 +113,7 @@ namespace SBI
             using (var conn = new SqlConnection(cs))
             {
                 var cmd = new SqlCommand(
-                    "SELECT fname, lname, username, password_hash, role_id, email, contact_no, is_active FROM AppUser WHERE user_id = @id",
-                    conn);
+                    "SELECT fname, lname, username, password, role FROM Users WHERE user_id = @id", conn);
                 cmd.Parameters.AddWithValue("@id", userId);
                 conn.Open();
                 using (var dr = cmd.ExecuteReader())
