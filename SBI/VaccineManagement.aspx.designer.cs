@@ -15,6 +15,15 @@ namespace SBI
     {
 
         /// <summary>
+        /// hfVialPage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfVialPage;
+
+        /// <summary>
         /// btnOpenAddStock control.
         /// </summary>
         /// <remarks>
@@ -177,6 +186,15 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Repeater rptBatches;
 
         /// <summary>
+        /// panelNoBatches control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel panelNoBatches;
+
+        /// <summary>
         /// panelVials control.
         /// </summary>
         /// <remarks>
@@ -247,6 +265,42 @@ namespace SBI
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater rptVials;
+
+        /// <summary>
+        /// btnVialPrev control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnVialPrev;
+
+        /// <summary>
+        /// litVialPageInfo control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litVialPageInfo;
+
+        /// <summary>
+        /// btnVialNext control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnVialNext;
+
+        /// <summary>
+        /// panelNoVials control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel panelNoVials;
 
         /// <summary>
         /// panelAddStock control.

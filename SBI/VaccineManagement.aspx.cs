@@ -18,6 +18,8 @@ namespace SBI
 
         public bool CanAddStock => UserRole == "A" || UserRole == "B"; // Admin or AdminAssistant
 
+        private const int VialPageSize = 10;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["userRole"] == null)
@@ -248,6 +250,10 @@ namespace SBI
                 lblSelectedVaccine.Text = vaccineName;
                 rptBatches.DataSource = dt;
                 rptBatches.DataBind();
+
+                // Handle empty batch state
+                panelNoBatches.Visible = dt.Rows.Count == 0;
+
                 panelBatchDetails.Visible = true;
                 panelVials.Visible = false;
             }
@@ -258,17 +264,33 @@ namespace SBI
             if (e.CommandName == "ViewVials")
             {
                 int batchId = Convert.ToInt32(e.CommandArgument);
+                // Reset page to 1 when viewing a new batch
+                hfVialPage.Value = "1";
                 LoadVials(batchId);
             }
         }
 
-        // ── Vials ───────────────────────────────────────────────────────────
+        // ── Vials (Read-Only Table with Paging) ───────────────────────────
 
         private void LoadVials(int batchId)
         {
+            // Store the current batch ID in ViewState so paging can reuse it
+            ViewState["CurrentBatchId"] = batchId;
+
+            // Get the current page from hidden field, default to 1
+            int page = 1;
+            if (!string.IsNullOrEmpty(hfVialPage.Value))
+                int.TryParse(hfVialPage.Value, out page);
+            if (page < 1) page = 1;
+
+            BindVialsPaged(batchId, page);
+        }
+
+        private void BindVialsPaged(int batchId, int page)
+        {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                // Get batch number first
+                // Get batch number
                 string batchNumber = "";
                 using (SqlCommand cmd = new SqlCommand(
                     "SELECT batch_number FROM VaccineBatch WHERE batch_id = @bid", conn))
@@ -280,9 +302,29 @@ namespace SBI
                         batchNumber = result.ToString();
                     conn.Close();
                 }
-
                 lblSelectedBatch.Text = batchNumber;
 
+                // Get total count for paging
+                int totalCount = 0;
+                using (SqlCommand cmd = new SqlCommand(
+                    "SELECT COUNT(*) FROM VaccineVial WHERE batch_id = @bid", conn))
+                {
+                    cmd.Parameters.AddWithValue("@bid", batchId);
+                    conn.Open();
+                    totalCount = Convert.ToInt32(cmd.ExecuteScalar());
+                    conn.Close();
+                }
+
+                // Calculate total pages
+                int totalPages = (int)Math.Ceiling((double)totalCount / VialPageSize);
+                if (totalPages < 1) totalPages = 1;
+                if (page > totalPages) page = totalPages;
+
+                // Store page in hidden field
+                hfVialPage.Value = page.ToString();
+
+                // Get paged data
+                int offset = (page - 1) * VialPageSize;
                 string query = @"
                     SELECT 
                         vial_id,
@@ -300,20 +342,56 @@ namespace SBI
                             WHEN 'Empty' THEN 3
                             WHEN 'Discarded' THEN 4
                         END,
-                        vial_no";
+                        vial_no
+                    OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY";
 
                 SqlDataAdapter da = new SqlDataAdapter(query, conn);
                 da.SelectCommand.Parameters.AddWithValue("@bid", batchId);
+                da.SelectCommand.Parameters.AddWithValue("@offset", offset);
+                da.SelectCommand.Parameters.AddWithValue("@pageSize", VialPageSize);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
-                ViewState["VialData"] = dt;
+
                 rptVials.DataSource = dt;
                 rptVials.DataBind();
-                panelVials.Visible = true;
 
-                // Load summary stats
+                // Update pager controls
+                btnVialPrev.Enabled = (page > 1);
+                btnVialNext.Enabled = (page < totalPages);
+                litVialPageInfo.Text = $"Page {page} of {totalPages}";
+
+                // Show/hide empty message
+                panelNoVials.Visible = (totalCount == 0);
+
+                // Load summary stats (full count, not paged)
                 LoadVialSummaryStats(batchId);
+
+                panelVials.Visible = true;
             }
+        }
+
+        protected void btnVialPrev_Click(object sender, EventArgs e)
+        {
+            int page = 1;
+            if (!string.IsNullOrEmpty(hfVialPage.Value))
+                int.TryParse(hfVialPage.Value, out page);
+            if (page > 1) page--;
+
+            int batchId = ViewState["CurrentBatchId"] != null ? Convert.ToInt32(ViewState["CurrentBatchId"]) : 0;
+            if (batchId > 0)
+                BindVialsPaged(batchId, page);
+        }
+
+        protected void btnVialNext_Click(object sender, EventArgs e)
+        {
+            int page = 1;
+            if (!string.IsNullOrEmpty(hfVialPage.Value))
+                int.TryParse(hfVialPage.Value, out page);
+            page++;
+
+            int batchId = ViewState["CurrentBatchId"] != null ? Convert.ToInt32(ViewState["CurrentBatchId"]) : 0;
+            if (batchId > 0)
+                BindVialsPaged(batchId, page);
         }
 
         private void LoadVialSummaryStats(int batchId)
@@ -343,303 +421,6 @@ namespace SBI
                             litDiscardedCount.Text = reader["Discarded"]?.ToString() ?? "0";
                         }
                     }
-                }
-            }
-        }
-
-        // ── Vial Operations ────────────────────────────────────────────────
-
-        protected void rptVials_ItemCommand(object source, RepeaterCommandEventArgs e)
-        {
-            int vialId = Convert.ToInt32(e.CommandArgument);
-            string command = e.CommandName;
-
-            switch (command)
-            {
-                case "OpenVial":
-                    OpenVial(vialId);
-                    break;
-                case "UseDose":
-                    UseDose(vialId);
-                    break;
-                case "DiscardVial":
-                    DiscardVial(vialId);
-                    break;
-            }
-
-            // Refresh vial display
-            int batchId = GetBatchIdFromVial(vialId);
-            if (batchId > 0)
-                LoadVials(batchId);
-        }
-
-        private void OpenVial(int vialId)
-        {
-            if (UserRole == "C")
-            {
-                ShowAlert("Vaccinators cannot open vials.", "error");
-                return;
-            }
-
-            int? userId = GetValidUserId();
-            if (!userId.HasValue)
-            {
-                ShowAlert("User not found. Please log in again.", "error");
-                return;
-            }
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-                SqlTransaction trans = conn.BeginTransaction();
-                try
-                {
-                    // Get vial info
-                    int batchId = 0;
-                    int dosesPerVial = 0;
-                    using (SqlCommand cmd = new SqlCommand(
-                        "SELECT batch_id, doses_per_vial FROM VaccineVial WHERE vial_id = @vid", conn, trans))
-                    {
-                        cmd.Parameters.AddWithValue("@vid", vialId);
-                        using (SqlDataReader dr = cmd.ExecuteReader())
-                        {
-                            if (dr.Read())
-                            {
-                                batchId = Convert.ToInt32(dr["batch_id"]);
-                                dosesPerVial = Convert.ToInt32(dr["doses_per_vial"]);
-                            }
-                            dr.Close();
-                        }
-                    }
-
-                    if (batchId == 0)
-                    {
-                        ShowAlert("Vial not found.", "error");
-                        return;
-                    }
-
-                    // Update vial status
-                    using (SqlCommand cmd = new SqlCommand(@"
-                        UPDATE VaccineVial 
-                        SET vial_status = 'Open', opened_at = GETDATE(), opened_by = @userId
-                        WHERE vial_id = @vid AND vial_status = 'Sealed'", conn, trans))
-                    {
-                        cmd.Parameters.AddWithValue("@vid", vialId);
-                        cmd.Parameters.AddWithValue("@userId", userId.Value);
-                        int rows = cmd.ExecuteNonQuery();
-                        if (rows == 0)
-                        {
-                            ShowAlert("Vial is already open or not found.", "warning");
-                            trans.Rollback();
-                            return;
-                        }
-                    }
-
-                    // Audit
-                    LogAudit(conn, trans, "VaccineVial", vialId.ToString(), "UPDATE",
-                        $@"{{""action"":""opened"",""vial_id"":{vialId},""batch_id"":{batchId}}}");
-
-                    trans.Commit();
-                    ShowAlert("Vial opened successfully.", "success");
-                    LoadOverviewStats();
-                }
-                catch (Exception ex)
-                {
-                    trans.Rollback();
-                    ShowAlert("Error opening vial: " + ex.Message, "error");
-                }
-            }
-        }
-
-        private void UseDose(int vialId)
-        {
-            int? userId = GetValidUserId();
-            if (!userId.HasValue)
-            {
-                ShowAlert("User not found. Please log in again.", "error");
-                return;
-            }
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-                SqlTransaction trans = conn.BeginTransaction();
-                try
-                {
-                    // Get vial info
-                    int batchId = 0;
-                    int dosesPerVial = 0;
-                    int dosesUsed = 0;
-                    using (SqlCommand cmd = new SqlCommand(
-                        "SELECT batch_id, doses_per_vial, doses_used FROM VaccineVial WHERE vial_id = @vid", conn, trans))
-                    {
-                        cmd.Parameters.AddWithValue("@vid", vialId);
-                        using (SqlDataReader dr = cmd.ExecuteReader())
-                        {
-                            if (dr.Read())
-                            {
-                                batchId = Convert.ToInt32(dr["batch_id"]);
-                                dosesPerVial = Convert.ToInt32(dr["doses_per_vial"]);
-                                dosesUsed = Convert.ToInt32(dr["doses_used"]);
-                            }
-                            dr.Close();
-                        }
-                    }
-
-                    if (batchId == 0)
-                    {
-                        ShowAlert("Vial not found.", "error");
-                        return;
-                    }
-                    if (dosesUsed >= dosesPerVial)
-                    {
-                        ShowAlert("Vial is empty.", "warning");
-                        return;
-                    }
-
-                    int newDosesUsed = dosesUsed + 1;
-                    string newStatus = newDosesUsed >= dosesPerVial ? "Empty" : "Open";
-
-                    // Update vial
-                    using (SqlCommand cmd = new SqlCommand(@"
-                        UPDATE VaccineVial 
-                        SET doses_used = @used, vial_status = @status
-                        WHERE vial_id = @vid", conn, trans))
-                    {
-                        cmd.Parameters.AddWithValue("@used", newDosesUsed);
-                        cmd.Parameters.AddWithValue("@status", newStatus);
-                        cmd.Parameters.AddWithValue("@vid", vialId);
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    // Update batch stock
-                    using (SqlCommand cmd = new SqlCommand(@"
-                        UPDATE VaccineBatch 
-                        SET current_stock = current_stock - 1
-                        WHERE batch_id = @bid AND current_stock > 0", conn, trans))
-                    {
-                        cmd.Parameters.AddWithValue("@bid", batchId);
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    // Audit
-                    LogAudit(conn, trans, "VaccineVial", vialId.ToString(), "UPDATE",
-                        $@"{{""action"":""dose_used"",""vial_id"":{vialId},""doses_used"":{newDosesUsed},""status"":""{newStatus}""}}");
-
-                    trans.Commit();
-                    ShowAlert($"Dose used. {newDosesUsed}/{dosesPerVial} used.", "success");
-                    LoadOverviewStats();
-                }
-                catch (Exception ex)
-                {
-                    trans.Rollback();
-                    ShowAlert("Error using dose: " + ex.Message, "error");
-                }
-            }
-        }
-
-        private void DiscardVial(int vialId)
-        {
-            if (UserRole == "C")
-            {
-                ShowAlert("Vaccinators cannot discard vials.", "error");
-                return;
-            }
-
-            int? userId = GetValidUserId();
-            if (!userId.HasValue)
-            {
-                ShowAlert("User not found. Please log in again.", "error");
-                return;
-            }
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-                SqlTransaction trans = conn.BeginTransaction();
-                try
-                {
-                    // Get vial info
-                    int batchId = 0;
-                    int dosesUsed = 0;
-                    int dosesPerVial = 0;
-                    using (SqlCommand cmd = new SqlCommand(
-                        "SELECT batch_id, doses_used, doses_per_vial FROM VaccineVial WHERE vial_id = @vid", conn, trans))
-                    {
-                        cmd.Parameters.AddWithValue("@vid", vialId);
-                        using (SqlDataReader dr = cmd.ExecuteReader())
-                        {
-                            if (dr.Read())
-                            {
-                                batchId = Convert.ToInt32(dr["batch_id"]);
-                                dosesUsed = Convert.ToInt32(dr["doses_used"]);
-                                dosesPerVial = Convert.ToInt32(dr["doses_per_vial"]);
-                            }
-                            dr.Close();
-                        }
-                    }
-
-                    if (batchId == 0)
-                    {
-                        ShowAlert("Vial not found.", "error");
-                        return;
-                    }
-
-                    // Update vial
-                    using (SqlCommand cmd = new SqlCommand(@"
-                        UPDATE VaccineVial 
-                        SET vial_status = 'Discarded', discarded_at = GETDATE(), discarded_by = @userId,
-                            discard_reason = @reason
-                        WHERE vial_id = @vid", conn, trans))
-                    {
-                        cmd.Parameters.AddWithValue("@userId", userId.Value);
-                        cmd.Parameters.AddWithValue("@reason", "Discarded by user");
-                        cmd.Parameters.AddWithValue("@vid", vialId);
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    // If vial had unused doses, remove from batch stock
-                    int unusedDoses = dosesPerVial - dosesUsed;
-                    if (unusedDoses > 0)
-                    {
-                        using (SqlCommand cmd = new SqlCommand(@"
-                            UPDATE VaccineBatch 
-                            SET current_stock = current_stock - @removed
-                            WHERE batch_id = @bid AND current_stock >= @removed", conn, trans))
-                        {
-                            cmd.Parameters.AddWithValue("@removed", unusedDoses);
-                            cmd.Parameters.AddWithValue("@bid", batchId);
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-
-                    // Audit
-                    LogAudit(conn, trans, "VaccineVial", vialId.ToString(), "UPDATE",
-                        $@"{{""action"":""discarded"",""vial_id"":{vialId},""unused_doses"":{unusedDoses}}}");
-
-                    trans.Commit();
-                    ShowAlert($"Vial discarded. {unusedDoses} unused doses removed from inventory.", "success");
-                    LoadOverviewStats();
-                }
-                catch (Exception ex)
-                {
-                    trans.Rollback();
-                    ShowAlert("Error discarding vial: " + ex.Message, "error");
-                }
-            }
-        }
-
-        private int GetBatchIdFromVial(int vialId)
-        {
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(
-                    "SELECT batch_id FROM VaccineVial WHERE vial_id = @vid", conn))
-                {
-                    cmd.Parameters.AddWithValue("@vid", vialId);
-                    conn.Open();
-                    object result = cmd.ExecuteScalar();
-                    return result != null ? Convert.ToInt32(result) : 0;
                 }
             }
         }
@@ -949,15 +730,15 @@ namespace SBI
             }
         }
 
-        protected string GetVialCssClass(string status)
+        protected string GetVialBadgeClass(string status)
         {
             switch (status.ToLower())
             {
-                case "sealed": return "sealed";
-                case "open": return "open";
-                case "empty": return "empty";
-                case "discarded": return "discarded";
-                default: return "";
+                case "sealed": return "badge-ok";
+                case "open": return "badge-warn";
+                case "empty": return "badge-in";
+                case "discarded": return "badge-exp";
+                default: return "badge-ok";
             }
         }
 

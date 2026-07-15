@@ -673,8 +673,16 @@ namespace SBI
             string role = Session["userRole"]?.ToString().ToUpper() ?? "";
             if (role == "C") { ShowAlert("You do not have permission to register patients.", "error"); return; }
 
-            DateTime dob, biteDateTime;
+            // Get and clean the input values
+            string fn = txtFirstName.Text.Trim();
+            string ln = txtLastName.Text.Trim();
 
+            // Remove extra spaces between words
+            fn = System.Text.RegularExpressions.Regex.Replace(fn, @"\s+", " ");
+            ln = System.Text.RegularExpressions.Regex.Replace(ln, @"\s+", " ");
+
+            // Validate date of birth
+            DateTime dob;
             if (!DateTime.TryParse(txtDOB.Text, out dob))
             {
                 ShowAlert("Invalid Date of Birth", "warning");
@@ -687,7 +695,8 @@ namespace SBI
                 return;
             }
 
-            if (!DateTime.TryParse(txtBiteDateTime.Text, out biteDateTime))
+            // Validate bite date and time
+            if (!DateTime.TryParse(txtBiteDateTime.Text, out DateTime biteDateTime))
             {
                 ShowAlert("Invalid Bite Date and Time", "warning");
                 return;
@@ -703,13 +712,18 @@ namespace SBI
                 return;
             }
 
-            string fn = txtFirstName.Text.Trim();
-            string ln = txtLastName.Text.Trim();
+            // DEBUG: Show what's being checked
+            string debugMsg = $"Checking duplicate for: '{fn}' '{ln}' DOB: {dob:yyyy-MM-dd}";
+            System.Diagnostics.Debug.WriteLine(debugMsg);
 
-            if (IsDuplicatePatient(fn, ln, dob))
+            // Check for duplicate patient
+            bool isDuplicate = IsDuplicatePatient(fn, ln, dob);
+
+            if (isDuplicate)
             {
-                ShowAlert("A patient with the same name and date of birth is already registered. " +
-                          "Please search for the existing record instead of creating a new one.", "error");
+                // Get detailed info about the duplicate
+                string duplicateInfo = GetDuplicatePatientInfo(fn, ln, dob);
+                ShowAlert($"A patient with the same name and date of birth is already registered.\n\n{duplicateInfo}\n\nPlease search for the existing record instead of creating a new one.", "error");
                 return;
             }
 
@@ -1226,29 +1240,128 @@ namespace SBI
             txtCasePatientSearch.Text = "";
         }
 
-        // ── Duplicate-patient check ─────────────────────────────────────────
+        // ── FIXED Duplicate-patient check ─────────────────────────────────────────
 
+        /// <summary>
+        /// Checks if a patient with the same name and date of birth already exists.
+        /// This version uses a more reliable comparison method.
+        /// </summary>
         private bool IsDuplicatePatient(string fname, string lname, DateTime dob, string excludePatientId = null)
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            try
             {
-                string query = @"
-                    SELECT COUNT(*)
-                    FROM dbo.Patient
-                    WHERE UPPER(LTRIM(RTRIM(fname))) = UPPER(LTRIM(RTRIM(@fn)))
-                      AND UPPER(LTRIM(RTRIM(lname))) = UPPER(LTRIM(RTRIM(@ln)))
-                      AND date_of_birth = @dob
-                      AND (@excludeId = '' OR patient_id <> @excludeId)";
+                // Normalize the input
+                fname = NormalizeName(fname);
+                lname = NormalizeName(lname);
 
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@fn", fname);
-                cmd.Parameters.AddWithValue("@ln", lname);
-                cmd.Parameters.AddWithValue("@dob", dob.Date);
-                cmd.Parameters.AddWithValue("@excludeId", excludePatientId ?? "");
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT COUNT(*)
+                        FROM dbo.Patient
+                        WHERE LTRIM(RTRIM(fname)) = @fn
+                          AND LTRIM(RTRIM(lname)) = @ln
+                          AND date_of_birth = @dob";
 
-                conn.Open();
-                return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                    // Add exclude condition if provided
+                    if (!string.IsNullOrEmpty(excludePatientId))
+                    {
+                        query += " AND patient_id != @excludeId";
+                    }
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@fn", fname);
+                    cmd.Parameters.AddWithValue("@ln", lname);
+                    cmd.Parameters.AddWithValue("@dob", dob.Date);
+
+                    if (!string.IsNullOrEmpty(excludePatientId))
+                    {
+                        cmd.Parameters.AddWithValue("@excludeId", excludePatientId);
+                    }
+
+                    conn.Open();
+                    int count = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    // Log for debugging
+                    System.Diagnostics.Debug.WriteLine($"Duplicate check: Name='{fname} {lname}', DOB={dob:yyyy-MM-dd}, Count={count}");
+
+                    return count > 0;
+                }
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in IsDuplicatePatient: {ex.Message}");
+                return false; // Don't block on error
+            }
+        }
+
+        /// <summary>
+        /// Gets information about duplicate patients for display in error messages.
+        /// </summary>
+        private string GetDuplicatePatientInfo(string fname, string lname, DateTime dob)
+        {
+            try
+            {
+                fname = NormalizeName(fname);
+                lname = NormalizeName(lname);
+
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT TOP 3
+                            patient_id,
+                            fname,
+                            lname,
+                            date_of_birth,
+                            contact_no,
+                            ISNULL(barangay, '') + CASE WHEN city_province IS NOT NULL AND city_province != '' THEN ', ' + city_province ELSE '' END AS address
+                        FROM dbo.Patient
+                        WHERE LTRIM(RTRIM(fname)) = @fn
+                          AND LTRIM(RTRIM(lname)) = @ln
+                          AND date_of_birth = @dob";
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@fn", fname);
+                    cmd.Parameters.AddWithValue("@ln", lname);
+                    cmd.Parameters.AddWithValue("@dob", dob.Date);
+
+                    conn.Open();
+                    SqlDataReader dr = cmd.ExecuteReader();
+
+                    if (!dr.HasRows)
+                    {
+                        return "No matching records found in the database.";
+                    }
+
+                    string result = "Existing record(s):\n";
+                    int count = 0;
+
+                    while (dr.Read() && count < 3)
+                    {
+                        result += $"• ID: {dr["patient_id"]}, Contact: {dr["contact_no"]}, Address: {dr["address"]}\n";
+                        count++;
+                    }
+
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                return $"Error checking duplicates: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Normalizes a name by trimming and removing extra spaces.
+        /// </summary>
+        private string NormalizeName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "";
+
+            // Trim and collapse multiple spaces into single space
+            name = name.Trim();
+            return System.Text.RegularExpressions.Regex.Replace(name, @"\s+", " ");
         }
 
         // ── Upsert helpers ───────────────────────────────────────────────────
@@ -1318,8 +1431,14 @@ namespace SBI
 
         private void ShowAlert(string message, string type = "info")
         {
-            string safe = message.Replace("\\", "\\\\").Replace("'", "\\'")
-                                 .Replace(Environment.NewLine, " ").Replace("\r", "").Replace("\n", " ");
+            // Escape the message for JavaScript
+            string safe = message.Replace("\\", "\\\\")
+                                .Replace("'", "\\'")
+                                .Replace("\"", "\\\"")
+                                .Replace(Environment.NewLine, " ")
+                                .Replace("\r", "")
+                                .Replace("\n", " ");
+
             ClientScript.RegisterStartupScript(this.GetType(), Guid.NewGuid().ToString(),
                 "showNotifyModal('" + safe + "','" + type + "');", true);
         }

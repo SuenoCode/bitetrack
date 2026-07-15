@@ -18,6 +18,34 @@
     .pager-wrap a:hover { background:#2563eb; color:#fff; border-color:#2563eb; }
     .pager-wrap span { background:#2563eb; color:#fff; border-color:#2563eb; cursor:default; }
 
+    .vial-pager {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 0 4px 0;
+        border-top: 1px solid #e2e8f0;
+        margin-top: 12px;
+    }
+    .vial-pager .page-btn {
+        background: white;
+        border: 1px solid #e2e8f0;
+        padding: 4px 14px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #475569;
+        cursor: pointer;
+        transition: all .2s;
+    }
+    .vial-pager .page-btn:hover:not(:disabled) { background: #f1f5f9; }
+    .vial-pager .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .vial-pager .page-info {
+        font-size: 12px;
+        color: #64748b;
+        padding: 0 6px;
+    }
+
     /* ── Table rows ─────────────────────────────────────────────── */
     .gv-table tr:hover td { background:#f1f5f9; }
     .gv-table td, .gv-table th { vertical-align:middle !important; }
@@ -64,96 +92,57 @@
     .stat-card .stat-number.red { color: #dc2626; }
     .stat-card .stat-number.purple { color: #7c3aed; }
 
-    /* ── Vial Display - Simplified ──────────────────────────────── */
-    .vial-container {
-        max-height: 350px;
-        overflow-y: auto;
-        padding: 4px 0;
-    }
-    .vial-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 8px;
-    }
-    .vial-item {
-        background: #f8fafc;
+    /* ── Vial Table ──────────────────────────────────────────────── */
+    .vial-table-wrap {
         border: 1px solid #e2e8f0;
         border-radius: 8px;
-        padding: 8px 10px;
-        text-align: center;
-        transition: all .15s;
-        cursor: default;
-        position: relative;
+        overflow: hidden;
+        margin-top: 8px;
     }
-    .vial-item:hover { border-color: #94a3b8; background: #f1f5f9; }
-    .vial-item .vial-number {
+    .vial-table-wrap table {
+        width: 100%;
+        border-collapse: collapse;
         font-size: 13px;
-        font-weight: 700;
-        color: #0f172a;
-        font-family: monospace;
     }
-    .vial-item .vial-status-text {
-        font-size: 9px;
+    .vial-table-wrap th {
+        background: #f8fafc;
+        text-align: left;
+        padding: 8px 12px;
         font-weight: 700;
+        font-size: 10px;
         text-transform: uppercase;
-        letter-spacing: .3px;
-        padding: 1px 8px;
-        border-radius: 10px;
-        display: inline-block;
-        margin-top: 2px;
+        letter-spacing: .5px;
+        color: #94a3b8;
+        border-bottom: 1px solid #e2e8f0;
     }
-    .vial-item .vial-status-text.sealed { background: #dcfce7; color: #15803d; }
-    .vial-item .vial-status-text.open { background: #fef3c7; color: #b45309; }
-    .vial-item .vial-status-text.empty { background: #dbeafe; color: #1d4ed8; }
-    .vial-item .vial-status-text.discarded { background: #fee2e2; color: #b91c1c; }
-    
-    .vial-item .vial-doses {
-        font-size: 11px;
-        color: #64748b;
-        margin-top: 2px;
+    .vial-table-wrap td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #1e293b;
     }
-    .vial-item .vial-doses span { font-weight: 700; color: #0f172a; }
-    
-    .vial-item .vial-actions {
-        display: flex;
-        gap: 4px;
-        justify-content: center;
-        margin-top: 6px;
-        flex-wrap: wrap;
-    }
-    .vial-item .vial-actions .btn-sm {
-        font-size: 9px;
-        padding: 2px 8px;
-        border: none;
-        border-radius: 4px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all .15s;
-        text-decoration: none;
-        display: inline-block;
-    }
-    .vial-item .vial-actions .btn-sm.open-btn { background: #f59e0b; color: #fff; }
-    .vial-item .vial-actions .btn-sm.open-btn:hover { background: #d97706; }
-    .vial-item .vial-actions .btn-sm.use-btn { background: #3b82f6; color: #fff; }
-    .vial-item .vial-actions .btn-sm.use-btn:hover { background: #2563eb; }
-    .vial-item .vial-actions .btn-sm.discard-btn { background: #ef4444; color: #fff; }
-    .vial-item .vial-actions .btn-sm.discard-btn:hover { background: #dc2626; }
-    .vial-item .vial-actions .btn-sm:disabled { opacity:0.4; cursor:not-allowed; }
+    .vial-table-wrap tr:last-child td { border-bottom: none; }
+    .vial-table-wrap tr:hover td { background: #fafbfc; }
 
-    /* Vial border colors */
-    .vial-item.sealed { border-left: 3px solid #22c55e; }
-    .vial-item.open { border-left: 3px solid #f59e0b; background: #fffbeb; }
-    .vial-item.empty { border-left: 3px solid #3b82f6; background: #eff6ff; }
-    .vial-item.discarded { border-left: 3px solid #ef4444; background: #fef2f2; opacity:0.6; }
+    .vial-table-wrap .vial-status-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 6px;
+    }
+    .vial-table-wrap .vial-status-dot.sealed { background: #22c55e; }
+    .vial-table-wrap .vial-status-dot.open { background: #f59e0b; }
+    .vial-table-wrap .vial-status-dot.empty { background: #3b82f6; }
+    .vial-table-wrap .vial-status-dot.discarded { background: #ef4444; }
 
     /* ── Vial Summary ────────────────────────────────────────────── */
     .vial-summary {
         display: flex;
-        gap: 16px;
+        gap: 20px;
         flex-wrap: wrap;
-        padding: 6px 0 10px 0;
+        padding: 8px 0 12px 0;
         border-bottom: 1px solid #e2e8f0;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
     .vial-summary .vs-item {
         display: flex;
@@ -196,7 +185,7 @@
     .batch-card {
         background: white;
         border: 1px solid #e2e8f0;
-        border-radius: 10px;
+        border-radius: 8px;
         padding: 12px 16px;
         margin-bottom: 8px;
         transition: all .15s;
@@ -205,6 +194,7 @@
         align-items: center;
         flex-wrap: wrap;
         gap: 8px;
+        cursor: pointer;
     }
     .batch-card:hover { border-color: #94a3b8; background: #fafbfc; }
     .batch-card .batch-info {
@@ -215,7 +205,7 @@
     }
     .batch-card .batch-number {
         font-weight: 700;
-        font-family: monospace;
+        font-family: 'Consolas', monospace;
         font-size: 13px;
         color: #0f172a;
     }
@@ -230,10 +220,17 @@
     .batch-card .batch-stock.green { color: #15803d; }
     .batch-card .batch-stock.amber { color: #d97706; }
     .batch-card .batch-stock.red { color: #dc2626; }
+    .batch-card .batch-toggle {
+        font-size: 12px;
+        color: #2563eb;
+        font-weight: 600;
+        user-select: none;
+    }
 </style>
 
 <div class="p-6 font-heading2 text-slate-900">
-
+    <%-- Hidden fields for paging --%>
+<asp:HiddenField ID="hfVialPage" runat="server" Value="1" />
     <%-- Page Header --%>
     <div class="flex justify-between items-center mb-4">
         <div>
@@ -359,7 +356,7 @@
                                     <%# Eval("stock_status") %>
                                 </span>
                             </div>
-                            <div>
+                            <div class="batch-toggle">
                                 <asp:LinkButton ID="btnViewVials" runat="server" 
                                     CommandName="ViewVials"
                                     CommandArgument='<%# Eval("batch_id") %>'
@@ -369,12 +366,13 @@
                             </div>
                         </div>
                     </ItemTemplate>
-                    <EmptyDataTemplate>
-                        <div class="p-6 text-center text-slate-400 text-sm">No batches available.</div>
-                    </EmptyDataTemplate>
                 </asp:Repeater>
 
-                <%-- Vials --%>
+                <asp:Panel ID="panelNoBatches" runat="server" Visible="false">
+                    <div class="p-6 text-center text-slate-400 text-sm">No batches available.</div>
+                </asp:Panel>
+
+                <%-- Vials Section — Clean Table View with Paging --%>
                 <asp:Panel ID="panelVials" runat="server" Visible="false" CssClass="mt-4 pt-4 border-t border-slate-200">
                     <div class="flex justify-between items-center mb-2">
                         <span class="section-title text-sm">
@@ -391,46 +389,48 @@
                         <div class="vs-item"><span class="vs-dot red"></span>Discarded: <span class="vs-count"><asp:Literal ID="litDiscardedCount" runat="server" Text="0" /></span></div>
                     </div>
 
-                    <div class="vial-container">
-                        <div class="vial-grid">
-                            <asp:Repeater ID="rptVials" runat="server" OnItemCommand="rptVials_ItemCommand">
-                                <ItemTemplate>
-                                    <div class='vial-item <%# GetVialCssClass(Eval("vial_status").ToString()) %>'>
-                                        <div class="vial-number"><%# Eval("vial_no") %></div>
-                                        <div class="vial-status-text <%# Eval("vial_status").ToString().ToLower() %>">
-                                            <%# Eval("vial_status") %>
-                                        </div>
-                                        <div class="vial-doses">
-                                            <span><%# Eval("doses_used") %>/<%# Eval("doses_per_vial") %></span>
-                                        </div>
-                                        <div class="vial-actions">
-                                            <asp:LinkButton ID="btnOpenVial" runat="server" 
-                                                CommandName="OpenVial"
-                                                CommandArgument='<%# Eval("vial_id") %>'
-                                                Visible='<%# Eval("vial_status").ToString() == "Sealed" %>'
-                                                CssClass="btn-sm open-btn">
-                                                Open
-                                            </asp:LinkButton>
-                                            <asp:LinkButton ID="btnUseDose" runat="server"
-                                                CommandName="UseDose"
-                                                CommandArgument='<%# Eval("vial_id") %>'
-                                                Visible='<%# Eval("vial_status").ToString() == "Open" && Convert.ToInt32(Eval("doses_used")) < Convert.ToInt32(Eval("doses_per_vial")) %>'
-                                                CssClass="btn-sm use-btn">
-                                                Use
-                                            </asp:LinkButton>
-                                            <asp:LinkButton ID="btnDiscardVial" runat="server"
-                                                CommandName="DiscardVial"
-                                                CommandArgument='<%# Eval("vial_id") %>'
-                                                Visible='<%# Eval("vial_status").ToString() == "Open" || Eval("vial_status").ToString() == "Sealed" %>'
-                                                CssClass="btn-sm discard-btn">
-                                                Discard
-                                            </asp:LinkButton>
-                                        </div>
-                                    </div>
-                                </ItemTemplate>
-                            </asp:Repeater>
-                        </div>
+                    <div class="vial-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Vial Number</th>
+                                    <th>Status</th>
+                                    <th>Doses Used</th>
+                                    <th>Opened</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <asp:Repeater ID="rptVials" runat="server">
+                                    <ItemTemplate>
+                                        <tr>
+                                            <td><strong><%# Eval("vial_no") %></strong></td>
+                                            <td>
+                                                <span class="vial-status-dot <%# Eval("vial_status").ToString().ToLower() %>"></span>
+                                                <span class="badge <%# GetVialBadgeClass(Eval("vial_status").ToString()) %>" style="font-size:10px; padding:1px 8px;">
+                                                    <%# Eval("vial_status") %>
+                                                </span>
+                                            </td>
+                                            <td><%# Eval("doses_used") %> / <%# Eval("doses_per_vial") %></td>
+                                            <td>
+                                                <%# Eval("opened_at") == DBNull.Value ? "—" : Convert.ToDateTime(Eval("opened_at")).ToString("MMM dd, yyyy") %>
+                                            </td>
+                                        </tr>
+                                    </ItemTemplate>
+                                </asp:Repeater>
+                            </tbody>
+                        </table>
                     </div>
+
+                    <%-- Vial Paging Controls --%>
+                    <div class="vial-pager">
+                        <asp:LinkButton ID="btnVialPrev" runat="server" CssClass="page-btn" OnClick="btnVialPrev_Click">Previous</asp:LinkButton>
+                        <span class="page-info"><asp:Literal ID="litVialPageInfo" runat="server" Text="Page 1 of 1" /></span>
+                        <asp:LinkButton ID="btnVialNext" runat="server" CssClass="page-btn" OnClick="btnVialNext_Click">Next</asp:LinkButton>
+                    </div>
+
+                    <asp:Panel ID="panelNoVials" runat="server" Visible="false">
+                        <div class="p-6 text-center text-slate-400 text-sm">No vials available.</div>
+                    </asp:Panel>
                 </asp:Panel>
             </div>
         </asp:Panel>
@@ -552,7 +552,7 @@
 
             <asp:GridView ID="gvAuditLog" runat="server" AutoGenerateColumns="False"
                           CssClass="gv-table w-full text-sm" GridLines="None"
-                          AllowPaging="True" PageSize="15"
+                          AllowPaging="True" PageSize="10"
                           OnPageIndexChanging="gvAuditLog_PageIndexChanging"
                           PagerStyle-CssClass="pager-wrap">
                 <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
@@ -680,7 +680,7 @@
     });
 
     // Calculate total doses
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         var vialCount = document.getElementById('<%= txtVialCount.ClientID %>');
         var dosesPerVial = document.getElementById('<%= ddlDosesPerVial.ClientID %>');
         var display = document.getElementById('totalDosesDisplay');
