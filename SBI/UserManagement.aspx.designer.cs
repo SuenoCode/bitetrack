@@ -96,6 +96,15 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Panel panelCurrentPassword;
 
         /// <summary>
+        /// litCurrentPassword control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litCurrentPassword;
+
+        /// <summary>
         /// txtEmail control.
         /// </summary>
         /// <remarks>

@@ -68,6 +68,7 @@
                             <asp:Panel ID="panelCurrentPassword" runat="server" Visible="false"
                                 CssClass="mt-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-500">
                                 Password is set (hidden for security)
+                                <asp:Literal ID="litCurrentPassword" runat="server" />
                             </asp:Panel>
                             <p class="text-[11px] text-slate-400 mt-1">Leave blank to keep existing password when editing.</p>
                         </div>

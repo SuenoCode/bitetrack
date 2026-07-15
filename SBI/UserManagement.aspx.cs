@@ -24,23 +24,37 @@ namespace SBI
         {
             using (var conn = new SqlConnection(cs))
             {
-                var da = new SqlDataAdapter(
-                    "SELECT user_id, fname + ' ' + lname AS full_name, username, password, role FROM Users ORDER BY user_id DESC",
-                    conn);
-                var dt = new DataTable();
+                string query = @"
+                    SELECT 
+                        user_id,
+                        fname + ' ' + lname AS full_name,
+                        username,
+                        password_hash AS password,
+                        email,
+                        contact_no,
+                        is_active,
+                        created_at,
+                        role_id
+                    FROM AppUser
+                    ORDER BY user_id DESC";
+
+                SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                DataTable dt = new DataTable();
                 da.Fill(dt);
+
                 gvUsers.DataSource = dt;
                 gvUsers.DataBind();
             }
         }
 
-        // Role helper methods
+        // Get role label from role_id
         public string GetRoleLabel(object roleId)
         {
             if (roleId == null || roleId == DBNull.Value)
                 return "Unknown";
 
-            switch (roleId.ToString())
+            string id = roleId.ToString();
+            switch (id)
             {
                 case "1": return "Admin";
                 case "2": return "Admin Assistant";
@@ -49,6 +63,7 @@ namespace SBI
             }
         }
 
+        // Get role badge class from role_id
         public string GetRoleBadgeClass(object roleId)
         {
             string base_ = "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide ";
@@ -56,7 +71,8 @@ namespace SBI
             if (roleId == null || roleId == DBNull.Value)
                 return base_ + "bg-slate-100 text-slate-600";
 
-            switch (roleId.ToString())
+            string id = roleId.ToString();
+            switch (id)
             {
                 case "1": return base_ + "bg-blue-100 text-blue-700";
                 case "2": return base_ + "bg-violet-100 text-violet-700";
@@ -65,7 +81,7 @@ namespace SBI
             }
         }
 
-        // Status helper methods
+        // Get status label - ADD THIS METHOD
         public string GetStatusLabel(object isActive)
         {
             if (isActive == null || isActive == DBNull.Value)
@@ -74,6 +90,7 @@ namespace SBI
             return isActive.ToString() == "Yes" ? "Active" : "Inactive";
         }
 
+        // Get status badge class - ADD THIS METHOD
         public string GetStatusBadgeClass(object isActive)
         {
             string base_ = "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide ";
@@ -113,7 +130,8 @@ namespace SBI
             using (var conn = new SqlConnection(cs))
             {
                 var cmd = new SqlCommand(
-                    "SELECT fname, lname, username, password, role FROM Users WHERE user_id = @id", conn);
+                    "SELECT fname, lname, username, password_hash, role_id, email, contact_no, is_active FROM AppUser WHERE user_id = @id",
+                    conn);
                 cmd.Parameters.AddWithValue("@id", userId);
                 conn.Open();
                 using (var dr = cmd.ExecuteReader())
@@ -123,6 +141,7 @@ namespace SBI
                         txtFullName.Text = dr["fname"].ToString() + " " + dr["lname"].ToString();
                         txtUsername.Text = dr["username"].ToString();
                         txtPassword.Text = "";
+                        litCurrentPassword.Text = "••••••••";
                         panelCurrentPassword.Visible = true;
                         ddlRole.SelectedValue = dr["role_id"].ToString();
                         txtEmail.Text = dr["email"].ToString();
@@ -144,6 +163,7 @@ namespace SBI
             chkIsActive.Checked = true;
             lblFormError.Visible = false;
             panelCurrentPassword.Visible = false;
+            litCurrentPassword.Text = "";
         }
 
         protected void btnSave_Click(object sender, EventArgs e)
