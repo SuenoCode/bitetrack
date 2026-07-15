@@ -105,6 +105,42 @@ namespace SBI
         protected global::System.Web.UI.WebControls.HiddenField hfConfirmBatchId;
 
         /// <summary>
+        /// hfTodayPage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfTodayPage;
+
+        /// <summary>
+        /// hfCasePage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfCasePage;
+
+        /// <summary>
+        /// hfTodayPageSize control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfTodayPageSize;
+
+        /// <summary>
+        /// hfCasePageSize control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfCasePageSize;
+
+        /// <summary>
         /// btnTabToday control.
         /// </summary>
         /// <remarks>
@@ -150,6 +186,33 @@ namespace SBI
         protected global::System.Web.UI.WebControls.GridView gvTodaySchedules;
 
         /// <summary>
+        /// btnTodayPrev control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnTodayPrev;
+
+        /// <summary>
+        /// litTodayPageInfo control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litTodayPageInfo;
+
+        /// <summary>
+        /// btnTodayNext control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnTodayNext;
+
+        /// <summary>
         /// panelRegistrySearch control.
         /// </summary>
         /// <remarks>
@@ -186,6 +249,42 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Button btnClearCaseSearch;
 
         /// <summary>
+        /// litStatCompleted control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litStatCompleted;
+
+        /// <summary>
+        /// litStatPending control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litStatPending;
+
+        /// <summary>
+        /// litStatCancelled control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litStatCancelled;
+
+        /// <summary>
+        /// litStatMissed control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litStatMissed;
+
+        /// <summary>
         /// gvSummary control.
         /// </summary>
         /// <remarks>
@@ -193,6 +292,33 @@ namespace SBI
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView gvSummary;
+
+        /// <summary>
+        /// btnCasePrev control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnCasePrev;
+
+        /// <summary>
+        /// litCasePageInfo control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litCasePageInfo;
+
+        /// <summary>
+        /// btnCaseNext control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnCaseNext;
 
         /// <summary>
         /// panelActiveCase control.
@@ -249,6 +375,15 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Literal litPendingDoses;
 
         /// <summary>
+        /// litCancelledDoses control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litCancelledDoses;
+
+        /// <summary>
         /// litProtocolDisplay control.
         /// </summary>
         /// <remarks>
@@ -256,6 +391,15 @@ namespace SBI
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litProtocolDisplay;
+
+        /// <summary>
+        /// litProtocolDoses control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litProtocolDoses;
 
         /// <summary>
         /// litCaseNoDisplay control.

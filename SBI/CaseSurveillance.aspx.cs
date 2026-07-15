@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
 using System.Web.UI.WebControls;
+using System.Collections.Generic;
 
 namespace SBI
 {
@@ -22,6 +23,48 @@ namespace SBI
         public bool CanManageCase => IsAdmin || IsRoleB;
         public bool CanAdminister => IsAdmin || IsRoleB || IsRoleC;
 
+        private int TodayPageSize => string.IsNullOrEmpty(hfTodayPageSize.Value) ? 10 : Convert.ToInt32(hfTodayPageSize.Value);
+        private int CasePageSize => string.IsNullOrEmpty(hfCasePageSize.Value) ? 10 : Convert.ToInt32(hfCasePageSize.Value);
+
+        // Protocol definitions based on category
+        private struct ProtocolDefinition
+        {
+            public string Name;
+            public int[] DoseDays;
+            public string VaccineType;
+        }
+
+        private Dictionary<string, ProtocolDefinition> GetProtocols()
+        {
+            return new Dictionary<string, ProtocolDefinition>
+            {
+                {
+                    "III", new ProtocolDefinition
+                    {
+                        Name = "PEP Zagreb (0, 0, 7, 21)",
+                        DoseDays = new[] { 0, 0, 7, 21 },
+                        VaccineType = "Rabies Immunoglobulin"
+                    }
+                },
+                {
+                    "II", new ProtocolDefinition
+                    {
+                        Name = "PEP Essen (0, 3, 7, 14, 28)",
+                        DoseDays = new[] { 0, 3, 7, 14, 28 },
+                        VaccineType = "Post-Exposure Prophylaxis"
+                    }
+                },
+                {
+                    "I", new ProtocolDefinition
+                    {
+                        Name = "PrEP Standard (0, 7, 21)",
+                        DoseDays = new[] { 0, 7, 21 },
+                        VaccineType = "Pre-Exposure Prophylaxis"
+                    }
+                }
+            };
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["userRole"] == null)
@@ -33,8 +76,10 @@ namespace SBI
             if (!IsPostBack)
             {
                 AutoCancelMissedDoses();
+                AutoGenerateSchedulesForAllCases();
                 SwitchTab("Today");
                 BindTodaySchedules();
+                BindCaseSummaryStats();
             }
         }
 
@@ -67,7 +112,6 @@ namespace SBI
                     SET status = 'Cancelled'
                     WHERE status = 'Pending'
                       AND CAST(schedule_date AS DATE) < CAST(DATEADD(DAY, -3, GETDATE()) AS DATE)";
-
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     conn.Open();
@@ -76,306 +120,115 @@ namespace SBI
             }
         }
 
-        protected void btnTabToday_Click(object sender, EventArgs e)
+        private void AutoGenerateSchedulesForAllCases()
         {
-            SwitchTab("Today");
-            BindTodaySchedules();
-        }
+            var protocols = GetProtocols();
 
-        protected void btnTabRegistry_Click(object sender, EventArgs e)
-        {
-            SwitchTab("Registry");
-            BindRegistrySummary();
-        }
-
-        protected void btnBackToCases_Click(object sender, EventArgs e)
-        {
-            string tab = ViewState["ActiveTab"] as string ?? "Registry";
-            SwitchTab(tab);
-
-            if (tab == "Today")
-                BindTodaySchedules();
-            else
-                BindRegistrySummary();
-        }
-
-        private void SwitchTab(string tabName)
-        {
-            ViewState["ActiveTab"] = tabName;
-
-            panelTodaySchedules.Visible = (tabName == "Today");
-            panelRegistrySearch.Visible = (tabName == "Registry");
-            panelActiveCase.Visible = false;
-
-            string active = "h-11 rounded-lg bg-blue-600 px-6 font-bold text-white shadow hover:bg-blue-700 transition cursor-pointer";
-            string inactive = "h-11 rounded-lg bg-white border border-slate-300 px-6 font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer";
-
-            btnTabToday.CssClass = (tabName == "Today") ? active : inactive;
-            btnTabRegistry.CssClass = (tabName == "Registry") ? active : inactive;
-        }
-
-        private void ShowActiveCaseView()
-        {
-            panelTodaySchedules.Visible = false;
-            panelRegistrySearch.Visible = false;
-            panelActiveCase.Visible = true;
-            panelAdministration.Visible = false;
-            panelScheduleInfo.Visible = true;
-        }
-
-        private void BindTodaySchedules()
-        {
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 string query = @"
-                    SELECT s.schedule_id, r.case_id, c.case_no,
-                           (p.fname + ' ' + p.lname) AS patient_name,
-                           s.dose_number, s.schedule_date, v.vaccine_name,
-                           c.category,
-                           s.status
-                    FROM ScheduledDose s
-                    INNER JOIN VaccineRegimen r ON s.regimen_id = r.regimen_id
-                    INNER JOIN [Case] c ON r.case_id = c.case_id
-                    INNER JOIN Patient p ON c.patient_id = p.patient_id
-                    LEFT JOIN Vaccine v ON s.vaccine_id = v.vaccine_id
-                    WHERE s.status = 'Pending'
-                      AND CAST(s.schedule_date AS DATE) <= CAST(GETDATE() AS DATE)
-                    ORDER BY s.schedule_date ASC";
-
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    conn.Open();
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-
-                    gvTodaySchedules.DataSource = dt;
-                    gvTodaySchedules.DataBind();
-                }
-            }
-        }
-
-        private void BindRegistrySummary(string searchTerm = "")
-        {
-            using (SqlConnection conn = new SqlConnection(connString))
-            {
-                string query = @"
-                    SELECT c.case_id, c.case_no,
-                           (p.fname + ' ' + p.lname) AS patient_name,
-                           c.category,
-                           c.date_of_bite,
-                           r.regimen_type,
-                           r.total_doses,
-                           (SELECT COUNT(*)
-                            FROM ScheduledDose sd
-                            WHERE sd.regimen_id = r.regimen_id
-                              AND sd.status = 'Completed') AS completed_doses,
-                           CASE 
-                               WHEN r.regimen_id IS NULL THEN 'No Schedule'
-                               WHEN (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Pending') > 0 THEN 'In Progress'
-                               WHEN (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Completed') = r.total_doses THEN 'Complete'
-                               ELSE 'In Progress'
-                           END AS case_status
+                    SELECT c.case_id, c.category, c.date_of_bite
                     FROM [Case] c
-                    INNER JOIN Patient p ON c.patient_id = p.patient_id
                     LEFT JOIN VaccineRegimen r ON c.case_id = r.case_id
-                    WHERE (@s = ''
-                           OR p.fname LIKE '%' + @s + '%'
-                           OR p.lname LIKE '%' + @s + '%'
-                           OR c.case_no LIKE '%' + @s + '%')
-                    ORDER BY c.case_id DESC";
+                    WHERE r.regimen_id IS NULL
+                      AND c.date_of_bite IS NOT NULL
+                      AND c.category IS NOT NULL
+                      AND c.category IN ('I', 'II', 'III')";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@s", searchTerm ?? "");
                     conn.Open();
-
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-
-                    gvSummary.DataSource = dt;
-                    gvSummary.DataBind();
-                }
-            }
-        }
-
-        private void BindVisitHistory(int caseId)
-        {
-            using (SqlConnection conn = new SqlConnection(connString))
-            {
-                string query = @"
-                    SELECT visit_id, visit_type, visit_date, dose_day, diagnosis, status
-                    FROM Visit
-                    WHERE case_id = @CaseId
-                    ORDER BY visit_date DESC, visit_id DESC";
-
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@CaseId", caseId);
-                    conn.Open();
-
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-
-                    gvVisits.DataSource = dt;
-                    gvVisits.DataBind();
-                }
-            }
-        }
-
-        private void BindOverallSchedule(int caseId)
-        {
-            using (SqlConnection conn = new SqlConnection(connString))
-            {
-                string query = @"
-                    SELECT s.schedule_id, s.dose_number, s.schedule_date,
-                           s.status, v.vaccine_name, 
-                           s.vaccine_id, s.batch_id,
-                           s.administered_by_user,
-                           ISNULL(u.fname + ' ' + u.lname, 'System') AS administered_by
-                    FROM ScheduledDose s
-                    INNER JOIN VaccineRegimen r ON s.regimen_id = r.regimen_id
-                    LEFT JOIN Vaccine v ON s.vaccine_id = v.vaccine_id
-                    LEFT JOIN AppUser u ON s.administered_by_user = u.user_id
-                    WHERE r.case_id = @CaseId
-                    ORDER BY s.schedule_date ASC";
-
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@CaseId", caseId);
-                    conn.Open();
-
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-
-                    gvSchedule.DataSource = dt;
-                    gvSchedule.DataBind();
-
-                    panelScheduleInfo.Visible = true;
-
-                    int total = dt.Rows.Count;
-                    int completed = 0;
-                    int pending = 0;
-                    foreach (DataRow row in dt.Rows)
-                    {
-                        string status = row["status"].ToString();
-                        if (status == "Completed") completed++;
-                        else if (status == "Pending") pending++;
-                    }
-
-                    litTotalDoses.Text = total.ToString();
-                    litCompletedDoses.Text = completed.ToString();
-                    litPendingDoses.Text = pending.ToString();
-
-                    string protocolName = "";
-                    using (SqlCommand cmd2 = new SqlCommand(
-                        "SELECT TOP 1 regimen_type FROM VaccineRegimen WHERE case_id = @cid", conn))
-                    {
-                        cmd2.Parameters.AddWithValue("@cid", caseId);
-                        object result = cmd2.ExecuteScalar();
-                        if (result != null)
-                            protocolName = result.ToString();
-                    }
-                    litProtocolDisplay.Text = string.IsNullOrEmpty(protocolName) ? "—" : protocolName;
-                }
-            }
-        }
-
-        private void LoadCaseDetails(int caseId)
-        {
-            using (SqlConnection conn = new SqlConnection(connString))
-            {
-                string query = @"
-                    SELECT c.case_no, c.date_of_bite, c.category,
-                           (p.fname + ' ' + p.lname) AS patient_name,
-                           v.diagnosis AS initial_diagnosis,
-                           c.animal_type,
-                           c.site_of_bite,
-                           c.wound_type
-                    FROM [Case] c
-                    INNER JOIN Patient p ON c.patient_id = p.patient_id
-                    LEFT JOIN Visit v ON c.case_id = v.case_id
-                                     AND v.visit_type = 'Initial Visit'
-                    WHERE c.case_id = @CaseId";
-
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@CaseId", caseId);
-                    conn.Open();
-
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        if (reader.Read())
+                        while (reader.Read())
                         {
-                            litCaseNoDisplay.Text = reader["case_no"].ToString();
-                            litPatientNameDisplay.Text = reader["patient_name"].ToString();
-                            litCategoryDisplay.Text = reader["category"].ToString();
+                            int caseId = Convert.ToInt32(reader["case_id"]);
+                            string category = reader["category"]?.ToString()?.Trim() ?? "";
+                            DateTime? biteDate = reader["date_of_bite"] == DBNull.Value
+                                ? (DateTime?)null
+                                : Convert.ToDateTime(reader["date_of_bite"]);
 
-                            litBiteDateDisplay.Text = reader["date_of_bite"] == DBNull.Value
-                                ? "—"
-                                : Convert.ToDateTime(reader["date_of_bite"]).ToString("MMM dd, yyyy");
-
-                            litInitialDiagnosis.Text = reader["initial_diagnosis"] == DBNull.Value
-                                ? "—"
-                                : reader["initial_diagnosis"].ToString();
-
-                            litAnimalType.Text = reader["animal_type"] == DBNull.Value
-                                ? "—"
-                                : reader["animal_type"].ToString();
-
-                            litSiteOfBite.Text = reader["site_of_bite"] == DBNull.Value
-                                ? "—"
-                                : reader["site_of_bite"].ToString();
-
-                            litWoundType.Text = reader["wound_type"] == DBNull.Value
-                                ? "—"
-                                : reader["wound_type"].ToString();
+                            if (!string.IsNullOrEmpty(category) && biteDate.HasValue && protocols.ContainsKey(category))
+                            {
+                                AutoGenerateSchedule(caseId, category, biteDate.Value);
+                            }
                         }
                     }
                 }
             }
-
-            bool hasSchedule = CheckIfScheduleExists(caseId);
-            if (!hasSchedule)
-            {
-                AutoGenerateSchedule(caseId);
-            }
-            else
-            {
-                AutoReserveVialsForCase(caseId);
-            }
         }
 
-        private bool CheckIfScheduleExists(int caseId)
+        private void AutoGenerateSchedule(int caseId, string category, DateTime biteDate)
         {
+            var protocols = GetProtocols();
+
+            if (!protocols.ContainsKey(category))
+                return;
+
+            var protocol = protocols[category];
+
+            int vaccineId = GetRecommendedVaccine(protocol.VaccineType);
+
             using (SqlConnection conn = new SqlConnection(connString))
             {
-                string query = "SELECT COUNT(*) FROM VaccineRegimen WHERE case_id = @CaseId";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                conn.Open();
+                using (SqlTransaction trans = conn.BeginTransaction())
                 {
-                    cmd.Parameters.AddWithValue("@CaseId", caseId);
-                    conn.Open();
-                    int count = Convert.ToInt32(cmd.ExecuteScalar());
-                    return count > 0;
+                    try
+                    {
+                        int newRegimenId;
+                        using (SqlCommand cmd = new SqlCommand(@"
+                            INSERT INTO VaccineRegimen 
+                                (case_id, vaccine_id, regimen_type, start_date, total_doses, status)
+                            OUTPUT INSERTED.regimen_id
+                            VALUES 
+                                (@cid, @vid, @proto, @start, @total, 'Active')", conn, trans))
+                        {
+                            cmd.Parameters.AddWithValue("@cid", caseId);
+                            cmd.Parameters.AddWithValue("@vid", vaccineId);
+                            cmd.Parameters.AddWithValue("@proto", protocol.Name);
+                            cmd.Parameters.AddWithValue("@start", biteDate);
+                            cmd.Parameters.AddWithValue("@total", protocol.DoseDays.Length);
+                            newRegimenId = Convert.ToInt32(cmd.ExecuteScalar());
+                        }
+
+                        for (int i = 0; i < protocol.DoseDays.Length; i++)
+                        {
+                            DateTime doseDate = biteDate.AddDays(protocol.DoseDays[i]);
+
+                            using (SqlCommand cmd = new SqlCommand(@"
+                                INSERT INTO ScheduledDose 
+                                    (regimen_id, dose_number, schedule_date, status, vaccine_id)
+                                VALUES 
+                                    (@rid, @dnum, @sdate, 'Pending', @vid)", conn, trans))
+                            {
+                                cmd.Parameters.AddWithValue("@rid", newRegimenId);
+                                cmd.Parameters.AddWithValue("@dnum", i + 1);
+                                cmd.Parameters.AddWithValue("@sdate", doseDate);
+                                cmd.Parameters.AddWithValue("@vid", vaccineId);
+                                cmd.ExecuteNonQuery();
+                            }
+                        }
+
+                        ReserveVialsForRegimen(conn, trans, newRegimenId, vaccineId);
+                        trans.Commit();
+                    }
+                    catch
+                    {
+                        trans.Rollback();
+                    }
                 }
             }
         }
 
-        private int GetRecommendedVaccine(string category)
+        private int GetRecommendedVaccine(string vaccineType)
         {
-            string vaccineType = category.ToUpper().Trim() == "III"
-                ? "Rabies Immunoglobulin"
-                : "Post-Exposure Prophylaxis";
-
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 string query = @"
                     SELECT TOP 1 v.vaccine_id
                     FROM Vaccine v
-                    WHERE v.vaccine_type = @type
+                    WHERE v.vaccine_type LIKE '%' + @type + '%'
                       AND v.is_active = 'Yes'
                       AND EXISTS (
                           SELECT 1 
@@ -396,6 +249,7 @@ namespace SBI
                 }
             }
 
+            // Fallback: get any active vaccine
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 string query = @"
@@ -417,114 +271,6 @@ namespace SBI
             }
 
             return 1;
-        }
-
-        private void AutoGenerateSchedule(int caseId)
-        {
-            string category = "";
-            DateTime? biteDate = null;
-
-            using (SqlConnection conn = new SqlConnection(connString))
-            {
-                string query = "SELECT category, date_of_bite FROM [Case] WHERE case_id = @CaseId";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@CaseId", caseId);
-                    conn.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            category = reader["category"]?.ToString() ?? "";
-                            biteDate = reader["date_of_bite"] == DBNull.Value
-                                ? (DateTime?)null
-                                : Convert.ToDateTime(reader["date_of_bite"]);
-                        }
-                    }
-                }
-            }
-
-            if (string.IsNullOrEmpty(category) || !biteDate.HasValue)
-                return;
-
-            int[] doseDays;
-            string protocolName;
-
-            switch (category.ToUpper().Trim())
-            {
-                case "III":
-                    doseDays = new[] { 0, 0, 7, 21 };
-                    protocolName = "PEP Zagreb (0, 0, 7, 21)";
-                    break;
-                case "II":
-                    doseDays = new[] { 0, 3, 7, 14, 28 };
-                    protocolName = "PEP Essen (0, 3, 7, 14, 28)";
-                    break;
-                case "I":
-                    doseDays = new[] { 0, 7, 21 };
-                    protocolName = "PrEP Standard (0, 7, 21)";
-                    break;
-                default:
-                    doseDays = new[] { 0, 3, 7, 14, 28 };
-                    protocolName = "PEP Essen (0, 3, 7, 14, 28)";
-                    break;
-            }
-
-            int vaccineId = GetRecommendedVaccine(category);
-
-            using (SqlConnection conn = new SqlConnection(connString))
-            {
-                conn.Open();
-                using (SqlTransaction trans = conn.BeginTransaction())
-                {
-                    try
-                    {
-                        int newRegimenId;
-                        using (SqlCommand cmd = new SqlCommand(@"
-                            INSERT INTO VaccineRegimen 
-                                (case_id, vaccine_id, regimen_type, start_date, total_doses, status)
-                            OUTPUT INSERTED.regimen_id
-                            VALUES 
-                                (@cid, @vid, @proto, @start, @total, 'Active')", conn, trans))
-                        {
-                            cmd.Parameters.AddWithValue("@cid", caseId);
-                            cmd.Parameters.AddWithValue("@vid", vaccineId);
-                            cmd.Parameters.AddWithValue("@proto", protocolName);
-                            cmd.Parameters.AddWithValue("@start", biteDate.Value);
-                            cmd.Parameters.AddWithValue("@total", doseDays.Length);
-                            newRegimenId = Convert.ToInt32(cmd.ExecuteScalar());
-                        }
-
-                        for (int i = 0; i < doseDays.Length; i++)
-                        {
-                            DateTime doseDate = biteDate.Value.AddDays(doseDays[i]);
-
-                            using (SqlCommand cmd = new SqlCommand(@"
-                                INSERT INTO ScheduledDose 
-                                    (regimen_id, dose_number, schedule_date, status, vaccine_id)
-                                VALUES 
-                                    (@rid, @dnum, @sdate, 'Pending', @vid)", conn, trans))
-                            {
-                                cmd.Parameters.AddWithValue("@rid", newRegimenId);
-                                cmd.Parameters.AddWithValue("@dnum", i + 1);
-                                cmd.Parameters.AddWithValue("@sdate", doseDate);
-                                cmd.Parameters.AddWithValue("@vid", vaccineId);
-                                cmd.ExecuteNonQuery();
-                            }
-                        }
-
-                        ReserveVialsForRegimen(conn, trans, newRegimenId, vaccineId);
-
-                        trans.Commit();
-                        ShowAlert($"Schedule automatically generated: {protocolName} for Category {category}.", "success");
-                    }
-                    catch (Exception ex)
-                    {
-                        trans.Rollback();
-                        ShowAlert("Schedule generation failed: " + ex.Message, "error");
-                    }
-                }
-            }
         }
 
         private void ReserveVialsForRegimen(SqlConnection conn, SqlTransaction trans, int regimenId, int vaccineId)
@@ -725,18 +471,463 @@ namespace SBI
 
                         trans.Commit();
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         trans.Rollback();
-                        System.Diagnostics.Debug.WriteLine("Error reserving vials: " + ex.Message);
                     }
                 }
             }
         }
 
-        // ── REMOVED: BindVaccineDropdown() - no longer needed ──
+        protected void btnTabToday_Click(object sender, EventArgs e)
+        {
+            SwitchTab("Today");
+            BindTodaySchedules();
+            BindCaseSummaryStats();
+        }
 
-        // ── REMOVED: LoadDoseForEdit() - no longer needed ──
+        protected void btnTabRegistry_Click(object sender, EventArgs e)
+        {
+            SwitchTab("Registry");
+            BindRegistrySummary();
+            BindCaseSummaryStats();
+        }
+
+        protected void btnBackToCases_Click(object sender, EventArgs e)
+        {
+            string tab = ViewState["ActiveTab"] as string ?? "Registry";
+            SwitchTab(tab);
+
+            if (tab == "Today")
+                BindTodaySchedules();
+            else
+                BindRegistrySummary();
+
+            BindCaseSummaryStats();
+        }
+
+        private void SwitchTab(string tabName)
+        {
+            ViewState["ActiveTab"] = tabName;
+
+            panelTodaySchedules.Visible = (tabName == "Today");
+            panelRegistrySearch.Visible = (tabName == "Registry");
+            panelActiveCase.Visible = false;
+
+            string active = "h-11 rounded-lg bg-blue-600 px-6 font-bold text-white shadow hover:bg-blue-700 transition cursor-pointer";
+            string inactive = "h-11 rounded-lg bg-white border border-slate-300 px-6 font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer";
+
+            btnTabToday.CssClass = (tabName == "Today") ? active : inactive;
+            btnTabRegistry.CssClass = (tabName == "Registry") ? active : inactive;
+        }
+
+        private void ShowActiveCaseView()
+        {
+            panelTodaySchedules.Visible = false;
+            panelRegistrySearch.Visible = false;
+            panelActiveCase.Visible = true;
+            panelAdministration.Visible = false;
+            panelScheduleInfo.Visible = true;
+        }
+
+        private void BindCaseSummaryStats()
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                string query = @"
+                    SELECT 
+                        COUNT(CASE WHEN status = 'Completed' THEN 1 END) AS Completed,
+                        COUNT(CASE WHEN status = 'Pending' THEN 1 END) AS Pending,
+                        COUNT(CASE WHEN status = 'Cancelled' THEN 1 END) AS Cancelled,
+                        COUNT(CASE WHEN status = 'Pending' AND schedule_date < CAST(GETDATE() AS DATE) THEN 1 END) AS Missed
+                    FROM ScheduledDose";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            litStatCompleted.Text = reader["Completed"]?.ToString() ?? "0";
+                            litStatPending.Text = reader["Pending"]?.ToString() ?? "0";
+                            litStatCancelled.Text = reader["Cancelled"]?.ToString() ?? "0";
+                            litStatMissed.Text = reader["Missed"]?.ToString() ?? "0";
+                        }
+                    }
+                }
+            }
+        }
+
+        private void BindTodaySchedules()
+        {
+            int page = string.IsNullOrEmpty(hfTodayPage.Value) ? 1 : Convert.ToInt32(hfTodayPage.Value);
+            int pageSize = TodayPageSize;
+            int offset = (page - 1) * pageSize;
+
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                string countQuery = @"
+                    SELECT COUNT(*)
+                    FROM ScheduledDose s
+                    INNER JOIN VaccineRegimen r ON s.regimen_id = r.regimen_id
+                    INNER JOIN [Case] c ON r.case_id = c.case_id
+                    INNER JOIN Patient p ON c.patient_id = p.patient_id
+                    WHERE s.status = 'Pending'
+                      AND CAST(s.schedule_date AS DATE) <= CAST(GETDATE() AS DATE)";
+
+                int totalCount = 0;
+                using (SqlCommand cmd = new SqlCommand(countQuery, conn))
+                {
+                    conn.Open();
+                    totalCount = Convert.ToInt32(cmd.ExecuteScalar());
+                }
+
+                string query = @"
+                    SELECT s.schedule_id, r.case_id, c.case_no,
+                           (p.fname + ' ' + p.lname) AS patient_name,
+                           s.dose_number, s.schedule_date, v.vaccine_name,
+                           c.category,
+                           r.regimen_type,
+                           s.status
+                    FROM ScheduledDose s
+                    INNER JOIN VaccineRegimen r ON s.regimen_id = r.regimen_id
+                    INNER JOIN [Case] c ON r.case_id = c.case_id
+                    INNER JOIN Patient p ON c.patient_id = p.patient_id
+                    LEFT JOIN Vaccine v ON s.vaccine_id = v.vaccine_id
+                    WHERE s.status = 'Pending'
+                      AND CAST(s.schedule_date AS DATE) <= CAST(GETDATE() AS DATE)
+                    ORDER BY s.schedule_date ASC
+                    OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@offset", offset);
+                    cmd.Parameters.AddWithValue("@pageSize", pageSize);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+
+                    gvTodaySchedules.DataSource = dt;
+                    gvTodaySchedules.DataBind();
+
+                    int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+                    if (totalPages < 1) totalPages = 1;
+                    if (page > totalPages) page = totalPages;
+                    hfTodayPage.Value = page.ToString();
+
+                    btnTodayPrev.Enabled = (page > 1);
+                    btnTodayNext.Enabled = (page < totalPages);
+                    litTodayPageInfo.Text = $"Page {page} of {totalPages}";
+                }
+            }
+        }
+
+        private void BindRegistrySummary(string searchTerm = "")
+        {
+            int page = string.IsNullOrEmpty(hfCasePage.Value) ? 1 : Convert.ToInt32(hfCasePage.Value);
+            int pageSize = CasePageSize;
+            int offset = (page - 1) * pageSize;
+
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                string countQuery = @"
+                    SELECT COUNT(*)
+                    FROM [Case] c
+                    INNER JOIN Patient p ON c.patient_id = p.patient_id
+                    WHERE (@s = ''
+                           OR p.fname LIKE '%' + @s + '%'
+                           OR p.lname LIKE '%' + @s + '%'
+                           OR c.case_no LIKE '%' + @s + '%')";
+
+                int totalCount = 0;
+                using (SqlCommand cmd = new SqlCommand(countQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@s", searchTerm ?? "");
+                    conn.Open();
+                    totalCount = Convert.ToInt32(cmd.ExecuteScalar());
+                }
+
+                string query = @"
+                    SELECT c.case_id, c.case_no,
+                           (p.fname + ' ' + p.lname) AS patient_name,
+                           c.category,
+                           c.date_of_bite,
+                           r.regimen_type,
+                           r.total_doses,
+                           (SELECT COUNT(*)
+                            FROM ScheduledDose sd
+                            WHERE sd.regimen_id = r.regimen_id
+                              AND sd.status = 'Completed') AS completed_doses,
+                           CASE 
+                               WHEN r.regimen_id IS NULL THEN 'No Schedule'
+                               WHEN (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Pending') > 0 THEN 'In Progress'
+                               WHEN (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Completed') = r.total_doses THEN 'Complete'
+                               ELSE 'In Progress'
+                           END AS case_status
+                    FROM [Case] c
+                    INNER JOIN Patient p ON c.patient_id = p.patient_id
+                    LEFT JOIN VaccineRegimen r ON c.case_id = r.case_id
+                    WHERE (@s = ''
+                           OR p.fname LIKE '%' + @s + '%'
+                           OR p.lname LIKE '%' + @s + '%'
+                           OR c.case_no LIKE '%' + @s + '%')
+                    ORDER BY c.case_id DESC
+                    OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@s", searchTerm ?? "");
+                    cmd.Parameters.AddWithValue("@offset", offset);
+                    cmd.Parameters.AddWithValue("@pageSize", pageSize);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+
+                    gvSummary.DataSource = dt;
+                    gvSummary.DataBind();
+
+                    int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+                    if (totalPages < 1) totalPages = 1;
+                    if (page > totalPages) page = totalPages;
+                    hfCasePage.Value = page.ToString();
+
+                    btnCasePrev.Enabled = (page > 1);
+                    btnCaseNext.Enabled = (page < totalPages);
+                    litCasePageInfo.Text = $"Page {page} of {totalPages}";
+                }
+            }
+        }
+
+        protected void btnTodayPrev_Click(object sender, EventArgs e)
+        {
+            int page = string.IsNullOrEmpty(hfTodayPage.Value) ? 1 : Convert.ToInt32(hfTodayPage.Value);
+            if (page > 1)
+            {
+                hfTodayPage.Value = (page - 1).ToString();
+                BindTodaySchedules();
+            }
+        }
+
+        protected void btnTodayNext_Click(object sender, EventArgs e)
+        {
+            int page = string.IsNullOrEmpty(hfTodayPage.Value) ? 1 : Convert.ToInt32(hfTodayPage.Value);
+            hfTodayPage.Value = (page + 1).ToString();
+            BindTodaySchedules();
+        }
+
+        protected void btnCasePrev_Click(object sender, EventArgs e)
+        {
+            int page = string.IsNullOrEmpty(hfCasePage.Value) ? 1 : Convert.ToInt32(hfCasePage.Value);
+            if (page > 1)
+            {
+                hfCasePage.Value = (page - 1).ToString();
+                BindRegistrySummary(txtSearchCase.Text.Trim());
+            }
+        }
+
+        protected void btnCaseNext_Click(object sender, EventArgs e)
+        {
+            int page = string.IsNullOrEmpty(hfCasePage.Value) ? 1 : Convert.ToInt32(hfCasePage.Value);
+            hfCasePage.Value = (page + 1).ToString();
+            BindRegistrySummary(txtSearchCase.Text.Trim());
+        }
+
+        private void BindVisitHistory(int caseId)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                string query = @"
+                    SELECT visit_id, visit_type, visit_date, dose_day, diagnosis, status
+                    FROM Visit
+                    WHERE case_id = @CaseId
+                    ORDER BY visit_date DESC, visit_id DESC";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@CaseId", caseId);
+                    conn.Open();
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    gvVisits.DataSource = dt;
+                    gvVisits.DataBind();
+                }
+            }
+        }
+
+        private void BindOverallSchedule(int caseId)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                string query = @"
+                    SELECT s.schedule_id, s.dose_number, s.schedule_date,
+                           s.status, v.vaccine_name, 
+                           s.vaccine_id, s.batch_id,
+                           s.administered_by_user,
+                           ISNULL(u.fname + ' ' + u.lname, 'System') AS administered_by
+                    FROM ScheduledDose s
+                    INNER JOIN VaccineRegimen r ON s.regimen_id = r.regimen_id
+                    LEFT JOIN Vaccine v ON s.vaccine_id = v.vaccine_id
+                    LEFT JOIN AppUser u ON s.administered_by_user = u.user_id
+                    WHERE r.case_id = @CaseId
+                    ORDER BY s.schedule_date ASC";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@CaseId", caseId);
+                    conn.Open();
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+
+                    gvSchedule.DataSource = dt;
+                    gvSchedule.DataBind();
+
+                    panelScheduleInfo.Visible = true;
+
+                    int total = dt.Rows.Count;
+                    int completed = 0;
+                    int pending = 0;
+                    int cancelled = 0;
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        string status = row["status"].ToString();
+                        if (status == "Completed") completed++;
+                        else if (status == "Pending") pending++;
+                        else if (status == "Cancelled") cancelled++;
+                    }
+
+                    litTotalDoses.Text = total.ToString();
+                    litCompletedDoses.Text = completed.ToString();
+                    litPendingDoses.Text = pending.ToString();
+                    litCancelledDoses.Text = cancelled.ToString();
+
+                    string protocolName = "";
+                    string totalDoses = "";
+                    using (SqlCommand cmd2 = new SqlCommand(
+                        "SELECT TOP 1 regimen_type, total_doses FROM VaccineRegimen WHERE case_id = @cid", conn))
+                    {
+                        cmd2.Parameters.AddWithValue("@cid", caseId);
+                        using (SqlDataReader reader = cmd2.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                protocolName = reader["regimen_type"]?.ToString() ?? "";
+                                totalDoses = reader["total_doses"]?.ToString() ?? "";
+                            }
+                        }
+                    }
+                    litProtocolDisplay.Text = string.IsNullOrEmpty(protocolName) ? "—" : protocolName;
+                    litProtocolDoses.Text = string.IsNullOrEmpty(totalDoses) ? "" : $"({totalDoses} doses total)";
+                }
+            }
+        }
+
+        private void LoadCaseDetails(int caseId)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                string query = @"
+                    SELECT c.case_no, c.date_of_bite, c.category,
+                           (p.fname + ' ' + p.lname) AS patient_name,
+                           v.diagnosis AS initial_diagnosis,
+                           c.animal_type,
+                           c.site_of_bite,
+                           c.wound_type
+                    FROM [Case] c
+                    INNER JOIN Patient p ON c.patient_id = p.patient_id
+                    LEFT JOIN Visit v ON c.case_id = v.case_id
+                                     AND v.visit_type = 'Initial Visit'
+                    WHERE c.case_id = @CaseId";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@CaseId", caseId);
+                    conn.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            litCaseNoDisplay.Text = reader["case_no"].ToString();
+                            litPatientNameDisplay.Text = reader["patient_name"].ToString();
+                            litCategoryDisplay.Text = reader["category"].ToString();
+
+                            litBiteDateDisplay.Text = reader["date_of_bite"] == DBNull.Value
+                                ? "—"
+                                : Convert.ToDateTime(reader["date_of_bite"]).ToString("MMM dd, yyyy");
+
+                            litInitialDiagnosis.Text = reader["initial_diagnosis"] == DBNull.Value
+                                ? "—"
+                                : reader["initial_diagnosis"].ToString();
+
+                            litAnimalType.Text = reader["animal_type"] == DBNull.Value
+                                ? "—"
+                                : reader["animal_type"].ToString();
+
+                            litSiteOfBite.Text = reader["site_of_bite"] == DBNull.Value
+                                ? "—"
+                                : reader["site_of_bite"].ToString();
+
+                            litWoundType.Text = reader["wound_type"] == DBNull.Value
+                                ? "—"
+                                : reader["wound_type"].ToString();
+                        }
+                    }
+                }
+            }
+
+            bool hasSchedule = CheckIfScheduleExists(caseId);
+            if (!hasSchedule)
+            {
+                string category = "";
+                DateTime? biteDate = null;
+
+                using (SqlConnection conn = new SqlConnection(connString))
+                {
+                    string q = "SELECT category, date_of_bite FROM [Case] WHERE case_id = @CaseId";
+                    using (SqlCommand cmd = new SqlCommand(q, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@CaseId", caseId);
+                        conn.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                category = reader["category"]?.ToString() ?? "";
+                                biteDate = reader["date_of_bite"] == DBNull.Value
+                                    ? (DateTime?)null
+                                    : Convert.ToDateTime(reader["date_of_bite"]);
+                            }
+                        }
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(category) && biteDate.HasValue)
+                {
+                    AutoGenerateSchedule(caseId, category, biteDate.Value);
+                }
+            }
+            else
+            {
+                AutoReserveVialsForCase(caseId);
+            }
+        }
+
+        private bool CheckIfScheduleExists(int caseId)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                string query = "SELECT COUNT(*) FROM VaccineRegimen WHERE case_id = @CaseId";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@CaseId", caseId);
+                    conn.Open();
+                    int count = Convert.ToInt32(cmd.ExecuteScalar());
+                    return count > 0;
+                }
+            }
+        }
 
         private void LoadVisitForEdit(int visitId)
         {
@@ -751,7 +942,6 @@ namespace SBI
                 {
                     cmd.Parameters.AddWithValue("@VisitId", visitId);
                     conn.Open();
-
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
@@ -820,8 +1010,6 @@ namespace SBI
             return diff >= 0 ? (int?)diff : null;
         }
 
-        // ── Dose Confirmation (Auto-filled) ──────────────────────────
-
         private void LoadDoseConfirmation(int scheduleId)
         {
             using (SqlConnection conn = new SqlConnection(connString))
@@ -845,7 +1033,6 @@ namespace SBI
                 {
                     cmd.Parameters.AddWithValue("@sid", scheduleId);
                     conn.Open();
-
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
@@ -1026,6 +1213,7 @@ namespace SBI
                         BindOverallSchedule(caseId);
                         BindTodaySchedules();
                         BindVisitHistory(caseId);
+                        BindCaseSummaryStats();
                         ShowAlert($"Dose {litConfirmDoseNumber.Text} administered successfully.", "success");
                     }
                     catch (Exception ex)
@@ -1048,17 +1236,22 @@ namespace SBI
         {
             AutoCancelMissedDoses();
             BindTodaySchedules();
+            BindCaseSummaryStats();
         }
 
         protected void btnSearchCase_Click(object sender, EventArgs e)
         {
+            hfCasePage.Value = "1";
             BindRegistrySummary(txtSearchCase.Text.Trim());
+            BindCaseSummaryStats();
         }
 
         protected void btnClearCaseSearch_Click(object sender, EventArgs e)
         {
             txtSearchCase.Text = "";
+            hfCasePage.Value = "1";
             BindRegistrySummary();
+            BindCaseSummaryStats();
         }
 
         protected void btnRefreshSchedule_Click(object sender, EventArgs e)
@@ -1069,6 +1262,7 @@ namespace SBI
                 int caseId = Convert.ToInt32(hfSelectedCaseId.Value);
                 BindOverallSchedule(caseId);
                 AutoReserveVialsForCase(caseId);
+                BindCaseSummaryStats();
             }
         }
 
@@ -1160,6 +1354,7 @@ namespace SBI
             LoadCaseDetails(caseId);
             BindVisitHistory(caseId);
             BindOverallSchedule(caseId);
+            BindCaseSummaryStats();
             ShowActiveCaseView();
         }
 
@@ -1286,7 +1481,6 @@ namespace SBI
                 LoadDoseConfirmation(scheduleId);
                 panelAdministration.Visible = true;
             }
-            // REMOVED: EditDose functionality since we simplified
         }
 
         private void ShowAlert(string msg, string type = "info")
@@ -1295,6 +1489,21 @@ namespace SBI
                              .Replace(Environment.NewLine, " ").Replace("\r", "").Replace("\n", " ");
             ClientScript.RegisterStartupScript(this.GetType(), Guid.NewGuid().ToString(),
                 "showNotifyModal('" + safe + "','" + type + "');", true);
+        }
+
+        protected string GetProtocolClass(string protocolName)
+        {
+            if (string.IsNullOrEmpty(protocolName))
+                return "";
+
+            if (protocolName.Contains("Zagreb"))
+                return "zagreb";
+            if (protocolName.Contains("Essen"))
+                return "essen";
+            if (protocolName.Contains("PrEP"))
+                return "prep";
+
+            return "";
         }
     }
 }

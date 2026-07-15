@@ -14,40 +14,31 @@ namespace SBI
     {
         string connectionString = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
 
-        // ── Page Load ─────────────────────────────────────────────────
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["userRole"] == null)
-            { Response.Redirect("Login.aspx"); return; }
+            {
+                Response.Redirect("Login.aspx");
+                return;
+            }
 
             string role = Session["userRole"].ToString().ToUpper();
             if (role != "A" && role != "B" && role != "C")
-            { Response.Redirect("Login.aspx"); return; }
+            {
+                Response.Redirect("Login.aspx");
+                return;
+            }
 
-            // ── Handle PDF export render request ──────────────────────────
+            // Handle PDF export render request - Direct PDF generation
             string exportCaseId = Request.QueryString["exportCaseId"];
             if (!string.IsNullOrEmpty(exportCaseId))
             {
                 int caseId;
                 if (int.TryParse(exportCaseId, out caseId))
                 {
-                    // Show only the case detail panel, hide everything else
-                    hfActiveReport.Value = "BiteCaseReport";
-                    hfSelectedCaseId.Value = caseId.ToString();
-                    pnlInventory.Visible = false;
-                    pnlBiteCase.Visible = true;
-                    pnlCaseDetail.Visible = true;
-
-                    // Hide the nav/filter UI so PDF is clean
-                    btnTabInventory.Visible = false;
-                    btnTabBiteCase.Visible = false;
-                    btnExportPdf.Visible = false;
-                    btnBackToCaseList.Visible = false;
-
-                    LoadBiteCaseReport(caseId);
-                    lblActiveReport.Text = "Bite Case Report";
+                    GenerateAndExportPdf(caseId);
+                    return;
                 }
-                return; // Don't run the rest of Page_Load
             }
 
             if (!IsPostBack)
@@ -62,6 +53,43 @@ namespace SBI
             }
         }
 
+        // ── Generate PDF Directly ─────────────────────────────────────
+        private void GenerateAndExportPdf(int caseId)
+        {
+            try
+            {
+                // Build the HTML for the PDF
+                string html = BuildCaseReportHtml(caseId);
+
+                // Create PDF using SelectPdf
+                SelectPdf.HtmlToPdf converter = new SelectPdf.HtmlToPdf();
+                converter.Options.PdfPageSize = SelectPdf.PdfPageSize.A4;
+                converter.Options.PdfPageOrientation = SelectPdf.PdfPageOrientation.Portrait;
+                converter.Options.MarginTop = 20;
+                converter.Options.MarginBottom = 20;
+                converter.Options.MarginLeft = 20;
+                converter.Options.MarginRight = 20;
+
+                SelectPdf.PdfDocument doc = converter.ConvertHtmlString(html);
+
+                string fileName = "CaseReport_" + caseId.ToString() + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".pdf";
+
+                Response.Clear();
+                Response.ContentType = "application/pdf";
+                Response.AddHeader("content-disposition", "attachment; filename=" + fileName);
+                doc.Save(Response.OutputStream);
+                doc.Close();
+                Response.End();
+            }
+            catch (Exception ex)
+            {
+                Response.Clear();
+                Response.ContentType = "text/html";
+                Response.Write("Error generating PDF: " + ex.Message);
+                Response.End();
+            }
+        }
+
         // ── Tab Handlers ──────────────────────────────────────────────
         protected void btnTabInventory_Click(object sender, EventArgs e)
         {
@@ -72,6 +100,7 @@ namespace SBI
             pnlCaseDetail.Visible = false;
             ApplyTabStyles();
             lblActiveReport.Text = "Daily Inventory Summary";
+            LoadInventoryReport(DateTime.Today, DateTime.Today);
         }
 
         protected void btnTabBiteCase_Click(object sender, EventArgs e)
@@ -141,7 +170,7 @@ namespace SBI
             lblTotalRecords.Text = gvCaseList.Rows.Count.ToString();
         }
 
-        // ── Case List Grid RowCommand — load report for selected case ─
+        // ── Case List Grid RowCommand ─────────────────────────────────
         protected void gvCaseList_RowCommand(object sender, GridViewCommandEventArgs e)
         {
             if (e.CommandName == "ViewCase")
@@ -153,6 +182,14 @@ namespace SBI
                 pnlCaseDetail.Visible = true;
                 lblTotalRecords.Text = "1";
             }
+        }
+
+        protected void gvCaseList_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            gvCaseList.PageIndex = e.NewPageIndex;
+            BindCaseList(txtCaseSearch.Text.Trim(),
+                ParseNullableDate(txtCaseFromDate.Text),
+                ParseNullableDate(txtCaseToDate.Text));
         }
 
         // ── ApplyTabStyles ────────────────────────────────────────────
@@ -210,20 +247,18 @@ namespace SBI
 
             string sql = @"
                 SELECT
-                    v.vaccine_name                                                      AS [Vaccine],
-                    v.vaccine_category                                                  AS [Category],
-                    ISNULL(SUM(vb.quantity_received), 0)                               AS [INV. BEG],
-                    ISNULL(SUM(CASE WHEN il.transaction_type = 'Consumed'
-                                    THEN il.quantity ELSE 0 END), 0)                   AS [CONSUMED],
-                    ISNULL(SUM(CASE WHEN il.transaction_type = 'Pull-Out'
-                                    THEN il.quantity ELSE 0 END), 0)                   AS [PULL-OUT],
-                    ISNULL(SUM(vb.current_stock), 0)                                   AS [INV. END]
+                    v.vaccine_name AS [Vaccine],
+                    v.vaccine_category AS [Category],
+                    ISNULL(SUM(vb.quantity_received), 0) AS [INV. BEG],
+                    ISNULL(SUM(CASE WHEN il.transaction_type = 'Dispensed' THEN il.quantity ELSE 0 END), 0) AS [CONSUMED],
+                    ISNULL(SUM(CASE WHEN il.transaction_type = 'Expired' THEN il.quantity ELSE 0 END), 0) AS [PULL-OUT],
+                    ISNULL(SUM(vb.current_stock), 0) AS [INV. END]
                 FROM dbo.VaccineBatch vb
                 INNER JOIN dbo.Vaccine v ON vb.vaccine_id = v.vaccine_id
                 LEFT JOIN dbo.InventoryLog il
                     ON vb.batch_id = il.batch_id
                    AND il.transaction_date >= @from
-                   AND il.transaction_date <  DATEADD(DAY, 1, @to)
+                   AND il.transaction_date < DATEADD(DAY, 1, @to)
                 WHERE v.is_active = 'Yes'
                 GROUP BY v.vaccine_name, v.vaccine_category
                 ORDER BY v.vaccine_name ASC";
@@ -232,9 +267,56 @@ namespace SBI
             gvInventory.DataSource = dt;
             gvInventory.DataBind();
             lblTotalRecords.Text = dt.Rows.Count.ToString();
+
+            // Store the current data for Excel export
+            ViewState["InventoryReportData"] = dt;
         }
 
-        // ── Bite Case Report — load by case_id ───────────────────────
+        // ── Excel Export ──────────────────────────────────────────────
+        protected void btnExportExcel_Click(object sender, EventArgs e)
+        {
+            DateTime from, to;
+            if (!TryGetDates(out from, out to))
+            {
+                lblMessage.Text = "Please select valid date range.";
+                return;
+            }
+
+            // Get the data - either from ViewState or fresh from database
+            DataTable dt = ViewState["InventoryReportData"] as DataTable;
+            if (dt == null || dt.Rows.Count == 0)
+            {
+                string sql = @"
+                    SELECT
+                        v.vaccine_name AS [Vaccine],
+                        v.vaccine_category AS [Category],
+                        ISNULL(SUM(vb.quantity_received), 0) AS [INV. BEG],
+                        ISNULL(SUM(CASE WHEN il.transaction_type = 'Dispensed' THEN il.quantity ELSE 0 END), 0) AS [CONSUMED],
+                        ISNULL(SUM(CASE WHEN il.transaction_type = 'Expired' THEN il.quantity ELSE 0 END), 0) AS [PULL-OUT],
+                        ISNULL(SUM(vb.current_stock), 0) AS [INV. END]
+                    FROM dbo.VaccineBatch vb
+                    INNER JOIN dbo.Vaccine v ON vb.vaccine_id = v.vaccine_id
+                    LEFT JOIN dbo.InventoryLog il
+                        ON vb.batch_id = il.batch_id
+                       AND il.transaction_date >= @from
+                       AND il.transaction_date < DATEADD(DAY, 1, @to)
+                    WHERE v.is_active = 'Yes'
+                    GROUP BY v.vaccine_name, v.vaccine_category
+                    ORDER BY v.vaccine_name ASC";
+
+                dt = ExecuteTable(sql, from, to);
+            }
+
+            if (dt == null || dt.Rows.Count == 0)
+            {
+                lblMessage.Text = "No data to export.";
+                return;
+            }
+
+            ExportToExcel(dt, "Daily Inventory Summary", from, to);
+        }
+
+        // ── Bite Case Report ──────────────────────────────────────────
         private void LoadBiteCaseReport(int caseId)
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
@@ -244,58 +326,54 @@ namespace SBI
                 string caseQuery = @"
                     SELECT
                         p.patient_id,
-                        p.lname + ', ' + p.fname                                        AS full_name,
-                        CONVERT(VARCHAR, p.date_of_birth, 107)                          AS date_of_birth,
-                        DATEDIFF(YEAR, p.date_of_birth,
-                            CASE WHEN DATEADD(YEAR, DATEDIFF(YEAR, p.date_of_birth, GETDATE()), p.date_of_birth) > GETDATE()
-                                 THEN DATEADD(YEAR, DATEDIFF(YEAR, p.date_of_birth, GETDATE()) - 1, p.date_of_birth)
-                                 ELSE GETDATE() END)                                    AS age,
+                        p.fname + ' ' + p.lname AS full_name,
+                        CONVERT(VARCHAR, p.date_of_birth, 107) AS date_of_birth,
+                        DATEDIFF(YEAR, p.date_of_birth, GETDATE()) AS age,
                         CASE p.gender WHEN 'M' THEN 'Male' WHEN 'F' THEN 'Female' ELSE p.gender END AS gender,
                         p.civil_status,
                         p.contact_no,
                         p.occupation,
-                        p.address                                                       AS full_address,
-                        ISNULL(p.emergency_contact_person, 'N/A') + ' — '
-                            + ISNULL(p.emergency_contact_number, '')                   AS emergency_contact,
+                        ISNULL(p.house_no, '') + ' ' + ISNULL(p.street, '') + ', ' + 
+                        ISNULL(p.barangay, '') + ', ' + ISNULL(p.city_province, '') AS full_address,
+                        ISNULL(p.emergency_contact_person, 'N/A') + ' - ' 
+                            + ISNULL(p.emergency_contact_number, '') AS emergency_contact,
                         c.case_id,
                         c.case_no,
-                        CONVERT(VARCHAR, c.date_of_bite, 107)                           AS bite_date,
-                        CONVERT(VARCHAR, c.time_of_bite, 100)                           AS bite_time,
-                        c.place_of_bite,
+                        CONVERT(VARCHAR, c.date_of_bite, 107) AS bite_date,
+                        CONVERT(VARCHAR, c.time_of_bite, 100) AS bite_time,
+                        ISNULL(c.bite_house_no, '') + ' ' + ISNULL(c.bite_street, '') + ', ' + 
+                        ISNULL(c.bite_barangay, '') + ', ' + ISNULL(c.bite_city, '') AS place_of_bite,
                         c.type_of_exposure,
                         c.wound_type,
                         c.site_of_bite,
                         c.bleeding,
                         c.category,
                         c.washed,
-                        a.animal_type,
-                        a.ownership,
-                        a.animal_status,
-                        a.circumstances,
-                        af.day14_status,
-                        CONVERT(VARCHAR, af.followup_date, 107)                         AS followup_date,
-                        af.notes                                                        AS followup_notes,
+                        c.animal_type,
+                        c.ownership,
+                        c.animal_status,
+                        c.circumstances,
+                        c.day14_status,
+                        CONVERT(VARCHAR, c.followup_date, 107) AS followup_date,
+                        c.followup_notes,
                         vs.blood_pressure,
-                        CAST(vs.temperature AS VARCHAR(20))                             AS temperature,
-                        CAST(vs.wt AS VARCHAR(20))                                      AS weight,
-                        vs.cr                                                           AS capillary_refill,
+                        CAST(vs.temperature AS VARCHAR(20)) AS temperature,
+                        CAST(vs.wt AS VARCHAR(20)) AS weight,
+                        vs.cr AS capillary_refill,
                         vi.diagnosis,
                         vi.manifestation_notes,
                         vr.regimen_type,
-                        vr.start_date                                                   AS regimen_start,
+                        CONVERT(VARCHAR, vr.start_date, 107) AS regimen_start,
                         vr.total_doses,
-                        vr.status                                                       AS regimen_status,
+                        vr.status AS regimen_status,
                         vc.vaccine_name,
                         vc.manufacturer
                     FROM dbo.[Case] c
-                    INNER JOIN dbo.Patient p        ON c.patient_id    = p.patient_id
-                    LEFT JOIN dbo.Animal a           ON a.case_id      = c.case_id
-                    LEFT JOIN dbo.AnimalFollowUp af  ON af.animal_id   = a.animal_id
-                    LEFT JOIN dbo.VitalSigns vs      ON vs.patient_id  = p.patient_id
-                    LEFT JOIN dbo.Visit vi           ON vi.case_id     = c.case_id
-                                                    AND vi.visit_type  = 'Initial Visit'
-                    LEFT JOIN dbo.VaccineRegimen vr  ON vr.case_id     = c.case_id
-                    LEFT JOIN dbo.Vaccine vc         ON vc.vaccine_id  = vr.vaccine_id
+                    INNER JOIN dbo.Patient p ON c.patient_id = p.patient_id
+                    LEFT JOIN dbo.VitalSigns vs ON vs.patient_id = p.patient_id
+                    LEFT JOIN dbo.Visit vi ON vi.case_id = c.case_id AND vi.visit_type = 'Initial Visit'
+                    LEFT JOIN dbo.VaccineRegimen vr ON vr.case_id = c.case_id
+                    LEFT JOIN dbo.Vaccine vc ON vc.vaccine_id = vr.vaccine_id
                     WHERE c.case_id = @caseId";
 
                 SqlCommand cmd = new SqlCommand(caseQuery, conn);
@@ -335,24 +413,23 @@ namespace SBI
                     lblCircumstances.Text = rdr["circumstances"].ToString();
 
                     lblAnimalObsStatus.Text = rdr["animal_status"].ToString();
-                    lblDay14Status.Text = rdr["day14_status"] == DBNull.Value ? "—" : rdr["day14_status"].ToString();
-                    lblFollowupDate.Text = rdr["followup_date"] == DBNull.Value ? "—" : rdr["followup_date"].ToString();
-                    lblFollowupNotes.Text = rdr["followup_notes"] == DBNull.Value ? "—" : rdr["followup_notes"].ToString();
+                    lblDay14Status.Text = rdr["day14_status"] == DBNull.Value ? "-" : rdr["day14_status"].ToString();
+                    lblFollowupDate.Text = rdr["followup_date"] == DBNull.Value ? "-" : rdr["followup_date"].ToString();
+                    lblFollowupNotes.Text = rdr["followup_notes"] == DBNull.Value ? "-" : rdr["followup_notes"].ToString();
 
-                    lblBP.Text = rdr["blood_pressure"] == DBNull.Value ? "—" : rdr["blood_pressure"].ToString();
-                    lblTemp.Text = rdr["temperature"] == DBNull.Value ? "—" : rdr["temperature"].ToString() + " °C";
-                    lblWeight.Text = rdr["weight"] == DBNull.Value ? "—" : rdr["weight"].ToString() + " kg";
-                    lblCR.Text = rdr["capillary_refill"] == DBNull.Value ? "—" : rdr["capillary_refill"].ToString();
-                    lblDiagnosis.Text = rdr["diagnosis"] == DBNull.Value ? "—" : rdr["diagnosis"].ToString();
-                    lblSymptoms.Text = rdr["manifestation_notes"] == DBNull.Value ? "—" : rdr["manifestation_notes"].ToString();
+                    lblBP.Text = rdr["blood_pressure"] == DBNull.Value ? "-" : rdr["blood_pressure"].ToString();
+                    lblTemp.Text = rdr["temperature"] == DBNull.Value ? "-" : rdr["temperature"].ToString() + " C";
+                    lblWeight.Text = rdr["weight"] == DBNull.Value ? "-" : rdr["weight"].ToString() + " kg";
+                    lblCR.Text = rdr["capillary_refill"] == DBNull.Value ? "-" : rdr["capillary_refill"].ToString();
+                    lblDiagnosis.Text = rdr["diagnosis"] == DBNull.Value ? "-" : rdr["diagnosis"].ToString();
+                    lblSymptoms.Text = rdr["manifestation_notes"] == DBNull.Value ? "-" : rdr["manifestation_notes"].ToString();
 
-                    lblRegimenType.Text = rdr["regimen_type"] == DBNull.Value ? "—" : rdr["regimen_type"].ToString();
-                    lblVaccineName.Text = rdr["vaccine_name"] == DBNull.Value ? "—" : rdr["vaccine_name"].ToString();
-                    lblManufacturer.Text = rdr["manufacturer"] == DBNull.Value ? "—" : rdr["manufacturer"].ToString();
-                    lblRegimenStart.Text = rdr["regimen_start"] == DBNull.Value ? "—"
-                        : Convert.ToDateTime(rdr["regimen_start"]).ToString("MMM dd, yyyy");
-                    lblTotalDoses.Text = rdr["total_doses"] == DBNull.Value ? "—" : rdr["total_doses"].ToString();
-                    lblRegimenStatus.Text = rdr["regimen_status"] == DBNull.Value ? "—" : rdr["regimen_status"].ToString();
+                    lblRegimenType.Text = rdr["regimen_type"] == DBNull.Value ? "-" : rdr["regimen_type"].ToString();
+                    lblVaccineName.Text = rdr["vaccine_name"] == DBNull.Value ? "-" : rdr["vaccine_name"].ToString();
+                    lblManufacturer.Text = rdr["manufacturer"] == DBNull.Value ? "-" : rdr["manufacturer"].ToString();
+                    lblRegimenStart.Text = rdr["regimen_start"] == DBNull.Value ? "-" : rdr["regimen_start"].ToString();
+                    lblTotalDoses.Text = rdr["total_doses"] == DBNull.Value ? "-" : rdr["total_doses"].ToString();
+                    lblRegimenStatus.Text = rdr["regimen_status"] == DBNull.Value ? "-" : rdr["regimen_status"].ToString();
                 }
                 else
                 {
@@ -362,33 +439,22 @@ namespace SBI
                 }
                 rdr.Close();
 
-                // Pull manifestation symptoms
-                string manifestSql = @"
-                    SELECT STRING_AGG(symptom, ', ') AS symptoms
-                    FROM   dbo.Manifestation
-                    WHERE  case_id = @caseId";
-                SqlCommand manifestCmd = new SqlCommand(manifestSql, conn);
-                manifestCmd.Parameters.AddWithValue("@caseId", caseId);
-                object manifestResult = manifestCmd.ExecuteScalar();
-                if (manifestResult != DBNull.Value && manifestResult != null && manifestResult.ToString() != "")
-                    lblSymptoms.Text = manifestResult.ToString();
-
                 // Vaccination Schedule
                 string schedSql = @"
                     SELECT
-                        sd.dose_number                                              AS [Dose],
-                        CONVERT(VARCHAR, sd.schedule_date, 107)                     AS [Scheduled Date],
-                        sd.status                                                   AS [Status],
-                        ISNULL(vc.vaccine_name, '—')                               AS [Vaccine],
-                        ISNULL(vb.batch_number, '—')                               AS [Batch No.],
-                        ISNULL(t.administered_by, '—')                             AS [Administered By],
-                        ISNULL(CAST(t.dosage AS VARCHAR) + ' ' + ISNULL(t.unit,''), '—') AS [Dosage],
-                        ISNULL(t.route, '—')                                       AS [Route]
+                        sd.dose_number AS [Dose],
+                        CONVERT(VARCHAR, sd.schedule_date, 107) AS [Scheduled Date],
+                        sd.status AS [Status],
+                        ISNULL(vc.vaccine_name, '-') AS [Vaccine],
+                        ISNULL(vb.batch_number, '-') AS [Batch No.],
+                        ISNULL(u.fname + ' ' + u.lname, '-') AS [Administered By],
+                        ISNULL(CAST(sd.dosage AS VARCHAR), '-') AS [Dosage],
+                        ISNULL(sd.route, '-') AS [Route]
                     FROM dbo.ScheduledDose sd
                     INNER JOIN dbo.VaccineRegimen vr ON sd.regimen_id = vr.regimen_id
-                    LEFT JOIN dbo.Vaccine         vc ON sd.vaccine_id = vc.vaccine_id
-                    LEFT JOIN dbo.VaccineBatch    vb ON sd.batch_id   = vb.batch_id
-                    LEFT JOIN dbo.Treatment        t ON sd.visit_id   = t.visit_id
+                    LEFT JOIN dbo.Vaccine vc ON sd.vaccine_id = vc.vaccine_id
+                    LEFT JOIN dbo.VaccineBatch vb ON sd.batch_id = vb.batch_id
+                    LEFT JOIN dbo.AppUser u ON sd.administered_by_user = u.user_id
                     WHERE vr.case_id = @caseId
                     ORDER BY sd.dose_number ASC";
 
@@ -399,38 +465,19 @@ namespace SBI
                 // Treatment Summary
                 string treatSql = @"
                     SELECT
-                        CONVERT(VARCHAR, vi.visit_date, 107)                AS [Visit Date],
-                        vi.visit_type                                       AS [Visit Type],
-                        ISNULL('Day ' + CAST(vi.dose_day AS VARCHAR), '—') AS [Dose Day],
-                        ISNULL(vc.vaccine_name, '—')                       AS [Vaccine Used],
-                        ISNULL(vb.batch_number, '—')                       AS [Batch No.],
-                        ISNULL(CAST(t.dosage AS VARCHAR)+' '+ISNULL(t.unit,''), '—') AS [Dosage],
-                        ISNULL(t.route, '—')                               AS [Route],
-                        ISNULL(t.administered_by, '—')                     AS [Administered By]
+                        CONVERT(VARCHAR, vi.visit_date, 107) AS [Visit Date],
+                        vi.visit_type AS [Visit Type],
+                        ISNULL('Day ' + CAST(vi.dose_day AS VARCHAR), '-') AS [Dose Day],
+                        ISNULL(vc.vaccine_name, '-') AS [Vaccine Used],
+                        ISNULL(u.fname + ' ' + u.lname, '-') AS [Administered By]
                     FROM dbo.Visit vi
-                    LEFT JOIN dbo.Treatment    t  ON t.visit_id  = vi.visit_id
-                    LEFT JOIN dbo.Vaccine      vc ON t.vaccine_id= vc.vaccine_id
-                    LEFT JOIN dbo.VaccineBatch vb ON sd.batch_id = vb.batch_id
+                    LEFT JOIN dbo.ScheduledDose sd ON sd.visit_id = vi.visit_id
+                    LEFT JOIN dbo.Vaccine vc ON sd.vaccine_id = vc.vaccine_id
+                    LEFT JOIN dbo.AppUser u ON sd.administered_by_user = u.user_id
                     WHERE vi.case_id = @caseId
                     ORDER BY vi.visit_date ASC";
 
-                // Simplified treatment — avoid joining ScheduledDose here
-                string treatSqlSimple = @"
-                    SELECT
-                        CONVERT(VARCHAR, vi.visit_date, 107)                         AS [Visit Date],
-                        vi.visit_type                                                AS [Visit Type],
-                        ISNULL('Day ' + CAST(vi.dose_day AS VARCHAR), '—')           AS [Dose Day],
-                        ISNULL(vc.vaccine_name, '—')                                AS [Vaccine Used],
-                        ISNULL(CAST(t.dosage AS VARCHAR)+' '+ISNULL(t.unit,''), '—') AS [Dosage],
-                        ISNULL(t.route, '—')                                        AS [Route],
-                        ISNULL(t.administered_by, '—')                              AS [Administered By]
-                    FROM dbo.Visit vi
-                    LEFT JOIN dbo.Treatment t  ON t.visit_id   = vi.visit_id
-                    LEFT JOIN dbo.Vaccine   vc ON t.vaccine_id = vc.vaccine_id
-                    WHERE vi.case_id = @caseId
-                    ORDER BY vi.visit_date ASC";
-
-                DataTable dtTreat = ExecuteTableById(treatSqlSimple, caseId, conn);
+                DataTable dtTreat = ExecuteTableById(treatSql, caseId, conn);
                 gvTreatment.DataSource = dtTreat;
                 gvTreatment.DataBind();
 
@@ -438,10 +485,10 @@ namespace SBI
                 string prevSql = @"
                     SELECT TOP 1
                         CASE had_previous_vaccine WHEN 'Yes' THEN 'Yes' ELSE 'No' END AS [Had Previous Vaccine],
-                        ISNULL(previous_vaccine_type, '—')  AS previous_vaccine_type,
-                        ISNULL(previous_brand, '—')         AS previous_brand,
-                        ISNULL(dose_status, '—')            AS dose_status,
-                        ISNULL(CONVERT(VARCHAR, vaccination_date, 107), '—') AS vaccination_date
+                        ISNULL(previous_vaccine_type, '-') AS previous_vaccine_type,
+                        ISNULL(previous_brand, '-') AS previous_brand,
+                        ISNULL(dose_status, '-') AS dose_status,
+                        ISNULL(CONVERT(VARCHAR, vaccination_date, 107), '-') AS vaccination_date
                     FROM dbo.PreviousVaccineHistory
                     WHERE patient_id = @patientId";
 
@@ -460,79 +507,15 @@ namespace SBI
                 {
                     lblHadPrevVaccine.Text = "No record";
                     lblPrevVaccineType.Text = lblPrevBrand.Text =
-                    lblPrevDoseStatus.Text = lblPrevVaccDate.Text = "—";
+                    lblPrevDoseStatus.Text = lblPrevVaccDate.Text = "-";
                 }
                 prevRdr.Close();
             }
         }
 
-        // ── Excel Export (Inventory only) ─────────────────────────────
-        protected void btnExportExcel_Click(object sender, EventArgs e)
-        {
-            DateTime from, to;
-            if (!TryGetDates(out from, out to)) return;
-
-            string sql = @"
-                SELECT
-                    v.vaccine_name      AS [Vaccine],
-                    v.vaccine_category  AS [Category],
-                    ISNULL(SUM(vb.quantity_received), 0) AS [INV. BEG],
-                    ISNULL(SUM(CASE WHEN il.transaction_type='Consumed' THEN il.quantity ELSE 0 END),0) AS [CONSUMED],
-                    ISNULL(SUM(CASE WHEN il.transaction_type='Pull-Out'  THEN il.quantity ELSE 0 END),0) AS [PULL-OUT],
-                    ISNULL(SUM(vb.current_stock), 0) AS [INV. END]
-                FROM dbo.VaccineBatch vb
-                INNER JOIN dbo.Vaccine v ON vb.vaccine_id = v.vaccine_id
-                LEFT JOIN dbo.InventoryLog il
-                    ON vb.batch_id = il.batch_id
-                   AND il.transaction_date >= @from
-                   AND il.transaction_date <  DATEADD(DAY,1,@to)
-                WHERE v.is_active = 'Yes'
-                GROUP BY v.vaccine_name, v.vaccine_category
-                ORDER BY v.vaccine_name";
-
-            DataTable dt = ExecuteTable(sql, from, to);
-            if (dt.Rows.Count == 0) { lblMessage.Text = "No data to export."; return; }
-            ExportToExcel(dt, "Daily Inventory Summary", from, to);
-        }
-
-        // ── PDF Export (Bite Case only) ───────────────────────────────
-        protected void btnExportPdf_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(hfSelectedCaseId.Value))
-            {
-                lblMessage.Text = "Please select a case first.";
-                return;
-            }
-
-            int caseId = Convert.ToInt32(hfSelectedCaseId.Value);
-
-            // Build HTML string directly — no URL fetch needed
-            string html = BuildCaseReportHtml(caseId);
-
-            SelectPdf.HtmlToPdf converter = new SelectPdf.HtmlToPdf();
-            converter.Options.PdfPageSize = SelectPdf.PdfPageSize.A4;
-            converter.Options.PdfPageOrientation = SelectPdf.PdfPageOrientation.Portrait;
-            converter.Options.MarginTop = 20;
-            converter.Options.MarginBottom = 20;
-            converter.Options.MarginLeft = 20;
-            converter.Options.MarginRight = 20;
-
-            SelectPdf.PdfDocument doc = converter.ConvertHtmlString(html);
-
-            string fileName = "CaseReport_" + hfSelectedCaseId.Value
-                              + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".pdf";
-
-            Response.Clear();
-            Response.ContentType = "application/pdf";
-            Response.AddHeader("content-disposition", "attachment; filename=" + fileName);
-            doc.Save(Response.OutputStream);
-            doc.Close();
-            Response.End();
-        }
-
+        // ── Build Case Report HTML for PDF ───────────────────────────
         private string BuildCaseReportHtml(int caseId)
         {
-            // Re-fetch all case data fresh for PDF
             string patientId = "";
             string caseNo = "", patientName = "", dob = "", age = "", gender = "",
                    civilStatus = "", contact = "", occupation = "", address = "",
@@ -548,56 +531,64 @@ namespace SBI
 
             DataTable dtSched = new DataTable();
             DataTable dtTreat = new DataTable();
-            string hadPrevVacc = "No record", prevType = "—", prevBrand = "—",
-                   prevDoseStatus = "—", prevVaccDate = "—";
+            string hadPrevVacc = "No record", prevType = "-", prevBrand = "-",
+                   prevDoseStatus = "-", prevVaccDate = "-";
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
 
                 string caseQuery = @"
-            SELECT
-                p.patient_id,
-                p.lname + ', ' + p.fname AS full_name,
-                CONVERT(VARCHAR, p.date_of_birth, 107) AS date_of_birth,
-                DATEDIFF(YEAR, p.date_of_birth,
-                    CASE WHEN DATEADD(YEAR,DATEDIFF(YEAR,p.date_of_birth,GETDATE()),p.date_of_birth) > GETDATE()
-                         THEN DATEADD(YEAR,DATEDIFF(YEAR,p.date_of_birth,GETDATE())-1,p.date_of_birth)
-                         ELSE GETDATE() END) AS age,
-                CASE p.gender WHEN 'M' THEN 'Male' WHEN 'F' THEN 'Female' ELSE p.gender END AS gender,
-                p.civil_status, p.contact_no, p.occupation, p.address AS full_address,
-                ISNULL(p.emergency_contact_person,'N/A') + ' — ' + ISNULL(p.emergency_contact_number,'') AS emergency_contact,
-                c.case_no,
-                CONVERT(VARCHAR, c.date_of_bite, 107) AS bite_date,
-                CONVERT(VARCHAR, c.time_of_bite, 100) AS bite_time,
-                c.place_of_bite, c.type_of_exposure, c.wound_type, c.site_of_bite,
-                c.bleeding, c.category, c.washed,
-                a.animal_type, a.ownership, a.animal_status, a.circumstances,
-                ISNULL(af.day14_status,'—') AS day14_status,
-                ISNULL(CONVERT(VARCHAR,af.followup_date,107),'—') AS followup_date,
-                ISNULL(af.notes,'—') AS followup_notes,
-                ISNULL(vs.blood_pressure,'—') AS blood_pressure,
-                ISNULL(CAST(vs.temperature AS VARCHAR),'—') AS temperature,
-                ISNULL(CAST(vs.wt AS VARCHAR),'—') AS weight,
-                ISNULL(vs.cr,'—') AS capillary_refill,
-                ISNULL(vi.diagnosis,'—') AS diagnosis,
-                ISNULL(vi.manifestation_notes,'—') AS manifestation_notes,
-                ISNULL(vr.regimen_type,'—') AS regimen_type,
-                ISNULL(CONVERT(VARCHAR,vr.start_date,107),'—') AS regimen_start,
-                ISNULL(CAST(vr.total_doses AS VARCHAR),'—') AS total_doses,
-                ISNULL(vr.status,'—') AS regimen_status,
-                ISNULL(vc.vaccine_name,'—') AS vaccine_name,
-                ISNULL(vc.manufacturer,'—') AS manufacturer
-            FROM dbo.[Case] c
-            INNER JOIN dbo.Patient p        ON c.patient_id   = p.patient_id
-
-            LEFT JOIN dbo.Animal a           ON a.case_id     = c.case_id
-            LEFT JOIN dbo.AnimalFollowUp af  ON af.animal_id  = a.animal_id
-            LEFT JOIN dbo.VitalSigns vs      ON vs.patient_id = p.patient_id
-            LEFT JOIN dbo.Visit vi           ON vi.case_id    = c.case_id AND vi.visit_type = 'Initial Visit'
-            LEFT JOIN dbo.VaccineRegimen vr  ON vr.case_id    = c.case_id
-            LEFT JOIN dbo.Vaccine vc         ON vc.vaccine_id = vr.vaccine_id
-            WHERE c.case_id = @caseId";
+                    SELECT
+                        p.patient_id,
+                        p.fname + ' ' + p.lname AS full_name,
+                        CONVERT(VARCHAR, p.date_of_birth, 107) AS date_of_birth,
+                        DATEDIFF(YEAR, p.date_of_birth, GETDATE()) AS age,
+                        CASE p.gender WHEN 'M' THEN 'Male' WHEN 'F' THEN 'Female' ELSE p.gender END AS gender,
+                        p.civil_status,
+                        p.contact_no,
+                        p.occupation,
+                        ISNULL(p.house_no, '') + ' ' + ISNULL(p.street, '') + ', ' + 
+                        ISNULL(p.barangay, '') + ', ' + ISNULL(p.city_province, '') AS full_address,
+                        ISNULL(p.emergency_contact_person, 'N/A') + ' - ' 
+                            + ISNULL(p.emergency_contact_number, '') AS emergency_contact,
+                        c.case_no,
+                        CONVERT(VARCHAR, c.date_of_bite, 107) AS bite_date,
+                        CONVERT(VARCHAR, c.time_of_bite, 100) AS bite_time,
+                        ISNULL(c.bite_house_no, '') + ' ' + ISNULL(c.bite_street, '') + ', ' + 
+                        ISNULL(c.bite_barangay, '') + ', ' + ISNULL(c.bite_city, '') AS place_of_bite,
+                        c.type_of_exposure,
+                        c.wound_type,
+                        c.site_of_bite,
+                        c.bleeding,
+                        c.category,
+                        c.washed,
+                        c.animal_type,
+                        c.ownership,
+                        c.animal_status,
+                        c.circumstances,
+                        ISNULL(c.day14_status, '-') AS day14_status,
+                        ISNULL(CONVERT(VARCHAR, c.followup_date, 107), '-') AS followup_date,
+                        ISNULL(c.followup_notes, '-') AS followup_notes,
+                        ISNULL(vs.blood_pressure, '-') AS blood_pressure,
+                        ISNULL(CAST(vs.temperature AS VARCHAR), '-') AS temperature,
+                        ISNULL(CAST(vs.wt AS VARCHAR), '-') AS weight,
+                        ISNULL(vs.cr, '-') AS capillary_refill,
+                        ISNULL(vi.diagnosis, '-') AS diagnosis,
+                        ISNULL(vi.manifestation_notes, '-') AS manifestation_notes,
+                        ISNULL(vr.regimen_type, '-') AS regimen_type,
+                        ISNULL(CONVERT(VARCHAR, vr.start_date, 107), '-') AS regimen_start,
+                        ISNULL(CAST(vr.total_doses AS VARCHAR), '-') AS total_doses,
+                        ISNULL(vr.status, '-') AS regimen_status,
+                        ISNULL(vc.vaccine_name, '-') AS vaccine_name,
+                        ISNULL(vc.manufacturer, '-') AS manufacturer
+                    FROM dbo.[Case] c
+                    INNER JOIN dbo.Patient p ON c.patient_id = p.patient_id
+                    LEFT JOIN dbo.VitalSigns vs ON vs.patient_id = p.patient_id
+                    LEFT JOIN dbo.Visit vi ON vi.case_id = c.case_id AND vi.visit_type = 'Initial Visit'
+                    LEFT JOIN dbo.VaccineRegimen vr ON vr.case_id = c.case_id
+                    LEFT JOIN dbo.Vaccine vc ON vc.vaccine_id = vr.vaccine_id
+                    WHERE c.case_id = @caseId";
 
                 using (SqlCommand cmd = new SqlCommand(caseQuery, conn))
                 {
@@ -634,7 +625,7 @@ namespace SBI
                             followupDate = rdr["followup_date"].ToString();
                             followupNotes = rdr["followup_notes"].ToString();
                             bp = rdr["blood_pressure"].ToString();
-                            temp = rdr["temperature"].ToString() + " °C";
+                            temp = rdr["temperature"].ToString() + " C";
                             weight = rdr["weight"].ToString() + " kg";
                             cr = rdr["capillary_refill"].ToString();
                             diagnosis = rdr["diagnosis"].ToString();
@@ -649,55 +640,56 @@ namespace SBI
                     }
                 }
 
-                // Override symptoms from Manifestation table if available
-                object manifestResult = new SqlCommand(
-                    "SELECT STRING_AGG(symptom,', ') FROM dbo.Manifestation WHERE case_id=@caseId", conn)
-                { Parameters = { new SqlParameter("@caseId", caseId) } }.ExecuteScalar();
-                if (manifestResult != null && manifestResult != DBNull.Value && manifestResult.ToString() != "")
-                    symptoms = manifestResult.ToString();
-
                 // Schedule
-                dtSched = ExecuteTableById(@"
-            SELECT sd.dose_number AS [Dose],
-                   CONVERT(VARCHAR,sd.schedule_date,107) AS [Scheduled Date],
-                   sd.status AS [Status],
-                   ISNULL(vc.vaccine_name,'—') AS [Vaccine],
-                   ISNULL(vb.batch_number,'—') AS [Batch No.],
-                   ISNULL(t.administered_by,'—') AS [Administered By],
-                   ISNULL(CAST(t.dosage AS VARCHAR)+' '+ISNULL(t.unit,''),'—') AS [Dosage],
-                   ISNULL(t.route,'—') AS [Route]
-            FROM dbo.ScheduledDose sd
-            INNER JOIN dbo.VaccineRegimen vr ON sd.regimen_id = vr.regimen_id
-            LEFT JOIN dbo.Vaccine      vc ON sd.vaccine_id = vc.vaccine_id
-            LEFT JOIN dbo.VaccineBatch vb ON sd.batch_id   = vb.batch_id
-            LEFT JOIN dbo.Treatment     t ON sd.visit_id   = t.visit_id
-            WHERE vr.case_id = @caseId
-            ORDER BY sd.dose_number ASC", caseId, conn);
+                string schedSql = @"
+                    SELECT
+                        sd.dose_number AS [Dose],
+                        CONVERT(VARCHAR, sd.schedule_date, 107) AS [Scheduled Date],
+                        sd.status AS [Status],
+                        ISNULL(vc.vaccine_name, '-') AS [Vaccine],
+                        ISNULL(vb.batch_number, '-') AS [Batch No.],
+                        ISNULL(u.fname + ' ' + u.lname, '-') AS [Administered By],
+                        ISNULL(CAST(sd.dosage AS VARCHAR), '-') AS [Dosage],
+                        ISNULL(sd.route, '-') AS [Route]
+                    FROM dbo.ScheduledDose sd
+                    INNER JOIN dbo.VaccineRegimen vr ON sd.regimen_id = vr.regimen_id
+                    LEFT JOIN dbo.Vaccine vc ON sd.vaccine_id = vc.vaccine_id
+                    LEFT JOIN dbo.VaccineBatch vb ON sd.batch_id = vb.batch_id
+                    LEFT JOIN dbo.AppUser u ON sd.administered_by_user = u.user_id
+                    WHERE vr.case_id = @caseId
+                    ORDER BY sd.dose_number ASC";
+
+                dtSched = ExecuteTableById(schedSql, caseId, conn);
 
                 // Treatment
-                dtTreat = ExecuteTableById(@"
-            SELECT CONVERT(VARCHAR,vi.visit_date,107) AS [Visit Date],
-                   vi.visit_type AS [Visit Type],
-                   ISNULL('Day '+CAST(vi.dose_day AS VARCHAR),'—') AS [Dose Day],
-                   ISNULL(vc.vaccine_name,'—') AS [Vaccine Used],
-                   ISNULL(CAST(t.dosage AS VARCHAR)+' '+ISNULL(t.unit,''),'—') AS [Dosage],
-                   ISNULL(t.route,'—') AS [Route],
-                   ISNULL(t.administered_by,'—') AS [Administered By]
-            FROM dbo.Visit vi
-            LEFT JOIN dbo.Treatment t  ON t.visit_id   = vi.visit_id
-            LEFT JOIN dbo.Vaccine   vc ON t.vaccine_id = vc.vaccine_id
-            WHERE vi.case_id = @caseId
-            ORDER BY vi.visit_date ASC", caseId, conn);
+                string treatSql = @"
+                    SELECT
+                        CONVERT(VARCHAR, vi.visit_date, 107) AS [Visit Date],
+                        vi.visit_type AS [Visit Type],
+                        ISNULL('Day ' + CAST(vi.dose_day AS VARCHAR), '-') AS [Dose Day],
+                        ISNULL(vc.vaccine_name, '-') AS [Vaccine Used],
+                        ISNULL(u.fname + ' ' + u.lname, '-') AS [Administered By]
+                    FROM dbo.Visit vi
+                    LEFT JOIN dbo.ScheduledDose sd ON sd.visit_id = vi.visit_id
+                    LEFT JOIN dbo.Vaccine vc ON sd.vaccine_id = vc.vaccine_id
+                    LEFT JOIN dbo.AppUser u ON sd.administered_by_user = u.user_id
+                    WHERE vi.case_id = @caseId
+                    ORDER BY vi.visit_date ASC";
+
+                dtTreat = ExecuteTableById(treatSql, caseId, conn);
 
                 // Previous vaccine history
-                using (SqlCommand prevCmd = new SqlCommand(@"
-            SELECT TOP 1
-                CASE had_previous_vaccine WHEN 'Yes' THEN 'Yes' ELSE 'No' END AS had,
-                ISNULL(previous_vaccine_type,'—') AS pvt,
-                ISNULL(previous_brand,'—') AS pb,
-                ISNULL(dose_status,'—') AS ds,
-                ISNULL(CONVERT(VARCHAR,vaccination_date,107),'—') AS vd
-            FROM dbo.PreviousVaccineHistory WHERE patient_id=@pid", conn))
+                string prevSql = @"
+                    SELECT TOP 1
+                        CASE had_previous_vaccine WHEN 'Yes' THEN 'Yes' ELSE 'No' END AS had,
+                        ISNULL(previous_vaccine_type, '-') AS pvt,
+                        ISNULL(previous_brand, '-') AS pb,
+                        ISNULL(dose_status, '-') AS ds,
+                        ISNULL(CONVERT(VARCHAR, vaccination_date, 107), '-') AS vd
+                    FROM dbo.PreviousVaccineHistory
+                    WHERE patient_id = @pid";
+
+                using (SqlCommand prevCmd = new SqlCommand(prevSql, conn))
                 {
                     prevCmd.Parameters.AddWithValue("@pid", patientId);
                     using (SqlDataReader pr = prevCmd.ExecuteReader())
@@ -714,7 +706,7 @@ namespace SBI
                 }
             }
 
-            // ── Build HTML ─────────────────────────────────────────────────
+            // Build HTML
             var sb = new System.Text.StringBuilder();
             sb.Append(@"<!DOCTYPE html>
 <html>
@@ -749,12 +741,13 @@ namespace SBI
   .purple{ background:#faf5ff; color:#7e22ce; }
   .badge { display:inline-block; background:#fee2e2; color:#b91c1c;
            padding:1px 7px; border-radius:999px; font-weight:700; font-size:10px; }
+  .footer { margin-top: 20px; text-align: center; font-size: 9px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; }
 </style>
 </head>
 <body>
 <div class='header'>
-  <h1>SBI Medical Animal Bite Center — Morong Branch</h1>
-  <h2>Bite Case Report &nbsp;|&nbsp; Case No: " + H(caseNo) + @" &nbsp;|&nbsp; Generated: " + DateTime.Now.ToString("MMM dd, yyyy hh:mm tt") + @"</h2>
+  <h1>SBI Medical Animal Bite Center - Morong Branch</h1>
+  <h2>Bite Case Report | Case No: " + HtmlEncode(caseNo) + @" | Generated: " + DateTime.Now.ToString("MMM dd, yyyy hh:mm tt") + @"</h2>
 </div>");
 
             // Section helper
@@ -767,7 +760,7 @@ namespace SBI
             }
 
             string F(string label, string val, string span = "")
-                => "<p class='field " + span + "'><span class='label'>" + H(label) + ": </span><span class='val'>" + H(val) + "</span></p>";
+                => "<p class='field " + span + "'><span class='label'>" + HtmlEncode(label) + ": </span><span class='val'>" + HtmlEncode(val) + "</span></p>";
 
             // I. Patient Demographics
             Section("blue", "I. Patient Demographics",
@@ -795,7 +788,7 @@ namespace SBI
                 F("Wound Type", woundType) +
                 F("Site of Bite", biteSite) +
                 F("Bleeding", bleeding) +
-                "<p class='field'><span class='label'>Category: </span><span class='badge'>" + H(category) + "</span></p>" +
+                "<p class='field'><span class='label'>Category: </span><span class='badge'>" + HtmlEncode(category) + "</span></p>" +
                 F("Washed", washed) +
                 F("Animal Type", animalType) +
                 F("Ownership", ownership) +
@@ -826,12 +819,12 @@ namespace SBI
                 "</div>");
 
             // V. Vaccination Schedule
-            sb.Append("<div class='section'><div class='section-head slate'>V. Vaccination Schedule &amp; Administration</div><div class='section-body'>");
+            sb.Append("<div class='section'><div class='section-head slate'>V. Vaccination Schedule and Administration</div><div class='section-body'>");
             sb.Append(DataTableToHtmlTable(dtSched));
             sb.Append("</div></div>");
 
             // VI. Animal Follow-Up
-            Section("orange", "VI. Animal Observation &amp; Follow-Up",
+            Section("orange", "VI. Animal Observation and Follow-Up",
                 "<div class='grid'>" +
                 F("Animal Status", animalStatus) +
                 F("Day-14 Status", day14Status) +
@@ -854,15 +847,16 @@ namespace SBI
                 F("Vaccination Date", prevVaccDate) +
                 "</div>");
 
+            sb.Append("<div class='footer'>Report generated from SBI Medical Animal Bite Center System</div>");
             sb.Append("</body></html>");
             return sb.ToString();
         }
 
-        /// <summary>HTML-encode helper.</summary>
-        private string H(string s)
-            => System.Web.HttpUtility.HtmlEncode(s ?? "—");
+        private string HtmlEncode(string s)
+        {
+            return System.Web.HttpUtility.HtmlEncode(s ?? "-");
+        }
 
-        /// <summary>Converts a DataTable to a simple HTML table string.</summary>
         private string DataTableToHtmlTable(DataTable dt)
         {
             if (dt == null || dt.Rows.Count == 0)
@@ -871,58 +865,103 @@ namespace SBI
             var sb = new System.Text.StringBuilder();
             sb.Append("<table><tr>");
             foreach (DataColumn col in dt.Columns)
-                sb.Append("<th>" + H(col.ColumnName) + "</th>");
+                sb.Append("<th>" + HtmlEncode(col.ColumnName) + "</th>");
             sb.Append("</tr>");
             foreach (DataRow row in dt.Rows)
             {
                 sb.Append("<tr>");
                 foreach (DataColumn col in dt.Columns)
-                    sb.Append("<td>" + H(row[col]?.ToString()) + "</td>");
+                    sb.Append("<td>" + HtmlEncode(row[col]?.ToString()) + "</td>");
                 sb.Append("</tr>");
             }
             sb.Append("</table>");
             return sb.ToString();
         }
 
-        // ── Excel Helper ──────────────────────────────────────────────
+        // ── Export to Excel ───────────────────────────────────────────
         private void ExportToExcel(DataTable dt, string title, DateTime from, DateTime to)
         {
-            ExcelPackage.License.SetNonCommercialPersonal("SBI Medical");
-            using (ExcelPackage pkg = new ExcelPackage())
+            try
             {
-                ExcelWorksheet ws = pkg.Workbook.Worksheets.Add("Report");
-                ws.Cells["A1"].Value = "SBI Medical Animal Bite Center — Morong Branch";
-                ws.Cells["A2"].Value = title;
-                ws.Cells["A3"].Value = "From: " + from.ToString("MMM dd, yyyy") + "   To: " + to.ToString("MMM dd, yyyy");
-                ws.Cells["A1"].Style.Font.Bold = true; ws.Cells["A1"].Style.Font.Size = 14;
-                ws.Cells["A2"].Style.Font.Bold = true; ws.Cells["A2"].Style.Font.Size = 12;
-                ws.Cells["A3"].Style.Font.Italic = true;
+                ExcelPackage.License.SetNonCommercialPersonal("SBI Medical");
 
-                int startRow = 5;
-                for (int c = 0; c < dt.Columns.Count; c++)
+                using (ExcelPackage pkg = new ExcelPackage())
                 {
-                    ws.Cells[startRow, c + 1].Value = dt.Columns[c].ColumnName;
-                    ws.Cells[startRow, c + 1].Style.Font.Bold = true;
-                    ws.Cells[startRow, c + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                    ws.Cells[startRow, c + 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(11, 42, 122));
-                    ws.Cells[startRow, c + 1].Style.Font.Color.SetColor(Color.White);
-                    ws.Cells[startRow, c + 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-                }
-                for (int r = 0; r < dt.Rows.Count; r++)
+                    ExcelWorksheet ws = pkg.Workbook.Worksheets.Add("Inventory Report");
+
+                    // Header
+                    ws.Cells["A1"].Value = "SBI Medical Animal Bite Center - Morong Branch";
+                    ws.Cells["A2"].Value = title;
+                    ws.Cells["A3"].Value = "From: " + from.ToString("MMM dd, yyyy") + "   To: " + to.ToString("MMM dd, yyyy");
+                    ws.Cells["A4"].Value = "Generated: " + DateTime.Now.ToString("MMM dd, yyyy HH:mm tt");
+
+                    ws.Cells["A1"].Style.Font.Bold = true;
+                    ws.Cells["A1"].Style.Font.Size = 14;
+                    ws.Cells["A2"].Style.Font.Bold = true;
+                    ws.Cells["A2"].Style.Font.Size = 12;
+                    ws.Cells["A3"].Style.Font.Italic = true;
+                    ws.Cells["A3"].Style.Font.Size = 10;
+                    ws.Cells["A4"].Style.Font.Size = 10;
+
+                    // Data table headers
+                    int startRow = 6;
                     for (int c = 0; c < dt.Columns.Count; c++)
                     {
-                        ws.Cells[r + startRow + 1, c + 1].Value = dt.Rows[r][c];
-                        ws.Cells[r + startRow + 1, c + 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+                        ws.Cells[startRow, c + 1].Value = dt.Columns[c].ColumnName;
+                        ws.Cells[startRow, c + 1].Style.Font.Bold = true;
+                        ws.Cells[startRow, c + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        ws.Cells[startRow, c + 1].Style.Fill.BackgroundColor.SetColor(Color.FromArgb(11, 42, 122));
+                        ws.Cells[startRow, c + 1].Style.Font.Color.SetColor(Color.White);
+                        ws.Cells[startRow, c + 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
                     }
 
-                ws.Cells[ws.Dimension.Address].AutoFitColumns();
-                string fn = "Daily_Inventory_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
-                Response.Clear();
-                Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-                Response.AddHeader("content-disposition", "attachment; filename=" + fn);
-                Response.BinaryWrite(pkg.GetAsByteArray());
-                Response.End();
+                    // Data rows
+                    for (int r = 0; r < dt.Rows.Count; r++)
+                    {
+                        for (int c = 0; c < dt.Columns.Count; c++)
+                        {
+                            object value = dt.Rows[r][c];
+                            ws.Cells[r + startRow + 1, c + 1].Value = value != DBNull.Value ? value : "-";
+                            ws.Cells[r + startRow + 1, c + 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+                        }
+                    }
+
+                    // Auto-fit columns
+                    ws.Cells[ws.Dimension.Address].AutoFitColumns();
+
+                    // Add total row
+                    int totalRow = startRow + dt.Rows.Count + 1;
+                    ws.Cells[totalRow, 1].Value = "TOTAL";
+                    ws.Cells[totalRow, 1].Style.Font.Bold = true;
+                    ws.Cells[totalRow, 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    ws.Cells[totalRow, 1].Style.Fill.BackgroundColor.SetColor(Color.LightGray);
+
+                    // Export to response
+                    string fn = "Daily_Inventory_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
+                    Response.Clear();
+                    Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    Response.AddHeader("content-disposition", "attachment; filename=" + fn);
+                    Response.BinaryWrite(pkg.GetAsByteArray());
+                    Response.End();
+                }
             }
+            catch (Exception ex)
+            {
+                lblMessage.Text = "Error exporting to Excel: " + ex.Message;
+            }
+        }
+
+        // ── PDF Export Button Handler ────────────────────────────────
+        protected void btnExportPdf_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(hfSelectedCaseId.Value))
+            {
+                lblMessage.Text = "Please select a case first.";
+                return;
+            }
+
+            int caseId = Convert.ToInt32(hfSelectedCaseId.Value);
+            GenerateAndExportPdf(caseId);
         }
 
         // ── Helpers ───────────────────────────────────────────────────
@@ -936,11 +975,20 @@ namespace SBI
         {
             from = to = DateTime.MinValue;
             if (!DateTime.TryParse(txtFromDate.Text, out from))
-            { lblMessage.Text = "Invalid From Date."; return false; }
+            {
+                lblMessage.Text = "Invalid From Date.";
+                return false;
+            }
             if (!DateTime.TryParse(txtToDate.Text, out to))
-            { lblMessage.Text = "Invalid To Date."; return false; }
+            {
+                lblMessage.Text = "Invalid To Date.";
+                return false;
+            }
             if (from > to)
-            { lblMessage.Text = "From Date cannot be later than To Date."; return false; }
+            {
+                lblMessage.Text = "From Date cannot be later than To Date.";
+                return false;
+            }
             return true;
         }
 

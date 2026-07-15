@@ -5,14 +5,12 @@
     <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
 
     <style>
-        /* ── Status badges ──────────────────────────────────────────── */
         .badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; }
         .badge-ok   { background:#dcfce7; color:#15803d; }
         .badge-warn { background:#fef9c3; color:#a16207; }
         .badge-exp  { background:#fee2e2; color:#b91c1c; }
         .badge-in   { background:#dbeafe; color:#1d4ed8; }
 
-        /* ── Schedule summary ───────────────────────────────────────── */
         .schedule-summary {
             display: flex;
             gap: 24px;
@@ -36,8 +34,8 @@
         .schedule-summary .stat .value.total { color: #1e293b; }
         .schedule-summary .stat .value.completed { color: #15803d; }
         .schedule-summary .stat .value.pending { color: #b45309; }
+        .schedule-summary .stat .value.cancelled { color: #b91c1c; }
 
-        /* ── Modal animation ────────────────────────────────────────── */
         @keyframes fadeIn {
             from { opacity:0; transform:translateY(8px) scale(.98); }
             to   { opacity:1; transform:translateY(0) scale(1); }
@@ -69,11 +67,90 @@
         .admin-card {
             border-left: 4px solid #f59e0b;
         }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .pagination-container .page-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .pagination-container .page-btn:hover:not(:disabled) {
+            background: #f1f5f9;
+        }
+        .pagination-container .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .pagination-container .page-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        .pagination-container .page-info {
+            font-size: 13px;
+            color: #64748b;
+            padding: 0 8px;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .summary-stats .stat-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            text-align: center;
+        }
+        .summary-stats .stat-card .stat-num {
+            font-size: 22px;
+            font-weight: 800;
+        }
+        .summary-stats .stat-card .stat-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+        .summary-stats .stat-card.cancelled .stat-num { color: #b91c1c; }
+        .summary-stats .stat-card.missed .stat-num { color: #b45309; }
+        .summary-stats .stat-card.completed .stat-num { color: #15803d; }
+        .summary-stats .stat-card.pending .stat-num { color: #1d4ed8; }
+
+        .protocol-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .protocol-badge.zagreb { background: #fef3c7; color: #92400e; }
+        .protocol-badge.essen { background: #dbeafe; color: #1e40af; }
+        .protocol-badge.prep { background: #d1fae5; color: #065f46; }
     </style>
 
     <div class="p-6 font-heading2 text-slate-900">
 
-        <%-- ── Page Header ───────────────────────────────────────────── --%>
         <div class="flex justify-between items-start mb-6">
             <div>
                 <h1 class="text-4xl text-[#0b2a7a] font-heading2 tracking-widest">Case Surveillance</h1>
@@ -90,8 +167,11 @@
         <asp:HiddenField ID="hfFollowUpId" runat="server" />
         <asp:HiddenField ID="hfConfirmVaccineId" runat="server" />
         <asp:HiddenField ID="hfConfirmBatchId" runat="server" />
+        <asp:HiddenField ID="hfTodayPage" runat="server" Value="1" />
+        <asp:HiddenField ID="hfCasePage" runat="server" Value="1" />
+        <asp:HiddenField ID="hfTodayPageSize" runat="server" Value="10" />
+        <asp:HiddenField ID="hfCasePageSize" runat="server" Value="10" />
 
-        <%-- ── Tab Navigation ────────────────────────────────────────── --%>
         <div class="flex gap-2 border-b border-slate-200 pb-px mb-6">
             <asp:Button ID="btnTabToday" runat="server" Text="Today's Schedules"
                 CssClass="h-11 rounded-lg bg-blue-600 px-6 font-bold text-white shadow hover:bg-blue-700 transition cursor-pointer"
@@ -101,9 +181,6 @@
                 OnClick="btnTabRegistry_Click" />
         </div>
 
-        <%-- ════════════════════════════════════════════════════════════
-             TAB 1 — TODAY'S SCHEDULES
-             ════════════════════════════════════════════════════════════ --%>
         <asp:Panel ID="panelTodaySchedules" runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-6">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                 <div>
@@ -142,6 +219,13 @@
                             </span>
                         </ItemTemplate>
                     </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Protocol" HeaderStyle-CssClass="p-4 text-center" ItemStyle-CssClass="p-4 text-center">
+                        <ItemTemplate>
+                            <span class='protocol-badge <%# GetProtocolClass(Eval("regimen_type").ToString()) %>'>
+                                <%# Eval("regimen_type") %>
+                            </span>
+                        </ItemTemplate>
+                    </asp:TemplateField>
                     <asp:TemplateField HeaderText="Status" HeaderStyle-CssClass="p-4 text-center" ItemStyle-CssClass="p-4 text-center">
                         <ItemTemplate>
                             <span class='badge badge-warn'>Pending</span>
@@ -162,11 +246,14 @@
                     <div class="p-10 text-center text-slate-400 text-sm">No vaccinations scheduled for today.</div>
                 </EmptyDataTemplate>
             </asp:GridView>
+
+            <div class="pagination-container">
+                <asp:LinkButton ID="btnTodayPrev" runat="server" CssClass="page-btn" OnClick="btnTodayPrev_Click">Previous</asp:LinkButton>
+                <span class="page-info"><asp:Literal ID="litTodayPageInfo" runat="server" Text="Page 1 of 1" /></span>
+                <asp:LinkButton ID="btnTodayNext" runat="server" CssClass="page-btn" OnClick="btnTodayNext_Click">Next</asp:LinkButton>
+            </div>
         </asp:Panel>
 
-        <%-- ════════════════════════════════════════════════════════════
-             TAB 2 — CASE REGISTRY
-             ════════════════════════════════════════════════════════════ --%>
         <asp:Panel ID="panelRegistrySearch" runat="server" Visible="false"
             CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-6">
             <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-3">
@@ -174,13 +261,34 @@
                 <div class="flex gap-2 flex-wrap">
                     <asp:TextBox ID="txtSearchCase" runat="server"
                         CssClass="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        Placeholder="Search by patient name, case no…" />
+                        Placeholder="Search by patient name, case no..." />
                     <asp:Button ID="btnSearchCase" runat="server" Text="Filter"
                         CssClass="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold cursor-pointer hover:bg-slate-700 transition"
                         OnClick="btnSearchCase_Click" />
                     <asp:Button ID="btnClearCaseSearch" runat="server" Text="Clear"
                         CssClass="bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold cursor-pointer hover:bg-slate-50 transition"
                         OnClick="btnClearCaseSearch_Click" />
+                </div>
+            </div>
+
+            <div class="px-5 py-4">
+                <div class="summary-stats">
+                    <div class="stat-card completed">
+                        <div class="stat-num"><asp:Literal ID="litStatCompleted" runat="server" Text="0" /></div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat-card pending">
+                        <div class="stat-num"><asp:Literal ID="litStatPending" runat="server" Text="0" /></div>
+                        <div class="stat-label">In Progress</div>
+                    </div>
+                    <div class="stat-card cancelled">
+                        <div class="stat-num"><asp:Literal ID="litStatCancelled" runat="server" Text="0" /></div>
+                        <div class="stat-label">Cancelled</div>
+                    </div>
+                    <div class="stat-card missed">
+                        <div class="stat-num"><asp:Literal ID="litStatMissed" runat="server" Text="0" /></div>
+                        <div class="stat-label">Missed (No Show)</div>
+                    </div>
                 </div>
             </div>
 
@@ -240,11 +348,14 @@
                     <div class="p-10 text-center text-slate-400 text-sm">No cases found matching your criteria.</div>
                 </EmptyDataTemplate>
             </asp:GridView>
+
+            <div class="pagination-container">
+                <asp:LinkButton ID="btnCasePrev" runat="server" CssClass="page-btn" OnClick="btnCasePrev_Click">Previous</asp:LinkButton>
+                <span class="page-info"><asp:Literal ID="litCasePageInfo" runat="server" Text="Page 1 of 1" /></span>
+                <asp:LinkButton ID="btnCaseNext" runat="server" CssClass="page-btn" OnClick="btnCaseNext_Click">Next</asp:LinkButton>
+            </div>
         </asp:Panel>
 
-        <%-- ════════════════════════════════════════════════════════════
-             ACTIVE CASE VIEW
-             ════════════════════════════════════════════════════════════ --%>
         <asp:Panel ID="panelActiveCase" runat="server" Visible="false">
 
             <div class="mb-4">
@@ -256,10 +367,8 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <%-- LEFT: Treatment Details + Animal Follow-Up + Visit Form --%>
                 <div class="lg:col-span-1 space-y-6">
 
-                    <%-- Schedule Info (Auto-generated summary) --%>
                     <asp:Panel ID="panelScheduleInfo" runat="server" Visible="true"
                         CssClass="bg-white border border-emerald-200 rounded-xl shadow-sm overflow-hidden">
                         <div class="px-5 py-4 border-b border-emerald-200 bg-emerald-50">
@@ -285,15 +394,21 @@
                                     <span class="label">Pending</span>
                                     <span class="value pending"><asp:Literal ID="litPendingDoses" runat="server" Text="0" /></span>
                                 </div>
+                                <div class="stat">
+                                    <span class="label">Cancelled</span>
+                                    <span class="value cancelled"><asp:Literal ID="litCancelledDoses" runat="server" Text="0" /></span>
+                                </div>
                             </div>
                             <div class="mt-3 text-xs text-slate-500">
                                 <span class="font-semibold">Protocol:</span>
                                 <asp:Literal ID="litProtocolDisplay" runat="server" Text="—" />
+                                <span class="ml-2 text-emerald-600 font-semibold">
+                                    <asp:Literal ID="litProtocolDoses" runat="server" Text="" />
+                                </span>
                             </div>
                         </div>
                     </asp:Panel>
 
-                    <%-- Case Info --%>
                     <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
                         <h3 class="font-extrabold text-slate-800 border-b border-slate-100 pb-3 mb-4">Case Details</h3>
                         <div class="space-y-3">
@@ -332,7 +447,6 @@
                         </div>
                     </div>
 
-                    <%-- ── Animal Follow-Up ────────────────────────────────────── --%>
                     <asp:Panel ID="panelAnimalFollowUp" runat="server" Visible="false"
                         CssClass="bg-white border border-amber-200 rounded-xl shadow-sm overflow-hidden">
                         <div class="px-5 py-4 border-b border-amber-200 bg-amber-50">
@@ -370,7 +484,6 @@
                         </div>
                     </asp:Panel>
 
-                    <%-- ── Visit Form ──────────────────────────────────────────── --%>
                     <asp:Panel ID="panelVisitForm" runat="server"
                         CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                         <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
@@ -424,7 +537,7 @@
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Manifestation Notes</label>
                                 <asp:TextBox ID="txtManifestationNotes" runat="server" TextMode="MultiLine" Rows="3"
                                     CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Describe wound, location, severity…" />
+                                    placeholder="Describe wound, location, severity..." />
                             </div>
 
                             <div>
@@ -453,10 +566,8 @@
 
                 </div>
 
-                <%-- RIGHT: Visit History + Administration Form + Schedule --%>
                 <div class="lg:col-span-2 flex flex-col gap-6">
 
-                    <%-- ── Visit History ────────────────────────────────────────── --%>
                     <asp:Panel runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                         <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                             <div>
@@ -513,7 +624,6 @@
                         </asp:GridView>
                     </asp:Panel>
 
-                    <%-- ── Record Dose Administration (Simplified - Auto-filled) ── --%>
                     <asp:Panel ID="panelAdministration" runat="server" Visible="false"
                         CssClass="bg-white border border-l-4 border-l-emerald-600 border-slate-200 rounded-xl shadow-sm overflow-hidden">
                         <div class="px-5 py-4 border-b border-slate-200 bg-emerald-50">
@@ -576,7 +686,7 @@
                             </div>
 
                             <div class="mt-4 flex gap-3">
-                                <asp:Button ID="btnConfirmDose" runat="server" Text="✓ Confirm Administration"
+                                <asp:Button ID="btnConfirmDose" runat="server" Text="Confirm Administration"
                                     CssClass="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold cursor-pointer transition text-sm"
                                     OnClick="btnConfirmDose_Click" />
                                 <asp:Button ID="btnCancelConfirmDose" runat="server" Text="Cancel"
@@ -586,7 +696,6 @@
                         </div>
                     </asp:Panel>
 
-                    <%-- ── Overall Schedule ─────────────────────────────────────── --%>
                     <asp:Panel runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex-1">
                         <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                             <h3 class="font-extrabold text-slate-800">Overall Schedule</h3>
@@ -629,12 +738,6 @@
                                             Text="Administer"
                                             CssClass="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer"
                                             Visible='<%# Eval("status").ToString() == "Pending" && CanAdminister %>' />
-                                        <asp:Button ID="btnEdit" runat="server"
-                                            CommandName="EditDose"
-                                            CommandArgument='<%# Container.DataItemIndex %>'
-                                            Text="Edit"
-                                            CssClass="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-1.5 px-3 rounded-lg text-xs transition cursor-pointer"
-                                            Visible='<%# Eval("status").ToString() == "Completed" && CanAdminister %>' />
                                     </ItemTemplate>
                                 </asp:TemplateField>
                             </Columns>
@@ -653,7 +756,6 @@
 
     </div>
 
-    <%-- ── Notify Modal ──────────────────────────────────────────── --%>
     <div id="notifyModal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-slate-900/50 px-4">
         <div class="w-full max-w-sm rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden" style="animation:fadeIn .2s ease-out;">
             <div id="notifyModalHeader" class="px-6 py-4 border-b flex items-start gap-4">

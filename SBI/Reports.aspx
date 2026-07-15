@@ -38,13 +38,13 @@
             <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
                 <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">From Date</div>
                 <div class="text-2xl font-extrabold text-emerald-600">
-                    <asp:Label ID="lblFromDate" runat="server" Text="—" />
+                    <asp:Label ID="lblFromDate" runat="server" Text="-" />
                 </div>
             </div>
             <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
                 <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">To Date</div>
                 <div class="text-2xl font-extrabold text-amber-500">
-                    <asp:Label ID="lblToDate" runat="server" Text="—" />
+                    <asp:Label ID="lblToDate" runat="server" Text="-" />
                 </div>
             </div>
             <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
@@ -59,9 +59,7 @@
         <asp:Label ID="lblMessage" runat="server"
             CssClass="block mb-4 text-sm font-semibold text-red-600" />
 
-        <%-- ════════════════════════════════════════════════════════
-             PANEL A — Daily Inventory Summary
-        ════════════════════════════════════════════════════════ --%>
+        <%-- PANEL A — Daily Inventory Summary --%>
         <asp:Panel ID="pnlInventory" runat="server" CssClass="space-y-6">
 
             <%-- Filter bar for Inventory --%>
@@ -121,9 +119,7 @@
             </div>
         </asp:Panel>
 
-        <%-- ════════════════════════════════════════════════════════
-             PANEL B — Bite Case Report
-        ════════════════════════════════════════════════════════ --%>
+        <%-- PANEL B — Bite Case Report --%>
         <asp:Panel ID="pnlBiteCase" runat="server" Visible="false" CssClass="space-y-5">
 
             <%-- Case Search / Selection Bar --%>
@@ -135,7 +131,7 @@
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Search</label>
                             <asp:TextBox ID="txtCaseSearch" runat="server"
                                 CssClass="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Case No, Patient Name…" />
+                                placeholder="Case No, Patient Name..." />
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Bite Date From</label>
@@ -161,9 +157,14 @@
                     CssClass="w-full text-sm" GridLines="None"
                     AutoGenerateColumns="False"
                     DataKeyNames="case_id"
-                    OnRowCommand="gvCaseList_RowCommand">
+                    OnRowCommand="gvCaseList_RowCommand"
+                    AllowPaging="True" PageSize="10"
+                    OnPageIndexChanging="gvCaseList_PageIndexChanging"
+                    PagerStyle-CssClass="pager-wrap">
                     <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
                     <RowStyle CssClass="border-b border-slate-100 hover:bg-slate-50 transition-colors" />
+                    <PagerStyle CssClass="pager-wrap" />
+                    <PagerSettings Mode="NumericFirstLast" FirstPageText="First" LastPageText="Last" PageButtonCount="5" />
                     <Columns>
                         <asp:BoundField DataField="case_no" HeaderText="Case No"
                             ItemStyle-CssClass="p-4 font-bold text-slate-700" HeaderStyle-CssClass="p-4" />
@@ -192,7 +193,7 @@
                 </asp:GridView>
             </div>
 
-            <%-- Case Report Detail — shown after selecting a case --%>
+            <%-- Case Report Detail --%>
             <asp:Panel ID="pnlCaseDetail" runat="server" Visible="false" CssClass="space-y-5">
 
                 <%-- Report Action Bar --%>
@@ -203,7 +204,7 @@
                             <p class="text-slate-500 text-xs mt-0.5">Viewing detailed report for the selected case</p>
                         </div>
                         <div class="flex gap-2">
-                            <asp:Button ID="btnBackToCaseList" runat="server" Text="← Back to Cases"
+                            <asp:Button ID="btnBackToCaseList" runat="server" Text="Back to Cases"
                                 CausesValidation="false" OnClick="btnBackToCaseList_Click"
                                 CssClass="bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold cursor-pointer hover:bg-slate-50 transition" />
                             <asp:Button ID="btnExportPdf" runat="server" Text="Export PDF"
@@ -216,7 +217,7 @@
                 <%-- I. Patient Demographics --%>
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                     <div class="px-5 py-3 border-b border-slate-200 bg-[#0b2a7a]">
-                        <h3 class="font-extrabold text-white text-sm tracking-wide">I. &nbsp;Patient Demographics</h3>
+                        <h3 class="font-extrabold text-white text-sm tracking-wide">I. Patient Demographics</h3>
                     </div>
                     <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-sm">
                         <div><span class="font-semibold text-slate-500">Patient ID:</span>
@@ -245,7 +246,7 @@
                 <%-- II. Bite Incident Details --%>
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                     <div class="px-5 py-3 border-b border-red-200 bg-red-50">
-                        <h3 class="font-extrabold text-red-700 text-sm tracking-wide">II. &nbsp;Bite Incident Details</h3>
+                        <h3 class="font-extrabold text-red-700 text-sm tracking-wide">II. Bite Incident Details</h3>
                     </div>
                     <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-sm">
                         <div><span class="font-semibold text-slate-500">Case Number:</span>
@@ -283,12 +284,12 @@
                 <%-- III. Medical Assessment --%>
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                     <div class="px-5 py-3 border-b border-emerald-200 bg-emerald-50">
-                        <h3 class="font-extrabold text-emerald-700 text-sm tracking-wide">III. &nbsp;Medical Assessment</h3>
+                        <h3 class="font-extrabold text-emerald-700 text-sm tracking-wide">III. Medical Assessment</h3>
                     </div>
                     <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-sm">
                         <div><span class="font-semibold text-slate-500">Blood Pressure:</span>
                             <asp:Label ID="lblBP" runat="server" CssClass="ml-1 text-slate-800" /></div>
-                        <div><span class="font-semibold text-slate-500">Temperature (°C):</span>
+                        <div><span class="font-semibold text-slate-500">Temperature (C):</span>
                             <asp:Label ID="lblTemp" runat="server" CssClass="ml-1 text-slate-800" /></div>
                         <div><span class="font-semibold text-slate-500">Weight (kg):</span>
                             <asp:Label ID="lblWeight" runat="server" CssClass="ml-1 text-slate-800" /></div>
@@ -304,7 +305,7 @@
                 <%-- IV. Vaccination Regimen --%>
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                     <div class="px-5 py-3 border-b border-indigo-200 bg-indigo-50">
-                        <h3 class="font-extrabold text-indigo-700 text-sm tracking-wide">IV. &nbsp;Vaccination Regimen</h3>
+                        <h3 class="font-extrabold text-indigo-700 text-sm tracking-wide">IV. Vaccination Regimen</h3>
                     </div>
                     <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-sm">
                         <div><span class="font-semibold text-slate-500">Regimen Type:</span>
@@ -325,7 +326,7 @@
                 <%-- V. Vaccination Schedule --%>
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                     <div class="px-5 py-3 border-b border-slate-200 bg-slate-700">
-                        <h3 class="font-extrabold text-white text-sm tracking-wide">V. &nbsp;Vaccination Schedule &amp; Administration</h3>
+                        <h3 class="font-extrabold text-white text-sm tracking-wide">V. Vaccination Schedule and Administration</h3>
                     </div>
                     <div class="p-5 overflow-x-auto">
                         <asp:GridView ID="gvSchedule" runat="server" AutoGenerateColumns="true"
@@ -343,7 +344,7 @@
                 <%-- VI. Animal Follow-Up --%>
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                     <div class="px-5 py-3 border-b border-orange-200 bg-orange-50">
-                        <h3 class="font-extrabold text-orange-700 text-sm tracking-wide">VI. &nbsp;Animal Observation &amp; Follow-Up</h3>
+                        <h3 class="font-extrabold text-orange-700 text-sm tracking-wide">VI. Animal Observation and Follow-Up</h3>
                     </div>
                     <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-sm">
                         <div><span class="font-semibold text-slate-500">Animal Status:</span>
@@ -360,7 +361,7 @@
                 <%-- VII. Treatment Summary --%>
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                     <div class="px-5 py-3 border-b border-teal-200 bg-teal-50">
-                        <h3 class="font-extrabold text-teal-700 text-sm tracking-wide">VII. &nbsp;Treatment Summary</h3>
+                        <h3 class="font-extrabold text-teal-700 text-sm tracking-wide">VII. Treatment Summary</h3>
                     </div>
                     <div class="p-5 overflow-x-auto">
                         <asp:GridView ID="gvTreatment" runat="server" AutoGenerateColumns="true"
@@ -378,7 +379,7 @@
                 <%-- VIII. Previous Vaccine History --%>
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                     <div class="px-5 py-3 border-b border-purple-200 bg-purple-50">
-                        <h3 class="font-extrabold text-purple-700 text-sm tracking-wide">VIII. &nbsp;Previous Vaccine History</h3>
+                        <h3 class="font-extrabold text-purple-700 text-sm tracking-wide">VIII. Previous Vaccine History</h3>
                     </div>
                     <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-sm">
                         <div><span class="font-semibold text-slate-500">Had Previous Vaccine:</span>
@@ -398,4 +399,21 @@
         </asp:Panel>
 
     </div>
+
+    <style>
+        .pager-wrap { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-top:1px solid #e2e8f0; background:#f8fafc; }
+        .pager-wrap .pager-info { font-size:13px; color:#64748b; }
+        .pager-wrap table { margin:0; }
+        .pager-wrap td { padding:0 3px; }
+        .pager-wrap a, .pager-wrap span {
+            display:inline-flex; align-items:center; justify-content:center;
+            min-width:32px; height:32px; padding:0 10px;
+            border-radius:6px; font-size:13px; font-weight:600;
+            border:1px solid #e2e8f0; background:#fff; color:#475569;
+            text-decoration:none; transition:all .15s;
+        }
+        .pager-wrap a:hover { background:#2563eb; color:#fff; border-color:#2563eb; }
+        .pager-wrap span { background:#2563eb; color:#fff; border-color:#2563eb; cursor:default; }
+    </style>
+
 </asp:Content>

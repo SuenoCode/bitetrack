@@ -105,15 +105,6 @@ namespace SBI
         protected global::System.Web.UI.WebControls.Label lblOpenVials;
 
         /// <summary>
-        /// panelInventory control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel panelInventory;
-
-        /// <summary>
         /// txtSearch control.
         /// </summary>
         /// <remarks>
@@ -177,13 +168,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.LinkButton btnCloseDetails;
 
         /// <summary>
-        /// gvBatchDetails control.
+        /// rptBatches control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.GridView gvBatchDetails;
+        protected global::System.Web.UI.WebControls.Repeater rptBatches;
 
         /// <summary>
         /// panelVials control.
@@ -211,6 +202,42 @@ namespace SBI
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.LinkButton btnCloseVials;
+
+        /// <summary>
+        /// litSealedCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litSealedCount;
+
+        /// <summary>
+        /// litOpenCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litOpenCount;
+
+        /// <summary>
+        /// litEmptyCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litEmptyCount;
+
+        /// <summary>
+        /// litDiscardedCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal litDiscardedCount;
 
         /// <summary>
         /// rptVials control.
