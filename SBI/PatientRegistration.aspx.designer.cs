@@ -60,15 +60,6 @@ namespace SBI
         protected global::System.Web.UI.WebControls.HiddenField hfCasePatientId;
 
         /// <summary>
-        /// btnAddPanel control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnAddPanel;
-
-        /// <summary>
         /// txtFirstName control.
         /// </summary>
         /// <remarks>
@@ -186,13 +177,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.TextBox txtSubdivision;
 
         /// <summary>
-        /// txtBarangay control.
+        /// ddlBarangay control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtBarangay;
+        protected global::System.Web.UI.WebControls.DropDownList ddlBarangay;
 
         /// <summary>
         /// txtProvinceCity control.
@@ -249,13 +240,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.TextBox txtPlaceStreet;
 
         /// <summary>
-        /// txtPlaceBarangay control.
+        /// ddlPlaceBarangay control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtPlaceBarangay;
+        protected global::System.Web.UI.WebControls.DropDownList ddlPlaceBarangay;
 
         /// <summary>
         /// txtPlaceCity control.
@@ -546,13 +537,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.TextBox txtCasePlaceStreet;
 
         /// <summary>
-        /// txtCasePlaceBarangay control.
+        /// ddlCasePlaceBarangay control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtCasePlaceBarangay;
+        protected global::System.Web.UI.WebControls.DropDownList ddlCasePlaceBarangay;
 
         /// <summary>
         /// txtCasePlaceCity control.
@@ -744,6 +735,33 @@ namespace SBI
         protected global::System.Web.UI.WebControls.GridView gvPatients;
 
         /// <summary>
+        /// lblPatientPageInfo control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPatientPageInfo;
+
+        /// <summary>
+        /// btnPatientPrev control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnPatientPrev;
+
+        /// <summary>
+        /// btnPatientNext control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnPatientNext;
+
+        /// <summary>
         /// txtSearchCase control.
         /// </summary>
         /// <remarks>
@@ -796,6 +814,33 @@ namespace SBI
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView gvCases;
+
+        /// <summary>
+        /// lblCasePageInfo control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblCasePageInfo;
+
+        /// <summary>
+        /// btnCasePrev control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnCasePrev;
+
+        /// <summary>
+        /// btnCaseNext control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnCaseNext;
 
         /// <summary>
         /// pnlRecordPreviewContainer control.
@@ -906,13 +951,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.TextBox txtPreviewStreet;
 
         /// <summary>
-        /// txtPreviewBarangay control.
+        /// ddlPreviewBarangay control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtPreviewBarangay;
+        protected global::System.Web.UI.WebControls.DropDownList ddlPreviewBarangay;
 
         /// <summary>
         /// txtPreviewCityProvince control.
@@ -1086,13 +1131,13 @@ namespace SBI
         protected global::System.Web.UI.WebControls.TextBox txtPreviewCasePlaceStreet;
 
         /// <summary>
-        /// txtPreviewCasePlaceBarangay control.
+        /// ddlPreviewCasePlaceBarangay control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtPreviewCasePlaceBarangay;
+        protected global::System.Web.UI.WebControls.DropDownList ddlPreviewCasePlaceBarangay;
 
         /// <summary>
         /// txtPreviewCasePlaceCity control.

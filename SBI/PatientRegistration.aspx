@@ -281,6 +281,10 @@
             cursor: not-allowed !important;
             pointer-events: none;
         }
+
+        .pagination-btn {
+            min-width: 80px;
+        }
     </style>
 
     <div class="p-6 font-heading2 text-slate-900">
@@ -295,23 +299,24 @@
         <%-- Tab Nav --%>
         <div class="flex gap-2 border-b border-slate-200 pb-px mb-6 flex-wrap">
             <button type="button" id="btnViewPanel"
-                class="panel-tab h-11 rounded-lg px-6 font-bold text-sm transition cursor-pointer border"
+                class="panel-tab h-11 rounded-lg px-6 font-bold text-sm transition cursor-pointer border bg-blue-600 text-white border-blue-600"
                 onclick="showPanel('viewPatientPanel')">
                 View Patient / Case Details
             </button>
-            <asp:Button type="button" ID="btnAddPanel" runat="server"
-                CssClass="panel-tab h-11 rounded-lg px-6 font-bold text-sm transition cursor-pointer border"
-                Text="Add New Patient"
-                OnClientClick="showPanel('addPatientPanel'); return false;" />
+            <button type="button" id="btnAddPanel"
+                class="panel-tab h-11 rounded-lg px-6 font-bold text-sm transition cursor-pointer border bg-white text-slate-700 border-slate-300"
+                onclick="showPanel('addPatientPanel')">
+                Add New Patient
+            </button>
             <button type="button" id="btnAddCasePanel"
-                class="panel-tab h-11 rounded-lg px-6 font-bold text-sm transition cursor-pointer border"
+                class="panel-tab h-11 rounded-lg px-6 font-bold text-sm transition cursor-pointer border bg-white text-slate-700 border-slate-300"
                 onclick="showPanel('addCasePanel')">
                 Add New Case
             </button>
         </div>
 
         <%-- ══════════════════════════════════════════════════
-             ADD PATIENT PANEL — 5-step wizard (unchanged)
+             ADD PATIENT PANEL — 5-step wizard
              ══════════════════════════════════════════════════ --%>
         <div id="addPatientPanel" class="panel hidden">
 
@@ -453,7 +458,19 @@
                                 </div>
                                 <div class="field-group">
                                     <label class="field-label">Barangay <span class="field-required">*</span></label>
-                                    <asp:TextBox ID="txtBarangay" runat="server" CssClass="field-input" placeholder="Barangay" />
+                                    <asp:DropDownList ID="ddlBarangay" runat="server" CssClass="field-input">
+                                        <asp:ListItem Text="Select Barangay" Value="" />
+                                        <asp:ListItem Text="Bombongan" Value="Bombongan" />
+                                        <asp:ListItem Text="CCL (Christian Community Leaders)" Value="CCL" />
+                                        <asp:ListItem Text="Lagundi" Value="Lagundi" />
+                                        <asp:ListItem Text="Maybangcal" Value="Maybangcal" />
+                                        <asp:ListItem Text="San Francisco" Value="San Francisco" />
+                                        <asp:ListItem Text="San Guillermo" Value="San Guillermo" />
+                                        <asp:ListItem Text="San Jose" Value="San Jose" />
+                                        <asp:ListItem Text="San Juan" Value="San Juan" />
+                                        <asp:ListItem Text="San Pedro" Value="San Pedro" />
+                                        <asp:ListItem Text="San Vicente" Value="San Vicente" />
+                                    </asp:DropDownList>
                                 </div>
                                 <div class="field-group">
                                     <label class="field-label">City / Province <span class="field-required">*</span></label>
@@ -514,7 +531,19 @@
                                 </div>
                                 <div class="field-group">
                                     <label class="field-label">Barangay <span class="field-required">*</span></label>
-                                    <asp:TextBox ID="txtPlaceBarangay" runat="server" CssClass="field-input" placeholder="Barangay" />
+                                    <asp:DropDownList ID="ddlPlaceBarangay" runat="server" CssClass="field-input">
+                                        <asp:ListItem Text="Select Barangay" Value="" />
+                                        <asp:ListItem Text="Bombongan" Value="Bombongan" />
+                                        <asp:ListItem Text="CCL (Christian Community Leaders)" Value="CCL" />
+                                        <asp:ListItem Text="Lagundi" Value="Lagundi" />
+                                        <asp:ListItem Text="Maybangcal" Value="Maybangcal" />
+                                        <asp:ListItem Text="San Francisco" Value="San Francisco" />
+                                        <asp:ListItem Text="San Guillermo" Value="San Guillermo" />
+                                        <asp:ListItem Text="San Jose" Value="San Jose" />
+                                        <asp:ListItem Text="San Juan" Value="San Juan" />
+                                        <asp:ListItem Text="San Pedro" Value="San Pedro" />
+                                        <asp:ListItem Text="San Vicente" Value="San Vicente" />
+                                    </asp:DropDownList>
                                 </div>
                                 <div class="field-group">
                                     <label class="field-label">City / Province <span class="field-required">*</span></label>
@@ -848,7 +877,7 @@
                     </div>
                 </div>
 
-                <%-- STEP 2: Bite Incident (reuses wizStep3 fields) --%>
+                <%-- STEP 2: Bite Incident --%>
                 <div class="wizard-step" id="caseWizStep2">
                     <div class="section-header">
                         <div class="section-title">Step 2 — History of Biting Incident</div>
@@ -874,7 +903,19 @@
                                 </div>
                                 <div class="field-group">
                                     <label class="field-label">Barangay <span class="field-required">*</span></label>
-                                    <asp:TextBox ID="txtCasePlaceBarangay" runat="server" CssClass="field-input" placeholder="Barangay" />
+                                    <asp:DropDownList ID="ddlCasePlaceBarangay" runat="server" CssClass="field-input">
+                                        <asp:ListItem Text="Select Barangay" Value="" />
+                                        <asp:ListItem Text="Bombongan" Value="Bombongan" />
+                                        <asp:ListItem Text="CCL (Christian Community Leaders)" Value="CCL" />
+                                        <asp:ListItem Text="Lagundi" Value="Lagundi" />
+                                        <asp:ListItem Text="Maybangcal" Value="Maybangcal" />
+                                        <asp:ListItem Text="San Francisco" Value="San Francisco" />
+                                        <asp:ListItem Text="San Guillermo" Value="San Guillermo" />
+                                        <asp:ListItem Text="San Jose" Value="San Jose" />
+                                        <asp:ListItem Text="San Juan" Value="San Juan" />
+                                        <asp:ListItem Text="San Pedro" Value="San Pedro" />
+                                        <asp:ListItem Text="San Vicente" Value="San Vicente" />
+                                    </asp:DropDownList>
                                 </div>
                                 <div class="field-group">
                                     <label class="field-label">City / Province <span class="field-required">*</span></label>
@@ -926,7 +967,7 @@
                     </div>
                 </div>
 
-                <%-- STEP 3: Animal & Wound (reuses wizStep4 fields) --%>
+                <%-- STEP 3: Animal & Wound --%>
                 <div class="wizard-step" id="caseWizStep3">
                     <div class="section-header">
                         <div class="section-title">Step 3 — Animal &amp; Wound Details</div>
@@ -1078,14 +1119,14 @@
         </div>
 
         <%-- ══════════════════════════════════════════════════
-             VIEW PANEL (unchanged)
+             VIEW PANEL
              ══════════════════════════════════════════════════ --%>
         <div id="viewPatientPanel" class="panel space-y-6">
             <div id="viewLayout" class="grid grid-cols-1 gap-6 transition-all duration-300 no-preview">
 
                 <div id="detailsPane" class="space-y-6 min-w-0">
 
-                    <%-- Patient Grid --%>
+                    <%-- Patient Grid with Pagination --%>
                     <asp:Panel runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                         <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-3">
                             <div>
@@ -1101,7 +1142,7 @@
                                 <asp:Button ID="btnResetPatientSearch" runat="server" Text="Clear" OnClick="btnResetPatientSearch_Click" CssClass="bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold cursor-pointer hover:bg-slate-50 transition" />
                             </div>
                         </div>
-                        <asp:GridView ID="gvPatients" runat="server" AutoGenerateColumns="False" CssClass="w-full text-sm" GridLines="None" DataKeyNames="patient_id" OnRowCommand="gvPatients_RowCommand" OnRowDataBound="gvPatients_RowDataBound">
+                        <asp:GridView ID="gvPatients" runat="server" AutoGenerateColumns="False" CssClass="w-full text-sm" GridLines="None" DataKeyNames="patient_id" OnRowCommand="gvPatients_RowCommand" OnRowDataBound="gvPatients_RowDataBound" AllowPaging="false">
                             <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
                             <RowStyle CssClass="border-b border-slate-100 transition-colors" />
                             <Columns>
@@ -1122,9 +1163,17 @@
                                 <div class="p-10 text-center text-slate-400 text-sm">No patient records found.</div>
                             </EmptyDataTemplate>
                         </asp:GridView>
+                        <%-- Patient Pagination Controls --%>
+                        <div class="px-5 py-3 border-t border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-3">
+                            <asp:Label ID="lblPatientPageInfo" runat="server" Text="Page 1 of 1 (Total: 0 records)" CssClass="text-sm text-slate-600" />
+                            <div class="flex gap-2">
+                                <asp:Button ID="btnPatientPrev" runat="server" Text="← Previous" OnClick="btnPatientPrev_Click" CssClass="bg-white border border-slate-300 text-slate-600 px-4 py-1.5 rounded-lg text-sm font-bold transition cursor-pointer hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed pagination-btn" Enabled="false" />
+                                <asp:Button ID="btnPatientNext" runat="server" Text="Next →" OnClick="btnPatientNext_Click" CssClass="bg-white border border-slate-300 text-slate-600 px-4 py-1.5 rounded-lg text-sm font-bold transition cursor-pointer hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed pagination-btn" Enabled="false" />
+                            </div>
+                        </div>
                     </asp:Panel>
 
-                    <%-- Case Grid --%>
+                    <%-- Case Grid with Pagination --%>
                     <asp:Panel runat="server" CssClass="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                         <div class="px-5 py-4 border-b border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-3">
                             <div>
@@ -1140,7 +1189,7 @@
                                 <asp:Button ID="btnResetCaseSearch" runat="server" Text="Clear" OnClick="btnResetCaseSearch_Click" CssClass="bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold cursor-pointer hover:bg-slate-50 transition" />
                             </div>
                         </div>
-                        <asp:GridView ID="gvCases" runat="server" AutoGenerateColumns="False" CssClass="w-full text-sm" GridLines="None" DataKeyNames="case_id" OnRowCommand="gvCases_RowCommand" OnRowDataBound="gvCases_RowDataBound">
+                        <asp:GridView ID="gvCases" runat="server" AutoGenerateColumns="False" CssClass="w-full text-sm" GridLines="None" DataKeyNames="case_id" OnRowCommand="gvCases_RowCommand" OnRowDataBound="gvCases_RowDataBound" AllowPaging="false">
                             <HeaderStyle CssClass="text-left bg-slate-50 text-slate-500 border-b border-slate-200 uppercase text-xs font-bold" />
                             <RowStyle CssClass="border-b border-slate-100 transition-colors" />
                             <Columns>
@@ -1162,6 +1211,14 @@
                                 <div class="p-10 text-center text-slate-400 text-sm">No case records found.</div>
                             </EmptyDataTemplate>
                         </asp:GridView>
+                        <%-- Case Pagination Controls --%>
+                        <div class="px-5 py-3 border-t border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-3">
+                            <asp:Label ID="lblCasePageInfo" runat="server" Text="Page 1 of 1 (Total: 0 records)" CssClass="text-sm text-slate-600" />
+                            <div class="flex gap-2">
+                                <asp:Button ID="btnCasePrev" runat="server" Text="← Previous" OnClick="btnCasePrev_Click" CssClass="bg-white border border-slate-300 text-slate-600 px-4 py-1.5 rounded-lg text-sm font-bold transition cursor-pointer hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed pagination-btn" Enabled="false" />
+                                <asp:Button ID="btnCaseNext" runat="server" Text="Next →" OnClick="btnCaseNext_Click" CssClass="bg-white border border-slate-300 text-slate-600 px-4 py-1.5 rounded-lg text-sm font-bold transition cursor-pointer hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed pagination-btn" Enabled="false" />
+                            </div>
+                        </div>
                     </asp:Panel>
 
                 </div>
@@ -1244,7 +1301,19 @@
                                         </div>
                                         <div>
                                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Barangay</label>
-                                            <asp:TextBox ID="txtPreviewBarangay" runat="server" CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white" placeholder="Barangay" />
+                                            <asp:DropDownList ID="ddlPreviewBarangay" runat="server" CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white">
+                                                <asp:ListItem Text="Select Barangay" Value="" />
+                                                <asp:ListItem Text="Bombongan" Value="Bombongan" />
+                                                <asp:ListItem Text="CCL (Christian Community Leaders)" Value="CCL" />
+                                                <asp:ListItem Text="Lagundi" Value="Lagundi" />
+                                                <asp:ListItem Text="Maybangcal" Value="Maybangcal" />
+                                                <asp:ListItem Text="San Francisco" Value="San Francisco" />
+                                                <asp:ListItem Text="San Guillermo" Value="San Guillermo" />
+                                                <asp:ListItem Text="San Jose" Value="San Jose" />
+                                                <asp:ListItem Text="San Juan" Value="San Juan" />
+                                                <asp:ListItem Text="San Pedro" Value="San Pedro" />
+                                                <asp:ListItem Text="San Vicente" Value="San Vicente" />
+                                            </asp:DropDownList>
                                         </div>
                                         <div>
                                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">City / Province</label>
@@ -1350,7 +1419,19 @@
                                         </div>
                                         <div>
                                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Barangay</label>
-                                            <asp:TextBox ID="txtPreviewCasePlaceBarangay" runat="server" CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white" placeholder="Barangay" />
+                                            <asp:DropDownList ID="ddlPreviewCasePlaceBarangay" runat="server" CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm bg-white">
+                                                <asp:ListItem Text="Select Barangay" Value="" />
+                                                <asp:ListItem Text="Bombongan" Value="Bombongan" />
+                                                <asp:ListItem Text="CCL (Christian Community Leaders)" Value="CCL" />
+                                                <asp:ListItem Text="Lagundi" Value="Lagundi" />
+                                                <asp:ListItem Text="Maybangcal" Value="Maybangcal" />
+                                                <asp:ListItem Text="San Francisco" Value="San Francisco" />
+                                                <asp:ListItem Text="San Guillermo" Value="San Guillermo" />
+                                                <asp:ListItem Text="San Jose" Value="San Jose" />
+                                                <asp:ListItem Text="San Juan" Value="San Juan" />
+                                                <asp:ListItem Text="San Pedro" Value="San Pedro" />
+                                                <asp:ListItem Text="San Vicente" Value="San Vicente" />
+                                            </asp:DropDownList>
                                         </div>
                                         <div>
                                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">City / Province</label>
@@ -1588,14 +1669,14 @@
                 if (!getVal('<%=ddlOccupation.ClientID%>')) errors.push('Occupation is required.');
             }
             if (step === 2) {
-                if (!getVal('<%=txtBarangay.ClientID%>')) errors.push('Barangay (home address) is required.');
+                if (!getVal('<%=ddlBarangay.ClientID%>')) errors.push('Barangay (home address) is required.');
                 if (!getVal('<%=txtProvinceCity.ClientID%>')) errors.push('City / Province is required.');
                 if (!getVal('<%=txtEmergencyContactPerson.ClientID%>')) errors.push('Emergency contact person is required.');
                 if (!getVal('<%=txtEmergencyContactNo.ClientID%>')) errors.push('Emergency contact number is required.');
             }
             if (step === 3) {
                 if (!getVal('<%=txtBiteDateTime.ClientID%>')) errors.push('Date and Time of Bite is required.');
-                if (!getVal('<%=txtPlaceBarangay.ClientID%>')) errors.push('Barangay (place of bite) is required.');
+                if (!getVal('<%=ddlPlaceBarangay.ClientID%>')) errors.push('Barangay (place of bite) is required.');
                 if (!getVal('<%=txtPlaceCity.ClientID%>')) errors.push('City / Province (place of bite) is required.');
                 if (!getVal('<%=ddlCategory.ClientID%>')) errors.push('Category is required.');
             }
@@ -1640,7 +1721,7 @@
             }
             if (step === 2) {
                 if (!getVal('<%=txtCaseBiteDateTime.ClientID%>')) errors.push('Date and Time of Bite is required.');
-                if (!getVal('<%=txtCasePlaceBarangay.ClientID%>')) errors.push('Barangay (place of bite) is required.');
+                if (!getVal('<%=ddlCasePlaceBarangay.ClientID%>')) errors.push('Barangay (place of bite) is required.');
                 if (!getVal('<%=txtCasePlaceCity.ClientID%>')) errors.push('City / Province (place of bite) is required.');
                 if (!getVal('<%=ddlCaseCategory.ClientID%>')) errors.push('Category is required.');
             }
@@ -1670,7 +1751,7 @@
         function buildCaseReview() {
             document.getElementById('caseReviewBite').innerHTML =
                 row('Date & Time', getVal('<%=txtCaseBiteDateTime.ClientID%>')) +
-                row('Place Barangay', getVal('<%=txtCasePlaceBarangay.ClientID%>')) +
+                row('Place Barangay', getLbl('<%=ddlCasePlaceBarangay.ClientID%>')) +
             row('Place City', getVal('<%=txtCasePlaceCity.ClientID%>')) +
             row('Category', getLbl('<%=ddlCaseCategory.ClientID%>')) +
             row('Type of Exposure', getLbl('<%=ddlCaseExposureType.ClientID%>')) +
@@ -1692,18 +1773,17 @@
             document.getElementById('notifyModalBtn').onclick = function () {
                 hideNotifyModal();
                 document.getElementById('notifyModalBtn').onclick = hideNotifyModal;
-                // Clear case fields
                 ['<%=txtCaseBiteDateTime.ClientID%>','<%=txtCasePlaceHouseNo.ClientID%>',
-                 '<%=txtCasePlaceStreet.ClientID%>','<%=txtCasePlaceBarangay.ClientID%>',
-                 '<%=txtCasePlaceCity.ClientID%>','<%=txtCaseWoundLocation.ClientID%>'
+                 '<%=txtCasePlaceStreet.ClientID%>','<%=txtCasePlaceCity.ClientID%>',
+                 '<%=txtCaseWoundLocation.ClientID%>'
                 ].forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
-                ['<%=ddlCaseCategory.ClientID%>','<%=ddlCaseExposureType.ClientID%>',
-                 '<%=ddlCaseManifestation.ClientID%>','<%=ddlCaseBitingAnimal.ClientID%>',
-                 '<%=ddlCaseOwnership.ClientID%>','<%=ddlCaseAnimalStatus.ClientID%>',
-                 '<%=ddlCaseCircumstance.ClientID%>','<%=ddlCaseWoundType.ClientID%>',
-                 '<%=ddlCaseBleeding.ClientID%>','<%=ddlCaseWoundWashed.ClientID%>'
+                ['<%=ddlCasePlaceBarangay.ClientID%>','<%=ddlCaseCategory.ClientID%>',
+                 '<%=ddlCaseExposureType.ClientID%>','<%=ddlCaseManifestation.ClientID%>',
+                 '<%=ddlCaseBitingAnimal.ClientID%>','<%=ddlCaseOwnership.ClientID%>',
+                 '<%=ddlCaseAnimalStatus.ClientID%>','<%=ddlCaseCircumstance.ClientID%>',
+                 '<%=ddlCaseWoundType.ClientID%>','<%=ddlCaseBleeding.ClientID%>',
+                 '<%=ddlCaseWoundWashed.ClientID%>'
                 ].forEach(function (id) { var el = document.getElementById(id); if (el) el.selectedIndex = 0; });
-                // Reset patient selection
                 document.getElementById('<%=hfCasePatientId.ClientID%>').value = '';
                 document.getElementById('<%=pnlCaseSelectedPatient.ClientID%>').style.display = 'none';
                 document.getElementById('<%=pnlCasePatientResults.ClientID%>').style.display = 'none';
@@ -1734,7 +1814,7 @@
             document.getElementById('reviewPersonal').innerHTML =
                 row('First Name', getVal('<%=txtFirstName.ClientID%>')) +
                 row('Last Name', getVal('<%=txtLastName.ClientID%>')) +
-                row('Date of Birth', getVal('<%=txtDOB.ClientID%>')) +
+            row('Date of Birth', getVal('<%=txtDOB.ClientID%>')) +
                 row('Gender', getLbl('<%=ddlGender.ClientID%>')) +
                 row('Civil Status', getLbl('<%=ddlCivilStatus.ClientID%>')) +
                 row('Contact No', getVal('<%=txtContactNo.ClientID%>')) +
@@ -1747,14 +1827,14 @@
             document.getElementById('reviewAddress').innerHTML =
                 row('House No.', getVal('<%=txtHouseNo.ClientID%>')) +
                 row('Street', getVal('<%=txtSubdivision.ClientID%>')) +
-                row('Barangay', getVal('<%=txtBarangay.ClientID%>')) +
+                row('Barangay', getLbl('<%=ddlBarangay.ClientID%>')) +
                 row('City / Province', getVal('<%=txtProvinceCity.ClientID%>')) +
                 row('Emergency Person', getVal('<%=txtEmergencyContactPerson.ClientID%>')) +
                 row('Emergency No.', getVal('<%=txtEmergencyContactNo.ClientID%>'));
 
             document.getElementById('reviewBite').innerHTML =
                 row('Date & Time', getVal('<%=txtBiteDateTime.ClientID%>')) +
-                row('Place Barangay', getVal('<%=txtPlaceBarangay.ClientID%>')) +
+                row('Place Barangay', getLbl('<%=ddlPlaceBarangay.ClientID%>')) +
                 row('Place City', getVal('<%=txtPlaceCity.ClientID%>')) +
                 row('Category', getLbl('<%=ddlCategory.ClientID%>')) +
                 row('Type of Exposure', getLbl('<%=ddlExposureType.ClientID%>')) +
@@ -1781,13 +1861,14 @@
                  '<%=txtBloodPressure.ClientID%>','<%=txtTemperature.ClientID%>',
                  '<%=txtWeight.ClientID%>','<%=txtCapillaryRefill.ClientID%>',
                  '<%=txtHouseNo.ClientID%>','<%=txtSubdivision.ClientID%>',
-                 '<%=txtBarangay.ClientID%>','<%=txtProvinceCity.ClientID%>',
+                 '<%=txtProvinceCity.ClientID%>',
                  '<%=txtEmergencyContactPerson.ClientID%>','<%=txtEmergencyContactNo.ClientID%>',
                  '<%=txtBiteDateTime.ClientID%>','<%=txtPlaceHouseNo.ClientID%>',
-                 '<%=txtPlaceStreet.ClientID%>','<%=txtPlaceBarangay.ClientID%>',
-                 '<%=txtPlaceCity.ClientID%>','<%=txtWoundLocation.ClientID%>'
+                 '<%=txtPlaceStreet.ClientID%>','<%=txtPlaceCity.ClientID%>',
+                 '<%=txtWoundLocation.ClientID%>'
                 ].forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ''; });
-                ['<%=ddlGender.ClientID%>','<%=ddlCivilStatus.ClientID%>',
+                ['<%=ddlBarangay.ClientID%>','<%=ddlPlaceBarangay.ClientID%>',
+                 '<%=ddlGender.ClientID%>','<%=ddlCivilStatus.ClientID%>',
                  '<%=ddlOccupation.ClientID%>','<%=ddlCategory.ClientID%>',
                  '<%=ddlExposureType.ClientID%>','<%=ddlManifestation.ClientID%>',
                  '<%=ddlBitingAnimal.ClientID%>','<%=ddlOwnership.ClientID%>',
@@ -1807,14 +1888,14 @@
 
         // ── Panel switching ──────────────────────────────────────────
         function setActivePanelButton(panelId) {
-            var buttons = ['btnViewPanel', '<%=btnAddPanel.ClientID%>', 'btnAddCasePanel'];
+            var buttons = ['btnViewPanel', 'btnAddPanel', 'btnAddCasePanel'];
             buttons.forEach(function (id) {
                 var b = document.getElementById(id); if (!b) return;
                 b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'shadow');
                 b.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
             });
             var activeId = panelId === 'viewPatientPanel' ? 'btnViewPanel' :
-                panelId === 'addPatientPanel' ? '<%=btnAddPanel.ClientID%>' :
+                panelId === 'addPatientPanel' ? 'btnAddPanel' :
                     'btnAddCasePanel';
             var a = document.getElementById(activeId);
             if (a) {
@@ -1843,10 +1924,8 @@
         // ── Init ─────────────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', function () {
             var hf = document.getElementById('<%=hfActivePanel.ClientID%>');
-    showPanel(hf && hf.value ? hf.value : 'viewPatientPanel');
-    setTimeout(updateViewLayout, 100);
-    // Enable/disable case next step based on whether a patient is already selected
-    // (important after postback — e.g. right after clicking "Select" on a search result)
+            showPanel(hf && hf.value ? hf.value : 'viewPatientPanel');
+            setTimeout(updateViewLayout, 100);
             var casePid = document.getElementById('<%=hfCasePatientId.ClientID%>');
             enableCaseNextStep(!!(casePid && casePid.value));
         });

@@ -9,6 +9,7 @@ namespace SBI
     public partial class PatientRegistration : System.Web.UI.Page
     {
         string connectionString = ConfigurationManager.ConnectionStrings["BiteTrackConnection"].ConnectionString;
+        private const int PageSize = 6; // Number of records per page
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -18,9 +19,6 @@ namespace SBI
             string role = Session["userRole"].ToString().ToUpper();
             if (role != "A" && role != "B" && role != "C")
             { Response.Redirect("Login.aspx"); return; }
-
-            btnAddPanel.Text = "Add New Patient";
-            btnAddPanel.Visible = (role != "C");
 
             if (!IsPostBack)
             {
@@ -41,12 +39,40 @@ namespace SBI
             BindCases(txtSearchCase.Text.Trim(), ParseNullableDate(txtCaseDateFrom.Text), ParseNullableDate(txtCaseDateTo.Text));
         }
 
-        // ── Patient / Case list binding ─────────────────────────────────────
+        // ── Patient / Case list binding with pagination ─────────────────────
 
         private void BindPatients(string searchText = "", DateTime? fromDate = null, DateTime? toDate = null)
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
+                // Get total count for pagination
+                string countQuery = @"
+                    SELECT COUNT(*)
+                    FROM dbo.Patient p
+                    WHERE
+                        (@search = '' OR
+                         CAST(p.patient_id AS NVARCHAR(50)) LIKE '%' + @search + '%' OR
+                         p.fname LIKE '%' + @search + '%' OR
+                         p.lname LIKE '%' + @search + '%' OR
+                         (p.fname + ' ' + p.lname) LIKE '%' + @search + '%' OR
+                         p.contact_no LIKE '%' + @search + '%' OR
+                         ISNULL(p.barangay, '') LIKE '%' + @search + '%' OR
+                         ISNULL(p.city_province, '') LIKE '%' + @search + '%')
+                        AND (@fromDate IS NULL OR CAST(p.date_recorded AS DATE) >= @fromDate)
+                        AND (@toDate   IS NULL OR CAST(p.date_recorded AS DATE) <= @toDate)";
+
+                SqlCommand countCmd = new SqlCommand(countQuery, conn);
+                countCmd.Parameters.AddWithValue("@search", searchText);
+                countCmd.Parameters.AddWithValue("@fromDate", (object)fromDate ?? DBNull.Value);
+                countCmd.Parameters.AddWithValue("@toDate", (object)toDate ?? DBNull.Value);
+                conn.Open();
+                int totalRecords = Convert.ToInt32(countCmd.ExecuteScalar());
+                conn.Close();
+
+                // Calculate page index
+                int pageIndex = GetPatientPageIndex();
+                int startIndex = pageIndex * PageSize;
+
                 string query = @"
                     SELECT
                         p.patient_id,
@@ -68,17 +94,23 @@ namespace SBI
                          ISNULL(p.city_province, '') LIKE '%' + @search + '%')
                         AND (@fromDate IS NULL OR CAST(p.date_recorded AS DATE) >= @fromDate)
                         AND (@toDate   IS NULL OR CAST(p.date_recorded AS DATE) <= @toDate)
-                    ORDER BY p.date_recorded DESC";
+                    ORDER BY p.date_recorded DESC
+                    OFFSET @startIndex ROWS FETCH NEXT @pageSize ROWS ONLY";
 
                 SqlDataAdapter da = new SqlDataAdapter(query, conn);
                 da.SelectCommand.Parameters.AddWithValue("@search", searchText);
                 da.SelectCommand.Parameters.AddWithValue("@fromDate", (object)fromDate ?? DBNull.Value);
                 da.SelectCommand.Parameters.AddWithValue("@toDate", (object)toDate ?? DBNull.Value);
+                da.SelectCommand.Parameters.AddWithValue("@startIndex", startIndex);
+                da.SelectCommand.Parameters.AddWithValue("@pageSize", PageSize);
 
                 DataTable dt = new DataTable();
                 da.Fill(dt);
                 gvPatients.DataSource = dt;
                 gvPatients.DataBind();
+
+                // Update pagination controls
+                UpdatePatientPagination(totalRecords);
             }
         }
 
@@ -86,6 +118,35 @@ namespace SBI
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
+                // Get total count for pagination
+                string countQuery = @"
+                    SELECT COUNT(*)
+                    FROM dbo.[Case] c
+                    WHERE
+                        (@search = '' OR
+                         CAST(c.case_id AS NVARCHAR(50)) LIKE '%' + @search + '%' OR
+                         CAST(c.patient_id AS NVARCHAR(50)) LIKE '%' + @search + '%' OR
+                         ISNULL(c.case_no, '') LIKE '%' + @search + '%' OR
+                         ISNULL(c.bite_barangay, '') LIKE '%' + @search + '%' OR
+                         ISNULL(c.bite_city, '') LIKE '%' + @search + '%' OR
+                         ISNULL(c.type_of_exposure, '') LIKE '%' + @search + '%' OR
+                         ISNULL(c.site_of_bite, '') LIKE '%' + @search + '%' OR
+                         ISNULL(c.category, '') LIKE '%' + @search + '%')
+                        AND (@fromDate IS NULL OR c.date_of_bite >= @fromDate)
+                        AND (@toDate   IS NULL OR c.date_of_bite <= @toDate)";
+
+                SqlCommand countCmd = new SqlCommand(countQuery, conn);
+                countCmd.Parameters.AddWithValue("@search", searchText);
+                countCmd.Parameters.AddWithValue("@fromDate", (object)fromDate ?? DBNull.Value);
+                countCmd.Parameters.AddWithValue("@toDate", (object)toDate ?? DBNull.Value);
+                conn.Open();
+                int totalRecords = Convert.ToInt32(countCmd.ExecuteScalar());
+                conn.Close();
+
+                // Calculate page index
+                int pageIndex = GetCasePageIndex();
+                int startIndex = pageIndex * PageSize;
+
                 string query = @"
                     SELECT
                         c.case_id,
@@ -109,19 +170,147 @@ namespace SBI
                          ISNULL(c.category, '') LIKE '%' + @search + '%')
                         AND (@fromDate IS NULL OR c.date_of_bite >= @fromDate)
                         AND (@toDate   IS NULL OR c.date_of_bite <= @toDate)
-                    ORDER BY c.date_of_bite DESC, c.case_id DESC";
+                    ORDER BY c.date_of_bite DESC, c.case_id DESC
+                    OFFSET @startIndex ROWS FETCH NEXT @pageSize ROWS ONLY";
 
                 SqlDataAdapter da = new SqlDataAdapter(query, conn);
                 da.SelectCommand.Parameters.AddWithValue("@search", searchText);
                 da.SelectCommand.Parameters.AddWithValue("@fromDate", (object)fromDate ?? DBNull.Value);
                 da.SelectCommand.Parameters.AddWithValue("@toDate", (object)toDate ?? DBNull.Value);
+                da.SelectCommand.Parameters.AddWithValue("@startIndex", startIndex);
+                da.SelectCommand.Parameters.AddWithValue("@pageSize", PageSize);
 
                 DataTable dt = new DataTable();
                 da.Fill(dt);
                 gvCases.DataSource = dt;
                 gvCases.DataBind();
+
+                // Update pagination controls
+                UpdateCasePagination(totalRecords);
             }
         }
+
+        // ── Pagination helpers ──────────────────────────────────────────────
+
+        private int GetPatientPageIndex()
+        {
+            int pageIndex;
+            if (ViewState["PatientPageIndex"] == null)
+            {
+                pageIndex = 0;
+            }
+            else
+            {
+                pageIndex = Convert.ToInt32(ViewState["PatientPageIndex"]);
+            }
+            return pageIndex;
+        }
+
+        private int GetCasePageIndex()
+        {
+            int pageIndex;
+            if (ViewState["CasePageIndex"] == null)
+            {
+                pageIndex = 0;
+            }
+            else
+            {
+                pageIndex = Convert.ToInt32(ViewState["CasePageIndex"]);
+            }
+            return pageIndex;
+        }
+
+        private void UpdatePatientPagination(int totalRecords)
+        {
+            int totalPages = (int)Math.Ceiling((double)totalRecords / PageSize);
+            int currentPage = GetPatientPageIndex();
+
+            // Update page info label
+            lblPatientPageInfo.Text = $"Page {currentPage + 1} of {Math.Max(1, totalPages)} (Total: {totalRecords} records)";
+
+            // Enable/disable navigation buttons
+            btnPatientPrev.Enabled = (currentPage > 0);
+            btnPatientNext.Enabled = (currentPage < totalPages - 1 && totalPages > 0);
+
+            // Store total pages for reference
+            ViewState["PatientTotalPages"] = totalPages;
+        }
+
+        private void UpdateCasePagination(int totalRecords)
+        {
+            int totalPages = (int)Math.Ceiling((double)totalRecords / PageSize);
+            int currentPage = GetCasePageIndex();
+
+            // Update page info label
+            lblCasePageInfo.Text = $"Page {currentPage + 1} of {Math.Max(1, totalPages)} (Total: {totalRecords} records)";
+
+            // Enable/disable navigation buttons
+            btnCasePrev.Enabled = (currentPage > 0);
+            btnCaseNext.Enabled = (currentPage < totalPages - 1 && totalPages > 0);
+
+            // Store total pages for reference
+            ViewState["CaseTotalPages"] = totalPages;
+        }
+
+        // ── Patient Pagination Events ──────────────────────────────────────
+
+        protected void btnPatientPrev_Click(object sender, EventArgs e)
+        {
+            int currentPage = GetPatientPageIndex();
+            if (currentPage > 0)
+            {
+                ViewState["PatientPageIndex"] = currentPage - 1;
+                BindPatients(txtSearchPatient.Text.Trim(),
+                    ParseNullableDate(txtPatientDateFrom.Text),
+                    ParseNullableDate(txtPatientDateTo.Text));
+                HideRecordPreview();
+            }
+        }
+
+        protected void btnPatientNext_Click(object sender, EventArgs e)
+        {
+            int currentPage = GetPatientPageIndex();
+            int totalPages = ViewState["PatientTotalPages"] != null ? Convert.ToInt32(ViewState["PatientTotalPages"]) : 0;
+            if (currentPage < totalPages - 1)
+            {
+                ViewState["PatientPageIndex"] = currentPage + 1;
+                BindPatients(txtSearchPatient.Text.Trim(),
+                    ParseNullableDate(txtPatientDateFrom.Text),
+                    ParseNullableDate(txtPatientDateTo.Text));
+                HideRecordPreview();
+            }
+        }
+
+        // ── Case Pagination Events ────────────────────────────────────────
+
+        protected void btnCasePrev_Click(object sender, EventArgs e)
+        {
+            int currentPage = GetCasePageIndex();
+            if (currentPage > 0)
+            {
+                ViewState["CasePageIndex"] = currentPage - 1;
+                BindCases(txtSearchCase.Text.Trim(),
+                    ParseNullableDate(txtCaseDateFrom.Text),
+                    ParseNullableDate(txtCaseDateTo.Text));
+                HideRecordPreview();
+            }
+        }
+
+        protected void btnCaseNext_Click(object sender, EventArgs e)
+        {
+            int currentPage = GetCasePageIndex();
+            int totalPages = ViewState["CaseTotalPages"] != null ? Convert.ToInt32(ViewState["CaseTotalPages"]) : 0;
+            if (currentPage < totalPages - 1)
+            {
+                ViewState["CasePageIndex"] = currentPage + 1;
+                BindCases(txtSearchCase.Text.Trim(),
+                    ParseNullableDate(txtCaseDateFrom.Text),
+                    ParseNullableDate(txtCaseDateTo.Text));
+                HideRecordPreview();
+            }
+        }
+
+        // ── GvPatients_RowCommand ──────────────────────────────────────────
 
         protected void gvPatients_RowCommand(object sender, GridViewCommandEventArgs e)
         {
@@ -217,7 +406,7 @@ namespace SBI
 
                     txtPreviewHouseNo.Text = dr["house_no"] == DBNull.Value ? "" : dr["house_no"].ToString();
                     txtPreviewStreet.Text = dr["street"] == DBNull.Value ? "" : dr["street"].ToString();
-                    txtPreviewBarangay.Text = dr["barangay"] == DBNull.Value ? "" : dr["barangay"].ToString();
+                    ddlPreviewBarangay.SelectedValue = SafeDropdownValue(ddlPreviewBarangay, dr["barangay"].ToString());
                     txtPreviewCityProvince.Text = dr["city_province"] == DBNull.Value ? "" : dr["city_province"].ToString();
 
                     txtPreviewEmergencyPerson.Text = dr["emergency_contact_person"] == DBNull.Value ? "" : dr["emergency_contact_person"].ToString();
@@ -288,7 +477,7 @@ namespace SBI
 
                     txtPreviewCasePlaceHouseNo.Text = dr["bite_house_no"] == DBNull.Value ? "" : dr["bite_house_no"].ToString();
                     txtPreviewCasePlaceStreet.Text = dr["bite_street"] == DBNull.Value ? "" : dr["bite_street"].ToString();
-                    txtPreviewCasePlaceBarangay.Text = dr["bite_barangay"] == DBNull.Value ? "" : dr["bite_barangay"].ToString();
+                    ddlPreviewCasePlaceBarangay.SelectedValue = SafeDropdownValue(ddlPreviewCasePlaceBarangay, dr["bite_barangay"].ToString());
                     txtPreviewCasePlaceCity.Text = dr["bite_city"] == DBNull.Value ? "" : dr["bite_city"].ToString();
 
                     ddlPreviewCaseExposureType.SelectedValue = SafeDropdownValue(ddlPreviewCaseExposureType, dr["type_of_exposure"].ToString());
@@ -350,7 +539,7 @@ namespace SBI
                             new SqlParameter("@oc",  ddlPreviewOccupation.SelectedValue),
                             new SqlParameter("@h",   txtPreviewHouseNo.Text.Trim()),
                             new SqlParameter("@s",   txtPreviewStreet.Text.Trim()),
-                            new SqlParameter("@b",   txtPreviewBarangay.Text.Trim()),
+                            new SqlParameter("@b",   ddlPreviewBarangay.SelectedValue),
                             new SqlParameter("@c",   txtPreviewCityProvince.Text.Trim()),
                             new SqlParameter("@ep",  txtPreviewEmergencyPerson.Text.Trim()),
                             new SqlParameter("@en",  txtPreviewEmergencyNo.Text.Trim()),
@@ -426,7 +615,7 @@ namespace SBI
                             new SqlParameter("@w",   ddlPreviewCaseWashed.SelectedValue),
                             new SqlParameter("@bh",  txtPreviewCasePlaceHouseNo.Text.Trim()),
                             new SqlParameter("@bs",  txtPreviewCasePlaceStreet.Text.Trim()),
-                            new SqlParameter("@bb",  txtPreviewCasePlaceBarangay.Text.Trim()),
+                            new SqlParameter("@bb",  ddlPreviewCasePlaceBarangay.SelectedValue),
                             new SqlParameter("@bc",  txtPreviewCasePlaceCity.Text.Trim()),
                             new SqlParameter("@cid", caseId)
                         }
@@ -445,6 +634,7 @@ namespace SBI
 
         protected void btnSearchPatient_Click(object sender, EventArgs e)
         {
+            ViewState["PatientPageIndex"] = 0; // Reset to first page
             BindPatients(txtSearchPatient.Text.Trim(), ParseNullableDate(txtPatientDateFrom.Text), ParseNullableDate(txtPatientDateTo.Text));
             HideRecordPreview();
             hfActivePanel.Value = "viewPatientPanel";
@@ -453,12 +643,15 @@ namespace SBI
         protected void btnResetPatientSearch_Click(object sender, EventArgs e)
         {
             txtSearchPatient.Text = txtPatientDateFrom.Text = txtPatientDateTo.Text = "";
-            BindPatients(); HideRecordPreview();
+            ViewState["PatientPageIndex"] = 0; // Reset to first page
+            BindPatients();
+            HideRecordPreview();
             hfActivePanel.Value = "viewPatientPanel";
         }
 
         protected void btnSearchCase_Click(object sender, EventArgs e)
         {
+            ViewState["CasePageIndex"] = 0; // Reset to first page
             BindCases(txtSearchCase.Text.Trim(), ParseNullableDate(txtCaseDateFrom.Text), ParseNullableDate(txtCaseDateTo.Text));
             HideRecordPreview();
             hfActivePanel.Value = "viewPatientPanel";
@@ -467,7 +660,9 @@ namespace SBI
         protected void btnResetCaseSearch_Click(object sender, EventArgs e)
         {
             txtSearchCase.Text = txtCaseDateFrom.Text = txtCaseDateTo.Text = "";
-            BindCases(); HideRecordPreview();
+            ViewState["CasePageIndex"] = 0; // Reset to first page
+            BindCases();
+            HideRecordPreview();
             hfActivePanel.Value = "viewPatientPanel";
         }
 
@@ -544,7 +739,7 @@ namespace SBI
                             new SqlParameter("@oc",  ddlOccupation.SelectedValue),
                             new SqlParameter("@h",   txtHouseNo.Text.Trim()),
                             new SqlParameter("@s",   txtSubdivision.Text.Trim()),
-                            new SqlParameter("@b",   txtBarangay.Text.Trim()),
+                            new SqlParameter("@b",   ddlBarangay.SelectedValue),
                             new SqlParameter("@c",   txtProvinceCity.Text.Trim()),
                             new SqlParameter("@ep",  txtEmergencyContactPerson.Text.Trim()),
                             new SqlParameter("@en",  txtEmergencyContactNo.Text.Trim())
@@ -565,9 +760,8 @@ namespace SBI
                             txtWeight.Text.Trim());
                     }
 
-                    string newCaseNo = new SqlCommand(
-                        "SELECT 'C' + CAST(YEAR(GETDATE()) AS VARCHAR) + '-' + RIGHT('0000' + CAST(NEXT VALUE FOR dbo.SeqCase AS VARCHAR), 4)",
-                        conn, trans).ExecuteScalar().ToString();
+                    // Generate case number using the sequence
+                    string newCaseNo = GenerateCaseNumber(conn, trans);
 
                     string symptom = GetManifestation();
                     string initialDiagnosis = BuildInitialDiagnosis(GetSelectedCategory(), GetBitingAnimal());
@@ -596,7 +790,7 @@ namespace SBI
                     cmdCase.Parameters.AddWithValue("@w", GetWashed());
                     cmdCase.Parameters.AddWithValue("@bh", txtPlaceHouseNo.Text.Trim());
                     cmdCase.Parameters.AddWithValue("@bs", txtPlaceStreet.Text.Trim());
-                    cmdCase.Parameters.AddWithValue("@bb", txtPlaceBarangay.Text.Trim());
+                    cmdCase.Parameters.AddWithValue("@bb", ddlPlaceBarangay.SelectedValue);
                     cmdCase.Parameters.AddWithValue("@bc", txtPlaceCity.Text.Trim());
                     cmdCase.Parameters.AddWithValue("@at", GetBitingAnimal());
                     cmdCase.Parameters.AddWithValue("@ow", string.IsNullOrEmpty(GetOwnership()) ? (object)DBNull.Value : GetOwnership());
@@ -654,6 +848,61 @@ namespace SBI
             }
         }
 
+        // ── Generate Case Number Helper ─────────────────────────────────────
+
+        /// <summary>
+        /// Generates a unique case number using the SeqCase sequence.
+        /// Format: C{YYYY}-{0000}
+        /// Example: C2026-0001, C2026-0002, etc.
+        /// </summary>
+        private string GenerateCaseNumber(SqlConnection conn, SqlTransaction trans)
+        {
+            string query = @"
+                SELECT 'C' + CAST(YEAR(GETDATE()) AS VARCHAR(4)) + '-' + 
+                       RIGHT('0000' + CAST(NEXT VALUE FOR dbo.SeqCase AS VARCHAR(10)), 4)";
+
+            object result = new SqlCommand(query, conn, trans).ExecuteScalar();
+            return result != null ? result.ToString() : "";
+        }
+
+        // ── Check if case already exists for patient ────────────────────────
+
+        /// <summary>
+        /// Checks if a patient already has a case with the same date of bite.
+        /// </summary>
+        private bool CaseExistsForPatient(string patientId, DateTime biteDate)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"
+                    SELECT COUNT(*) 
+                    FROM dbo.[Case] 
+                    WHERE patient_id = @pid 
+                      AND CAST(date_of_bite AS DATE) = CAST(@biteDate AS DATE)";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@pid", patientId);
+                cmd.Parameters.AddWithValue("@biteDate", biteDate.Date);
+                conn.Open();
+                return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+            }
+        }
+
+        /// <summary>
+        /// Checks if a specific case number already exists in the database.
+        /// </summary>
+        private bool CaseNumberExists(string caseNo)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT COUNT(*) FROM dbo.[Case] WHERE case_no = @caseNo";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@caseNo", caseNo);
+                conn.Open();
+                return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+            }
+        }
+
         // ── Case-only registration (for existing patients) ──────────────
 
         protected void btnSaveCase_Click(object sender, EventArgs e)
@@ -668,6 +917,7 @@ namespace SBI
                 return;
             }
 
+            // Validate required fields
             DateTime biteDateTime;
             if (!DateTime.TryParse(txtCaseBiteDateTime.Text, out biteDateTime))
             {
@@ -685,15 +935,61 @@ namespace SBI
                 return;
             }
 
+            if (string.IsNullOrEmpty(ddlCasePlaceBarangay.SelectedValue))
+            {
+                ShowAlert("Barangay (place of bite) is required.", "warning");
+                return;
+            }
+            if (string.IsNullOrEmpty(txtCasePlaceCity.Text.Trim()))
+            {
+                ShowAlert("City / Province (place of bite) is required.", "warning");
+                return;
+            }
+            if (string.IsNullOrEmpty(ddlCaseCategory.SelectedValue))
+            {
+                ShowAlert("Category is required.", "warning");
+                return;
+            }
+            if (string.IsNullOrEmpty(ddlCaseBitingAnimal.SelectedValue))
+            {
+                ShowAlert("Animal Type is required.", "warning");
+                return;
+            }
+
+            // ── DUPLICATE CHECK: Check if patient already has a case on this date ──
+            if (CaseExistsForPatient(patientId, biteDateTime))
+            {
+                ShowAlert($"This patient already has a case recorded on {biteDateTime.ToString("MMM dd, yyyy")}. " +
+                          "Please check the existing case or select a different date.", "warning");
+                return;
+            }
+
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
                 SqlTransaction trans = conn.BeginTransaction();
                 try
                 {
-                    string newCaseNo = new SqlCommand(
-                        "SELECT 'C' + CAST(YEAR(GETDATE()) AS VARCHAR) + '-' + RIGHT('0000' + CAST(NEXT VALUE FOR dbo.SeqCase AS VARCHAR), 4)",
-                        conn, trans).ExecuteScalar().ToString();
+                    // Generate case number
+                    string newCaseNo = GenerateCaseNumber(conn, trans);
+
+                    // ── DUPLICATE CHECK: Verify the generated case number doesn't already exist ──
+                    if (CaseNumberExists(newCaseNo))
+                    {
+                        for (int i = 0; i < 10; i++)
+                        {
+                            newCaseNo = GenerateCaseNumber(conn, trans);
+                            if (!CaseNumberExists(newCaseNo))
+                                break;
+                        }
+
+                        if (CaseNumberExists(newCaseNo))
+                        {
+                            trans.Rollback();
+                            ShowAlert("Unable to generate a unique case number. Please try again.", "error");
+                            return;
+                        }
+                    }
 
                     string symptom = GetCaseManifestation();
                     string initialDiagnosis = BuildInitialDiagnosis(GetCaseCategory(), GetCaseBitingAnimal());
@@ -723,7 +1019,7 @@ namespace SBI
                     cmdCase.Parameters.AddWithValue("@w", GetCaseWashed());
                     cmdCase.Parameters.AddWithValue("@bh", txtCasePlaceHouseNo.Text.Trim());
                     cmdCase.Parameters.AddWithValue("@bs", txtCasePlaceStreet.Text.Trim());
-                    cmdCase.Parameters.AddWithValue("@bb", txtCasePlaceBarangay.Text.Trim());
+                    cmdCase.Parameters.AddWithValue("@bb", ddlCasePlaceBarangay.SelectedValue);
                     cmdCase.Parameters.AddWithValue("@bc", txtCasePlaceCity.Text.Trim());
                     cmdCase.Parameters.AddWithValue("@at", GetCaseBitingAnimal());
                     cmdCase.Parameters.AddWithValue("@ow", string.IsNullOrEmpty(GetCaseOwnership()) ? (object)DBNull.Value : GetCaseOwnership());
@@ -755,7 +1051,7 @@ namespace SBI
                     ClearCaseFormFields();
                     HideRecordPreview();
                     hfActivePanel.Value = "viewPatientPanel";
-                    ShowAlert("New case registered successfully for patient: " + patientId, "success");
+                    ShowAlert($"New case {newCaseNo} registered successfully for patient: {patientId}", "success");
                 }
                 catch (Exception ex)
                 {
@@ -888,14 +1184,18 @@ namespace SBI
             txtFirstName.Text = txtLastName.Text = txtDOB.Text = txtContactNo.Text = "";
             ddlGender.SelectedIndex = ddlCivilStatus.SelectedIndex = ddlOccupation.SelectedIndex = 0;
 
-            txtHouseNo.Text = txtSubdivision.Text = txtBarangay.Text = txtProvinceCity.Text = "";
+            txtHouseNo.Text = txtSubdivision.Text = "";
+            ddlBarangay.SelectedIndex = 0;
+            ddlPlaceBarangay.SelectedIndex = 0;
+            txtProvinceCity.Text = "";
             txtEmergencyContactPerson.Text = txtEmergencyContactNo.Text = "";
             txtBloodPressure.Text = txtTemperature.Text = txtWeight.Text = txtCapillaryRefill.Text = "";
 
             txtBiteDateTime.Text = txtWoundLocation.Text = "";
             ddlExposureType.SelectedIndex = ddlWoundType.SelectedIndex = ddlBleeding.SelectedIndex = 0;
 
-            txtPlaceHouseNo.Text = txtPlaceStreet.Text = txtPlaceBarangay.Text = txtPlaceCity.Text = "";
+            txtPlaceHouseNo.Text = txtPlaceStreet.Text = "";
+            txtPlaceCity.Text = "";
 
             ddlBitingAnimal.SelectedIndex = ddlOwnership.SelectedIndex = ddlCircumstance.SelectedIndex = 0;
             ddlAnimalStatus.SelectedIndex = ddlWoundWashed.SelectedIndex = ddlCategory.SelectedIndex = 0;
@@ -908,7 +1208,7 @@ namespace SBI
             txtCaseWoundLocation.Text = "";
             txtCasePlaceHouseNo.Text = "";
             txtCasePlaceStreet.Text = "";
-            txtCasePlaceBarangay.Text = "";
+            ddlCasePlaceBarangay.SelectedIndex = 0;
             txtCasePlaceCity.Text = "";
             ddlCaseExposureType.SelectedIndex = 0;
             ddlCaseWoundType.SelectedIndex = 0;
