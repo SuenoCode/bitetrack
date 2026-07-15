@@ -27,7 +27,7 @@ namespace SBI
             using (var conn = new SqlConnection(cs))
             {
                 var da = new SqlDataAdapter(
-                    "SELECT user_id, fname + ' ' + lname AS full_name, username, password, role FROM Users ORDER BY user_id DESC",
+                    "SELECT user_id, fname + ' ' + lname AS full_name, username, password_hash, role FROM AppUsers ORDER BY user_id DESC",
                     conn);
                 var dt = new DataTable();
                 da.Fill(dt);
@@ -63,7 +63,7 @@ namespace SBI
             using (var conn = new SqlConnection(cs))
             {
                 var cmd = new SqlCommand(
-                    "SELECT fname, lname, username, password, role FROM Users WHERE user_id = @id", conn);
+                    "SELECT fname, lname, username, password_hash, role FROM AppUsers WHERE user_id = @id", conn);
                 cmd.Parameters.AddWithValue("@id", userId);
                 conn.Open();
                 using (var dr = cmd.ExecuteReader())
