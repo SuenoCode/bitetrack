@@ -1843,10 +1843,12 @@
         // ── Init ─────────────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', function () {
             var hf = document.getElementById('<%=hfActivePanel.ClientID%>');
-            showPanel(hf && hf.value ? hf.value : 'viewPatientPanel');
-            setTimeout(updateViewLayout, 100);
-            // Disable case next step initially
-            enableCaseNextStep(false);
+    showPanel(hf && hf.value ? hf.value : 'viewPatientPanel');
+    setTimeout(updateViewLayout, 100);
+    // Enable/disable case next step based on whether a patient is already selected
+    // (important after postback — e.g. right after clicking "Select" on a search result)
+            var casePid = document.getElementById('<%=hfCasePatientId.ClientID%>');
+            enableCaseNextStep(!!(casePid && casePid.value));
         });
 
         document.addEventListener('keydown', function (e) {

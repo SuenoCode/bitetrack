@@ -20,20 +20,82 @@ namespace SBI
                 BindGrid();
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────
-
         private void BindGrid()
         {
             using (var conn = new SqlConnection(cs))
             {
-                var da = new SqlDataAdapter(
-                    "SELECT user_id, fname + ' ' + lname AS full_name, username, password, role FROM Users ORDER BY user_id DESC",
-                    conn);
-                var dt = new DataTable();
+                string query = @"
+                    SELECT 
+                        user_id,
+                        fname + ' ' + lname AS full_name,
+                        username,
+                        password_hash AS password,
+                        email,
+                        contact_no,
+                        is_active,
+                        created_at,
+                        role_id
+                    FROM AppUser
+                    ORDER BY user_id DESC";
+
+                SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                DataTable dt = new DataTable();
                 da.Fill(dt);
                 gvUsers.DataSource = dt;
                 gvUsers.DataBind();
             }
+        }
+
+        // Role helper methods
+        public string GetRoleLabel(object roleId)
+        {
+            if (roleId == null || roleId == DBNull.Value)
+                return "Unknown";
+
+            switch (roleId.ToString())
+            {
+                case "1": return "Admin";
+                case "2": return "Admin Assistant";
+                case "3": return "Vaccinator";
+                default: return "Unknown";
+            }
+        }
+
+        public string GetRoleBadgeClass(object roleId)
+        {
+            string base_ = "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide ";
+
+            if (roleId == null || roleId == DBNull.Value)
+                return base_ + "bg-slate-100 text-slate-600";
+
+            switch (roleId.ToString())
+            {
+                case "1": return base_ + "bg-blue-100 text-blue-700";
+                case "2": return base_ + "bg-violet-100 text-violet-700";
+                case "3": return base_ + "bg-emerald-100 text-emerald-700";
+                default: return base_ + "bg-slate-100 text-slate-600";
+            }
+        }
+
+        // Status helper methods
+        public string GetStatusLabel(object isActive)
+        {
+            if (isActive == null || isActive == DBNull.Value)
+                return "Inactive";
+
+            return isActive.ToString() == "Yes" ? "Active" : "Inactive";
+        }
+
+        public string GetStatusBadgeClass(object isActive)
+        {
+            string base_ = "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide ";
+
+            if (isActive == null || isActive == DBNull.Value)
+                return base_ + "bg-red-100 text-red-700";
+
+            return isActive.ToString() == "Yes"
+                ? base_ + "bg-green-100 text-green-700"
+                : base_ + "bg-red-100 text-red-700";
         }
 
         private void SplitFullName(string fullName, out string fname, out string lname)
@@ -63,7 +125,8 @@ namespace SBI
             using (var conn = new SqlConnection(cs))
             {
                 var cmd = new SqlCommand(
-                    "SELECT fname, lname, username, password, role FROM Users WHERE user_id = @id", conn);
+                    "SELECT fname, lname, username, password_hash, role_id, email, contact_no, is_active FROM AppUser WHERE user_id = @id",
+                    conn);
                 cmd.Parameters.AddWithValue("@id", userId);
                 conn.Open();
                 using (var dr = cmd.ExecuteReader())
@@ -73,9 +136,11 @@ namespace SBI
                         txtFullName.Text = dr["fname"].ToString() + " " + dr["lname"].ToString();
                         txtUsername.Text = dr["username"].ToString();
                         txtPassword.Text = "";
-                        litCurrentPassword.Text = dr["password"].ToString();
                         panelCurrentPassword.Visible = true;
-                        ddlRole.SelectedValue = dr["role"].ToString();
+                        ddlRole.SelectedValue = dr["role_id"].ToString();
+                        txtEmail.Text = dr["email"].ToString();
+                        txtContactNo.Text = dr["contact_no"].ToString();
+                        chkIsActive.Checked = dr["is_active"].ToString() == "Yes";
                     }
                 }
             }
@@ -86,38 +151,13 @@ namespace SBI
             txtFullName.Text = "";
             txtUsername.Text = "";
             txtPassword.Text = "";
+            txtEmail.Text = "";
+            txtContactNo.Text = "";
             ddlRole.SelectedIndex = 0;
+            chkIsActive.Checked = true;
             lblFormError.Visible = false;
             panelCurrentPassword.Visible = false;
-            litCurrentPassword.Text = "";
         }
-
-        // ── Role badge helpers (called from markup) ───────────────────────
-
-        public string GetRoleLabel(string code)
-        {
-            switch (code)
-            {
-                case "A": return "Admin";
-                case "B": return "Admin Assistant";
-                case "C": return "Vaccinator";
-                default: return code;
-            }
-        }
-
-        public string GetRoleBadgeClass(string code)
-        {
-            string base_ = "inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide ";
-            switch (code)
-            {
-                case "A": return base_ + "bg-blue-100 text-blue-700";
-                case "B": return base_ + "bg-violet-100 text-violet-700";
-                case "C": return base_ + "bg-emerald-100 text-emerald-700";
-                default: return base_ + "bg-slate-100 text-slate-600";
-            }
-        }
-
-        // ── Events ────────────────────────────────────────────────────────
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
@@ -148,26 +188,39 @@ namespace SBI
                     string sql;
 
                     if (!string.IsNullOrWhiteSpace(txtPassword.Text))
-                        sql = @"UPDATE Users 
-                                SET fname    = @fn,
-                                    lname    = @ln,
+                    {
+                        sql = @"UPDATE AppUser 
+                                SET fname = @fn,
+                                    lname = @ln,
                                     username = @un,
-                                    password = @pw,
-                                    role     = @r
+                                    password_hash = @pw,
+                                    role_id = @r,
+                                    email = @email,
+                                    contact_no = @contact,
+                                    is_active = @active
                                 WHERE user_id = @id";
+                    }
                     else
-                        sql = @"UPDATE Users 
-                                SET fname    = @fn,
-                                    lname    = @ln,
+                    {
+                        sql = @"UPDATE AppUser 
+                                SET fname = @fn,
+                                    lname = @ln,
                                     username = @un,
-                                    role     = @r
+                                    role_id = @r,
+                                    email = @email,
+                                    contact_no = @contact,
+                                    is_active = @active
                                 WHERE user_id = @id";
+                    }
 
-                    var cmd = new SqlCommand(sql, conn);
+                    SqlCommand cmd = new SqlCommand(sql, conn);
                     cmd.Parameters.AddWithValue("@fn", fname);
                     cmd.Parameters.AddWithValue("@ln", lname);
                     cmd.Parameters.AddWithValue("@un", txtUsername.Text.Trim());
-                    cmd.Parameters.AddWithValue("@r", ddlRole.SelectedValue);
+                    cmd.Parameters.AddWithValue("@r", int.Parse(ddlRole.SelectedValue));
+                    cmd.Parameters.AddWithValue("@email", txtEmail.Text.Trim());
+                    cmd.Parameters.AddWithValue("@contact", txtContactNo.Text.Trim());
+                    cmd.Parameters.AddWithValue("@active", chkIsActive.Checked ? "Yes" : "No");
                     cmd.Parameters.AddWithValue("@id", uid);
 
                     if (!string.IsNullOrWhiteSpace(txtPassword.Text))
@@ -178,14 +231,19 @@ namespace SBI
                 }
                 else
                 {
-                    var cmd = new SqlCommand(
-                        @"INSERT INTO Users (fname, lname, username, password, role)
-                          VALUES (@fn, @ln, @un, @pw, @r)", conn);
+                    string sql = @"INSERT INTO AppUser 
+                                   (fname, lname, username, password_hash, role_id, email, contact_no, is_active, created_at)
+                                   VALUES (@fn, @ln, @un, @pw, @r, @email, @contact, @active, GETDATE())";
+
+                    SqlCommand cmd = new SqlCommand(sql, conn);
                     cmd.Parameters.AddWithValue("@fn", fname);
                     cmd.Parameters.AddWithValue("@ln", lname);
                     cmd.Parameters.AddWithValue("@un", txtUsername.Text.Trim());
                     cmd.Parameters.AddWithValue("@pw", txtPassword.Text.Trim());
-                    cmd.Parameters.AddWithValue("@r", ddlRole.SelectedValue);
+                    cmd.Parameters.AddWithValue("@r", int.Parse(ddlRole.SelectedValue));
+                    cmd.Parameters.AddWithValue("@email", txtEmail.Text.Trim());
+                    cmd.Parameters.AddWithValue("@contact", txtContactNo.Text.Trim());
+                    cmd.Parameters.AddWithValue("@active", chkIsActive.Checked ? "Yes" : "No");
                     cmd.ExecuteNonQuery();
                     ShowAlert("User added successfully.");
                 }
@@ -214,8 +272,8 @@ namespace SBI
             {
                 using (var conn = new SqlConnection(cs))
                 {
-                    var cmd = new SqlCommand(
-                        "DELETE FROM Users WHERE user_id = @id", conn);
+                    string sql = "DELETE FROM AppUser WHERE user_id = @id";
+                    SqlCommand cmd = new SqlCommand(sql, conn);
                     cmd.Parameters.AddWithValue("@id", userId);
                     conn.Open();
                     cmd.ExecuteNonQuery();

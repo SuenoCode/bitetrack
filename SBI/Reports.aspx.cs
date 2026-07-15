@@ -255,8 +255,8 @@ namespace SBI
                         p.contact_no,
                         p.occupation,
                         p.address                                                       AS full_address,
-                        ISNULL(ec.emergency_contact_person, 'N/A') + ' — '
-                            + ISNULL(ec.emergency_contact_number, '')                   AS emergency_contact,
+                        ISNULL(p.emergency_contact_person, 'N/A') + ' — '
+                            + ISNULL(p.emergency_contact_number, '')                   AS emergency_contact,
                         c.case_id,
                         c.case_no,
                         CONVERT(VARCHAR, c.date_of_bite, 107)                           AS bite_date,
@@ -289,7 +289,6 @@ namespace SBI
                         vc.manufacturer
                     FROM dbo.[Case] c
                     INNER JOIN dbo.Patient p        ON c.patient_id    = p.patient_id
-                    LEFT JOIN dbo.EmergencyContact ec ON p.patient_id  = ec.patient_id
                     LEFT JOIN dbo.Animal a           ON a.case_id      = c.case_id
                     LEFT JOIN dbo.AnimalFollowUp af  ON af.animal_id   = a.animal_id
                     LEFT JOIN dbo.VitalSigns vs      ON vs.patient_id  = p.patient_id
@@ -567,7 +566,7 @@ namespace SBI
                          ELSE GETDATE() END) AS age,
                 CASE p.gender WHEN 'M' THEN 'Male' WHEN 'F' THEN 'Female' ELSE p.gender END AS gender,
                 p.civil_status, p.contact_no, p.occupation, p.address AS full_address,
-                ISNULL(ec.emergency_contact_person,'N/A') + ' — ' + ISNULL(ec.emergency_contact_number,'') AS emergency_contact,
+                ISNULL(p.emergency_contact_person,'N/A') + ' — ' + ISNULL(p.emergency_contact_number,'') AS emergency_contact,
                 c.case_no,
                 CONVERT(VARCHAR, c.date_of_bite, 107) AS bite_date,
                 CONVERT(VARCHAR, c.time_of_bite, 100) AS bite_time,
@@ -591,7 +590,7 @@ namespace SBI
                 ISNULL(vc.manufacturer,'—') AS manufacturer
             FROM dbo.[Case] c
             INNER JOIN dbo.Patient p        ON c.patient_id   = p.patient_id
-            LEFT JOIN dbo.EmergencyContact ec ON p.patient_id = ec.patient_id
+
             LEFT JOIN dbo.Animal a           ON a.case_id     = c.case_id
             LEFT JOIN dbo.AnimalFollowUp af  ON af.animal_id  = a.animal_id
             LEFT JOIN dbo.VitalSigns vs      ON vs.patient_id = p.patient_id

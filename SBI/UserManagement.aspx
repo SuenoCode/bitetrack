@@ -8,6 +8,7 @@
 
     <asp:HiddenField ID="hfEditMode" runat="server" Value="false" />
     <asp:HiddenField ID="hfEditUserId" runat="server" Value="" />
+    <asp:HiddenField ID="hfDeleteUserId" runat="server" Value="" />
 
     <div class="p-6 font-heading2 text-slate-900">
 
@@ -66,20 +67,41 @@
                             <%-- shown only in edit mode --%>
                             <asp:Panel ID="panelCurrentPassword" runat="server" Visible="false"
                                 CssClass="mt-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-500">
-                                Current (hashed): <span class="font-mono break-all"><asp:Literal ID="litCurrentPassword" runat="server" /></span>
+                                Password is set (hidden for security)
                             </asp:Panel>
                             <p class="text-[11px] text-slate-400 mt-1">Leave blank to keep existing password when editing.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email</label>
+                            <asp:TextBox ID="txtEmail" runat="server"
+                                CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="e.g. user@email.com" />
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Contact No.</label>
+                            <asp:TextBox ID="txtContactNo" runat="server"
+                                CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="e.g. 09171234567" />
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Role</label>
                             <asp:DropDownList ID="ddlRole" runat="server"
                                 CssClass="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                                <asp:ListItem Text="-- Select Role --"   Value=""  />
-                                <asp:ListItem Text="Admin"               Value="A" />
-                                <asp:ListItem Text="Admin Assistant"     Value="B" />
-                                <asp:ListItem Text="Vaccinator"          Value="C" />
+                                <asp:ListItem Text="-- Select Role --" Value="" />
+                                <asp:ListItem Text="Admin" Value="1" />
+                                <asp:ListItem Text="Admin Assistant" Value="2" />
+                                <asp:ListItem Text="Vaccinator" Value="3" />
                             </asp:DropDownList>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Active Status</label>
+                            <asp:CheckBox ID="chkIsActive" runat="server" Checked="true"
+                                CssClass="mr-2" />
+                            <span class="text-sm text-slate-600">Active</span>
                         </div>
 
                         <asp:Label ID="lblFormError" runat="server" Visible="false"
@@ -118,13 +140,13 @@
                         <RowStyle CssClass="border-b border-slate-100 transition-colors hover:bg-slate-50" />
                         <AlternatingRowStyle CssClass="border-b border-slate-100" />
                         <Columns>
-                            <asp:BoundField DataField="user_id"   HeaderText="ID"
+                            <asp:BoundField DataField="user_id" HeaderText="ID"
                                 ItemStyle-CssClass="p-4 text-slate-500 text-xs"
                                 HeaderStyle-CssClass="p-4" />
                             <asp:BoundField DataField="full_name" HeaderText="Full Name"
                                 ItemStyle-CssClass="p-4 font-bold text-slate-700"
                                 HeaderStyle-CssClass="p-4" />
-                            <asp:BoundField DataField="username"  HeaderText="Username"
+                            <asp:BoundField DataField="username" HeaderText="Username"
                                 ItemStyle-CssClass="p-4 text-slate-600"
                                 HeaderStyle-CssClass="p-4" />
                             <asp:TemplateField HeaderText="Password" HeaderStyle-CssClass="p-4" ItemStyle-CssClass="p-4">
@@ -142,8 +164,18 @@
                             </asp:TemplateField>
                             <asp:TemplateField HeaderText="Role" HeaderStyle-CssClass="p-4" ItemStyle-CssClass="p-4">
                                 <ItemTemplate>
-                                    <span class='<%# GetRoleBadgeClass(Eval("role").ToString()) %>'>
-                                        <%# GetRoleLabel(Eval("role").ToString()) %>
+                                    <span class='<%# GetRoleBadgeClass(Eval("role_id")) %>'>
+                                        <%# GetRoleLabel(Eval("role_id")) %>
+                                    </span>
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                            <asp:BoundField DataField="email" HeaderText="Email"
+                                ItemStyle-CssClass="p-4 text-slate-600"
+                                HeaderStyle-CssClass="p-4" />
+                            <asp:TemplateField HeaderText="Status" HeaderStyle-CssClass="p-4" ItemStyle-CssClass="p-4">
+                                <ItemTemplate>
+                                    <span class='<%# GetStatusBadgeClass(Eval("is_active")) %>'>
+                                        <%# GetStatusLabel(Eval("is_active")) %>
                                     </span>
                                 </ItemTemplate>
                             </asp:TemplateField>
