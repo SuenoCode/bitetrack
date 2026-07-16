@@ -489,7 +489,7 @@ namespace SBI
         protected void btnTabRegistry_Click(object sender, EventArgs e)
         {
             SwitchTab("Registry");
-            BindRegistrySummary();
+            BindRegistrySummary(txtSearchCase.Text.Trim());
             BindCaseSummaryStats();
         }
 
@@ -501,7 +501,7 @@ namespace SBI
             if (tab == "Today")
                 BindTodaySchedules();
             else
-                BindRegistrySummary();
+                BindRegistrySummary(txtSearchCase.Text.Trim());
 
             BindCaseSummaryStats();
         }
@@ -559,11 +559,14 @@ namespace SBI
             }
         }
 
+        // ── Pagination using ROW_NUMBER() ──────────────────────────────
+
         private void BindTodaySchedules()
         {
             int page = string.IsNullOrEmpty(hfTodayPage.Value) ? 1 : Convert.ToInt32(hfTodayPage.Value);
             int pageSize = TodayPageSize;
-            int offset = (page - 1) * pageSize;
+            int startRow = (page - 1) * pageSize + 1;
+            int endRow = page * pageSize;
 
             using (SqlConnection conn = new SqlConnection(connString))
             {
@@ -584,26 +587,33 @@ namespace SBI
                 }
 
                 string query = @"
-                    SELECT s.schedule_id, r.case_id, c.case_no,
-                           (p.fname + ' ' + p.lname) AS patient_name,
-                           s.dose_number, s.schedule_date, v.vaccine_name,
-                           c.category,
-                           r.regimen_type,
-                           s.status
-                    FROM ScheduledDose s
-                    INNER JOIN VaccineRegimen r ON s.regimen_id = r.regimen_id
-                    INNER JOIN [Case] c ON r.case_id = c.case_id
-                    INNER JOIN Patient p ON c.patient_id = p.patient_id
-                    LEFT JOIN Vaccine v ON s.vaccine_id = v.vaccine_id
-                    WHERE s.status = 'Pending'
-                      AND CAST(s.schedule_date AS DATE) <= CAST(GETDATE() AS DATE)
-                    ORDER BY s.schedule_date ASC
-                    OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY";
+                    WITH CTE AS (
+                        SELECT 
+                            s.schedule_id, r.case_id, c.case_no,
+                            (p.fname + ' ' + p.lname) AS patient_name,
+                            s.dose_number, s.schedule_date, v.vaccine_name,
+                            c.category,
+                            r.regimen_type,
+                            s.status,
+                            ROW_NUMBER() OVER (ORDER BY s.schedule_date ASC) AS RowNum
+                        FROM ScheduledDose s
+                        INNER JOIN VaccineRegimen r ON s.regimen_id = r.regimen_id
+                        INNER JOIN [Case] c ON r.case_id = c.case_id
+                        INNER JOIN Patient p ON c.patient_id = p.patient_id
+                        LEFT JOIN Vaccine v ON s.vaccine_id = v.vaccine_id
+                        WHERE s.status = 'Pending'
+                          AND CAST(s.schedule_date AS DATE) <= CAST(GETDATE() AS DATE)
+                    )
+                    SELECT schedule_id, case_id, case_no, patient_name, dose_number, schedule_date,
+                           vaccine_name, category, regimen_type, status
+                    FROM CTE
+                    WHERE RowNum BETWEEN @startRow AND @endRow
+                    ORDER BY schedule_date ASC";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@offset", offset);
-                    cmd.Parameters.AddWithValue("@pageSize", pageSize);
+                    cmd.Parameters.AddWithValue("@startRow", startRow);
+                    cmd.Parameters.AddWithValue("@endRow", endRow);
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
@@ -627,7 +637,8 @@ namespace SBI
         {
             int page = string.IsNullOrEmpty(hfCasePage.Value) ? 1 : Convert.ToInt32(hfCasePage.Value);
             int pageSize = CasePageSize;
-            int offset = (page - 1) * pageSize;
+            int startRow = (page - 1) * pageSize + 1;
+            int endRow = page * pageSize;
 
             using (SqlConnection conn = new SqlConnection(connString))
             {
@@ -649,37 +660,58 @@ namespace SBI
                 }
 
                 string query = @"
-                    SELECT c.case_id, c.case_no,
-                           (p.fname + ' ' + p.lname) AS patient_name,
-                           c.category,
-                           c.date_of_bite,
-                           r.regimen_type,
-                           r.total_doses,
-                           (SELECT COUNT(*)
-                            FROM ScheduledDose sd
-                            WHERE sd.regimen_id = r.regimen_id
-                              AND sd.status = 'Completed') AS completed_doses,
-                           CASE 
-                               WHEN r.regimen_id IS NULL THEN 'No Schedule'
-                               WHEN (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Pending') > 0 THEN 'In Progress'
-                               WHEN (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Completed') = r.total_doses THEN 'Complete'
-                               ELSE 'In Progress'
-                           END AS case_status
-                    FROM [Case] c
-                    INNER JOIN Patient p ON c.patient_id = p.patient_id
-                    LEFT JOIN VaccineRegimen r ON c.case_id = r.case_id
-                    WHERE (@s = ''
-                           OR p.fname LIKE '%' + @s + '%'
-                           OR p.lname LIKE '%' + @s + '%'
-                           OR c.case_no LIKE '%' + @s + '%')
-                    ORDER BY c.case_id DESC
-                    OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY";
+                    WITH CTE AS (
+                        SELECT 
+                            c.case_id, c.case_no,
+                            (p.fname + ' ' + p.lname) AS patient_name,
+                            c.category,
+                            c.date_of_bite,
+                            r.regimen_type,
+                            r.total_doses,
+                            ISNULL((SELECT COUNT(*) FROM ScheduledDose sd 
+                                    WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Completed'), 0) AS completed_doses,
+                            LTRIM(RTRIM(
+                                CASE 
+                                    WHEN r.regimen_id IS NULL THEN 'No Schedule'
+                                    WHEN (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Pending') = 0 
+                                         AND (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Completed') = r.total_doses 
+                                         THEN 'Complete'
+                                    WHEN (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Pending') = 0 
+                                         AND (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Completed') = 0
+                                         AND (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Cancelled') = r.total_doses
+                                         THEN 'Missed'
+                                    WHEN (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Pending') = 0 
+                                         AND (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Completed')
+                                             + (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Cancelled') = r.total_doses
+                                         THEN 'Complete'
+                                    WHEN (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Pending') > 0 
+                                         AND (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Pending' AND sd.schedule_date < CAST(GETDATE() AS DATE)) > 0
+                                         AND (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Pending' AND sd.schedule_date >= CAST(GETDATE() AS DATE)) = 0
+                                         THEN 'Missed'
+                                    WHEN (SELECT COUNT(*) FROM ScheduledDose sd WHERE sd.regimen_id = r.regimen_id AND sd.status = 'Pending' AND sd.schedule_date >= CAST(GETDATE() AS DATE)) > 0
+                                         THEN 'Ongoing'
+                                    ELSE 'In Progress'
+                                END
+                            )) AS case_status,
+                            ROW_NUMBER() OVER (ORDER BY c.case_id DESC) AS RowNum
+                        FROM [Case] c
+                        INNER JOIN Patient p ON c.patient_id = p.patient_id
+                        LEFT JOIN VaccineRegimen r ON c.case_id = r.case_id
+                        WHERE (@s = ''
+                               OR p.fname LIKE '%' + @s + '%'
+                               OR p.lname LIKE '%' + @s + '%'
+                               OR c.case_no LIKE '%' + @s + '%')
+                    )
+                    SELECT case_id, case_no, patient_name, category, date_of_bite, regimen_type, total_doses, completed_doses, case_status
+                    FROM CTE
+                    WHERE RowNum BETWEEN @startRow AND @endRow
+                    ORDER BY case_id DESC";
 
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@s", searchTerm ?? "");
-                    cmd.Parameters.AddWithValue("@offset", offset);
-                    cmd.Parameters.AddWithValue("@pageSize", pageSize);
+                    cmd.Parameters.AddWithValue("@startRow", startRow);
+                    cmd.Parameters.AddWithValue("@endRow", endRow);
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
@@ -1177,19 +1209,31 @@ namespace SBI
                             }
                         }
 
-                        using (SqlCommand cmd = new SqlCommand(@"
-                            UPDATE VaccineVial 
-                            SET doses_used = doses_used + 1,
-                                vial_status = CASE 
-                                    WHEN doses_used + 1 >= doses_per_vial THEN 'Empty'
-                                    ELSE 'Open'
-                                END
-                            WHERE batch_id = @bid AND vial_status = 'Open'
-                            ORDER BY vial_id
-                            OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY", conn, trans))
+                        // Get the first open vial for this batch (no OFFSET/FETCH)
+                        int vialIdToUpdate = -1;
+                        using (SqlCommand cmd = new SqlCommand(
+                            "SELECT TOP 1 vial_id FROM VaccineVial WHERE batch_id = @bid AND vial_status = 'Open' ORDER BY vial_id", conn, trans))
                         {
                             cmd.Parameters.AddWithValue("@bid", batchId);
-                            cmd.ExecuteNonQuery();
+                            object result = cmd.ExecuteScalar();
+                            if (result != null && result != DBNull.Value)
+                                vialIdToUpdate = Convert.ToInt32(result);
+                        }
+
+                        if (vialIdToUpdate > 0)
+                        {
+                            using (SqlCommand cmd = new SqlCommand(@"
+                                UPDATE VaccineVial 
+                                SET doses_used = doses_used + 1,
+                                    vial_status = CASE 
+                                        WHEN doses_used + 1 >= doses_per_vial THEN 'Empty'
+                                        ELSE 'Open'
+                                    END
+                                WHERE vial_id = @vialId", conn, trans))
+                            {
+                                cmd.Parameters.AddWithValue("@vialId", vialIdToUpdate);
+                                cmd.ExecuteNonQuery();
+                            }
                         }
 
                         using (SqlCommand cmd = new SqlCommand(@"
@@ -1250,7 +1294,7 @@ namespace SBI
         {
             txtSearchCase.Text = "";
             hfCasePage.Value = "1";
-            BindRegistrySummary();
+            BindRegistrySummary("");
             BindCaseSummaryStats();
         }
 
@@ -1504,6 +1548,18 @@ namespace SBI
                 return "prep";
 
             return "";
+        }
+
+        protected string GetStatusBadgeClass(string status)
+        {
+            switch (status)
+            {
+                case "Complete": return "badge-ok";
+                case "Ongoing": return "badge-warn";
+                case "Missed": return "badge-exp";
+                case "No Schedule": return "badge-in";
+                default: return "badge-warn";
+            }
         }
     }
 }
