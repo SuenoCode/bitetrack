@@ -131,7 +131,7 @@
             letter-spacing: .5px;
         }
         .summary-stats .stat-card.cancelled .stat-num { color: #b91c1c; }
-        .summary-stats .stat-card.missed .stat-num { color: #b45309; }
+        .summary-stats .stat-card.missed .stat-num { color: #7c3aed; }
         .summary-stats .stat-card.completed .stat-num { color: #15803d; }
         .summary-stats .stat-card.pending .stat-num { color: #1d4ed8; }
 
@@ -287,7 +287,7 @@
                     </div>
                     <div class="stat-card missed">
                         <div class="stat-num"><asp:Literal ID="litStatMissed" runat="server" Text="0" /></div>
-                        <div class="stat-label">Missed (No Show)</div>
+                        <div class="stat-label">Missed</div>
                     </div>
                 </div>
             </div>
@@ -328,7 +328,7 @@
                         HeaderStyle-CssClass="p-4 text-center" />
                     <asp:TemplateField HeaderText="Status" HeaderStyle-CssClass="p-4 text-center" ItemStyle-CssClass="p-4 text-center">
                         <ItemTemplate>
-                            <span class='badge <%# Eval("case_status").ToString() == "Complete" ? "badge-ok" : Eval("case_status").ToString() == "No Schedule" ? "badge-exp" : "badge-warn" %>'>
+                            <span class='badge <%# GetStatusBadgeClass(Eval("case_status").ToString()) %>'>
                                 <%# Eval("case_status") %>
                             </span>
                         </ItemTemplate>
